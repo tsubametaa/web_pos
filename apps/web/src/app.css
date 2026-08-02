@@ -1,0 +1,115 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+	--font-sans: 'Plus Jakarta Sans', 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	--font-display: 'Outfit', sans-serif;
+
+	/* Dynamic tailwind classes mapped to theme css variables */
+	--color-base: var(--color-base);
+	--color-surface: var(--color-surface);
+	--color-accent: var(--color-accent);
+	--color-accent-hover: var(--color-accent-hover);
+	--color-accent-soft: var(--color-accent-soft);
+	--color-ink: var(--color-ink);
+	--color-ink-muted: var(--color-ink-muted);
+	
+	/* Typography colors */
+	--color-h-text: var(--color-h-text);
+	--color-p-text: var(--color-p-text);
+
+	/* Maintain backward compatibility with old color names */
+	--color-sage-50: var(--color-base);
+	--color-sage-100: var(--color-surface);
+	--color-sage-200: var(--color-accent-soft);
+	--color-sage-300: var(--color-accent-soft);
+	--color-sage-500: var(--color-accent);
+	--color-sage-650: var(--color-ink);
+	--color-sage-600: var(--color-accent-hover);
+	--color-sage-700: var(--color-ink);
+}
+
+:root {
+	/* Light Theme Colors (Green palette) */
+	--color-base: #F0FDF4;      /* 60% — background dominan */
+	--color-surface: #D1FAE5;   /* 30% — card, sidebar, panel */
+	--color-accent: #34D399;    /* 10% — CTA, active state, highlight */
+	
+	/* Interactive states */
+	--color-accent-hover: #10B981;
+	--color-accent-soft: #A7F3D0;
+	--color-ink: #064E3B;       /* Text color over green */
+	--color-ink-muted: #636E72;
+	
+	--color-h-text: #2D3436;
+	--color-p-text: #636E72;
+}
+
+:root[data-theme="dark"] {
+	/* Dark Theme Colors */
+	--color-base: #022C22;      /* 60% — background dominan */
+	--color-surface: #064E3B;   /* 30% — card, sidebar, panel */
+	--color-accent: #34D399;    /* 10% — CTA, active state */
+	
+	/* Interactive states */
+	--color-accent-hover: #6EE7B7;
+	--color-accent-soft: #065F46;
+	--color-ink: #F0FDF4;
+	--color-ink-muted: #9CA3AF;
+	
+	--color-h-text: #F0FDF4;
+	--color-p-text: #9CA3AF;
+}
+
+body {
+	font-family: var(--font-sans);
+	background-color: var(--color-base);
+	color: var(--color-p-text);
+	margin: 0;
+	transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+::-webkit-scrollbar-track {
+	background: rgba(191, 200, 189, 0.2);
+}
+::-webkit-scrollbar-thumb {
+	background: var(--color-accent-hover);
+	opacity: 0.3;
+	border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: var(--color-accent-hover);
+	opacity: 0.6;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+	display: none;
+}
+.scrollbar-none {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+/* Glassmorphic Panel Styles adjusted for color variables */
+.glass-panel {
+	background: var(--color-surface);
+	border: 1px solid rgba(52, 211, 153, 0.15);
+	box-shadow: 0 4px 12px 0 rgba(2, 44, 34, 0.03);
+}
+
+.glass-panel-glow {
+	background: var(--color-surface);
+	border: 1px solid rgba(52, 211, 153, 0.25);
+	box-shadow: 0 12px 40px 0 rgba(2, 44, 34, 0.08), inset 0 0 0 1px rgba(240, 253, 244, 0.2);
+}
+
+.glass-card {
+	background: var(--color-accent-soft);
+	border: 1px solid rgba(52, 211, 153, 0.1);
+}

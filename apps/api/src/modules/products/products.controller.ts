@@ -1,0 +1,106 @@
+import { Elysia, t } from 'elysia';
+import { ProductsService } from './products.service';
+import { authPlugin } from '../../middlewares/auth';
+
+const productsService = new ProductsService();
+
+export const productsController = new Elysia({ prefix: '/products' })
+	.use(authPlugin)
+	.guard({ requireAuth: true })
+	.get('/', async ({ query }) => {
+		const activeOnly = query.active === 'true';
+		const list = await productsService.getProducts(query.category, activeOnly);
+		return { success: true, products: list };
+	}, {
+		query: t.Object({
+			category: t.Optional(t.String()),
+			active: t.Optional(t.String())
+		})
+	})
+	.post('/', async ({ body, set }) => {
+		try {
+			const product = await productsService.createProduct(body);
+			return { success: true, product };
+		} catch (err: any) {
+			set.status = 400;
+			return { success: false, error: err.message };
+		}
+	}, {
+		body: t.Object({
+			name: t.String({ minLength: 1, error: 'Nama produk wajib diisi.' }),
+			category: t.String({ minLength: 1, error: 'Kategori wajib diisi.' }),
+			unit: t.String({ minLength: 1, error: 'Satuan wajib diisi.' }),
+			costPrice: t.Number({ minimum: 0, error: 'HPP tidak boleh negatif.' }),
+			sellingPrice: t.Number({ minimum: 0, error: 'Harga jual tidak boleh negatif.' }),
+			stock: t.Optional(t.Number({ minimum: 0, error: 'Stok minimal 0.' })),
+			minStock: t.Optional(t.Number({ minimum: 0 })),
+			imageUrl: t.Optional(t.String()),
+			notes: t.Optional(t.String())
+		})
+	})
+	.put('/', async ({ body, set }) => {
+		try {
+			const { id, stockAdjustment, adjustmentNotes, ...updateData } = body;
+			if (!id) {
+				set.status = 400;
+				return { success: false, error: 'ID produk wajib disertakan.' };
+			}
+
+			// Handle Stock Adjustment if stockAdjustment is provided
+			if (stockAdjustment !== undefined) {
+				const adjustment = parseInt(stockAdjustment as any);
+				if (isNaN(adjustment)) {
+					set.status = 400;
+					return { success: false, error: 'Jumlah penyesuaian stok harus angka.' };
+				}
+
+				const product = await productsService.adjustStock(id, adjustment, adjustmentNotes);
+				return { success: true, product };
+			}
+
+			// Regular Product Update
+			const product = await productsService.updateProduct(id, updateData);
+			return { success: true, product };
+		} catch (err: any) {
+			set.status = 400;
+			return { success: false, error: err.message };
+		}
+	}, {
+		body: t.Object({
+			id: t.String({ minLength: 1 }),
+			name: t.Optional(t.String({ minLength: 1 })),
+			category: t.Optional(t.String({ minLength: 1 })),
+			unit: t.Optional(t.String({ minLength: 1 })),
+			costPrice: t.Optional(t.Number({ minimum: 0 })),
+			sellingPrice: t.Optional(t.Number({ minimum: 0 })),
+			stock: t.Optional(t.Number({ minimum: 0 })),
+			minStock: t.Optional(t.Number({ minimum: 0 })),
+			imageUrl: t.Optional(t.String()),
+			notes: t.Optional(t.String()),
+			stockAdjustment: t.Optional(t.Union([t.Number(), t.String()])),
+			adjustmentNotes: t.Optional(t.String())
+		})
+	})
+	.delete('/', async ({ query, set }) => {
+		try {
+			const id = query.id;
+			if (!id) {
+				set.status = 400;
+				return { success: false, error: 'ID produk wajib disertakan.' };
+			}
+
+			const product = await productsService.toggleStatus(id);
+			return {
+				success: true,
+				message: `Status produk berhasil diubah menjadi ${product.isActive ? 'aktif' : 'non-aktif'}.`,
+				product
+			};
+		} catch (err: any) {
+			set.status = 400;
+			return { success: false, error: err.message };
+		}
+	}, {
+		query: t.Object({
+			id: t.String({ minLength: 1, error: 'ID produk wajib disertakan.' })
+		})
+	});
