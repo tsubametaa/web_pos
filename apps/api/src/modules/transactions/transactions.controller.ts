@@ -1,16 +1,19 @@
 import { Elysia, t } from 'elysia';
 import { TransactionsService } from './transactions.service';
-import { requireAuthPlugin } from '../../middlewares/auth';
+import { resolveUser, unauthorized } from '../../middlewares/resolveUser';
 
 const transactionsService = new TransactionsService();
 
 export const transactionsController = new Elysia({ prefix: '/transactions' })
-	.use(requireAuthPlugin)
-	.get('/', async ({ user }: any) => {
+	.get('/', async ({ set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		const list = await transactionsService.getTransactions(user.id);
 		return { success: true, transactions: list };
 	})
-	.get('/:id', async ({ user, params, set }: any) => {
+	.get('/:id', async ({ params, set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		try {
 			const data = await transactionsService.getTransactionById(user.id, params.id);
 			return { success: true, ...data };
@@ -23,7 +26,9 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 			id: t.String({ minLength: 1 })
 		})
 	})
-	.post('/', async ({ user, body, set }: any) => {
+	.post('/', async ({ body, set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		try {
 			const transaction = await transactionsService.createTransaction(user.id, body);
 			return { success: true, transaction };
@@ -45,7 +50,9 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 			notes: t.Optional(t.String())
 		})
 	})
-	.post('/void', async ({ user, body, set }: any) => {
+	.post('/void', async ({ body, set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		try {
 			const { id } = body;
 			const transaction = await transactionsService.voidTransaction(user.id, id);

@@ -1,12 +1,13 @@
 import { Elysia } from 'elysia';
 import { DashboardService } from './dashboard.service';
-import { requireAuthPlugin } from '../../middlewares/auth';
+import { resolveUser, unauthorized } from '../../middlewares/resolveUser';
 
 const dashboardService = new DashboardService();
 
 export const dashboardController = new Elysia({ prefix: '/dashboard' })
-	.use(requireAuthPlugin)
-	.get('/stats', async ({ user }: any) => {
+	.get('/stats', async ({ set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		const stats = await dashboardService.getDashboardStats(user.id);
 		return { success: true, ...stats };
 	});

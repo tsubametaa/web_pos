@@ -1,12 +1,13 @@
 import { Elysia, t } from 'elysia';
 import { ProductsService } from './products.service';
-import { requireAuthPlugin } from '../../middlewares/auth';
+import { resolveUser, unauthorized } from '../../middlewares/resolveUser';
 
 const productsService = new ProductsService();
 
 export const productsController = new Elysia({ prefix: '/products' })
-	.use(requireAuthPlugin)
-	.get('/', async ({ user, query }: any) => {
+	.get('/', async ({ query, set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		const activeOnly = query.active === 'true';
 		const list = await productsService.getProducts(user.id, query.category, activeOnly);
 		return { success: true, products: list };
@@ -16,7 +17,9 @@ export const productsController = new Elysia({ prefix: '/products' })
 			active: t.Optional(t.String())
 		})
 	})
-	.post('/', async ({ user, body, set }: any) => {
+	.post('/', async ({ body, set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		try {
 			const product = await productsService.createProduct(user.id, body);
 			return { success: true, product };
@@ -37,7 +40,9 @@ export const productsController = new Elysia({ prefix: '/products' })
 			notes: t.Optional(t.Union([t.String(), t.Null()]))
 		})
 	})
-	.put('/', async ({ user, body, set }: any) => {
+	.put('/', async ({ body, set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		try {
 			const { id, stockAdjustment, adjustmentNotes, ...updateData } = body;
 			if (!id) {
@@ -80,7 +85,9 @@ export const productsController = new Elysia({ prefix: '/products' })
 			adjustmentNotes: t.Optional(t.String())
 		})
 	})
-	.delete('/', async ({ user, query, set }: any) => {
+	.delete('/', async ({ query, set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		try {
 			const id = query.id;
 			if (!id) {

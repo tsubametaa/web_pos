@@ -1,18 +1,21 @@
 import { Elysia, t } from 'elysia';
 import { SettingsService } from './settings.service';
-import { requireAuthPlugin } from '../../middlewares/auth';
+import { resolveUser, unauthorized } from '../../middlewares/resolveUser';
 
 const settingsService = new SettingsService();
 
 export const settingsController = new Elysia({ prefix: '/settings' })
-	.use(requireAuthPlugin)
-	.get('/', async ({ user }: any) => {
+	.get('/', async ({ set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		const data = await settingsService.getSettings(user.id);
 		return { success: true, settings: data };
 	})
-	.put('/', async ({ body, user, set }: any) => {
+	.put('/', async ({ body, set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		try {
-			const data = await settingsService.updateSettings(user.id, body, user?.email);
+			const data = await settingsService.updateSettings(user.id, body, user.email);
 			return { success: true, settings: data, message: 'Profil bisnis berhasil diperbarui!' };
 		} catch (err: any) {
 			set.status = 400;
@@ -29,12 +32,10 @@ export const settingsController = new Elysia({ prefix: '/settings' })
 			receiptFooter: t.Optional(t.String())
 		})
 	})
-	.put('/password', async ({ body, user, set }: any) => {
+	.put('/password', async ({ body, set, request }: any) => {
+		const user = await resolveUser(request);
+		if (!user) return unauthorized(set);
 		try {
-			if (!user?.email || !user?.id) {
-				set.status = 401;
-				return { success: false, error: 'Sesi tidak valid.' };
-			}
 			await settingsService.updatePassword(user.id, user.email, body.oldPassword, body.newPassword);
 			return { success: true, message: 'Password berhasil diperbarui!' };
 		} catch (err: any) {
