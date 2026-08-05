@@ -30,12 +30,12 @@ export const productsController = new Elysia({ prefix: '/products' })
 			name: t.String({ minLength: 1, error: 'Nama produk wajib diisi.' }),
 			category: t.String({ minLength: 1, error: 'Kategori wajib diisi.' }),
 			unit: t.String({ minLength: 1, error: 'Satuan wajib diisi.' }),
-			costPrice: t.Number({ minimum: 0, error: 'HPP tidak boleh negatif.' }),
-			sellingPrice: t.Number({ minimum: 0, error: 'Harga jual tidak boleh negatif.' }),
-			stock: t.Optional(t.Number({ minimum: 0, error: 'Stok minimal 0.' })),
-			minStock: t.Optional(t.Number({ minimum: 0 })),
-			imageUrl: t.Optional(t.String()),
-			notes: t.Optional(t.String())
+			costPrice: t.Union([t.Number({ minimum: 0 }), t.String()], { error: 'HPP tidak boleh negatif.' }),
+			sellingPrice: t.Union([t.Number({ minimum: 0 }), t.String()], { error: 'Harga jual tidak boleh negatif.' }),
+			stock: t.Optional(t.Union([t.Number({ minimum: 0 }), t.Null()])),
+			minStock: t.Optional(t.Union([t.Number({ minimum: 0 }), t.Null()])),
+			imageUrl: t.Optional(t.Union([t.String(), t.Null()])),
+			notes: t.Optional(t.Union([t.String(), t.Null()]))
 		})
 	})
 	.put('/', async ({ user, body, set }: any) => {

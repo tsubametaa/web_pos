@@ -214,12 +214,12 @@
       name: name.trim(),
       category: normalizeCategory(category),
       unit: unit.trim(),
-      costPrice: Number(costPrice),
-      sellingPrice: Number(sellingPrice),
-      stock: Number(stock),
-      minStock: Number(minStock),
-      imageUrl: imageUrl.trim() || undefined,
-      notes: notes.trim() || undefined,
+      costPrice: isFinite(Number(costPrice)) ? Number(costPrice) : 0,
+      sellingPrice: isFinite(Number(sellingPrice)) ? Number(sellingPrice) : 0,
+      stock: isFinite(Number(stock)) ? Number(stock) : 0,
+      minStock: isFinite(Number(minStock)) ? Number(minStock) : 0,
+      ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
+      ...(notes.trim() ? { notes: notes.trim() } : {}),
     });
   }
 </script>
