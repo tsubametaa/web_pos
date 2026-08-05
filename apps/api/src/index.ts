@@ -15,7 +15,15 @@ const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 const app = new Elysia()
 	.use(cors({
 		credentials: true,
-		origin: process.env.CORS_ORIGIN || true
+		origin: (request) => {
+			const origin = request.headers.get('origin');
+			const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+				.split(',')
+				.map(o => o.trim());
+			if (!origin) return true;
+			return allowedOrigins.includes(origin);
+		},
+		allowedHeaders: ['Content-Type', 'Authorization', 'X-User-Email'],
 	}))
 	.onTransform(({ body, query }) => {
 		if (body && typeof body === 'object') {

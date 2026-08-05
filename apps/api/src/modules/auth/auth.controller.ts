@@ -15,12 +15,13 @@ export const authController = new Elysia({ prefix: '/auth' })
 			const { businessName, email, password } = body;
 			const user = await authService.register(businessName, email, password);
 
+			const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
 			session.set({
 				value: user.email,
 				path: '/',
 				httpOnly: true,
-				sameSite: 'lax',
-				secure: false, // Set true in production if HTTPS
+				sameSite: isProduction ? 'none' : 'lax',
+				secure: isProduction,
 				maxAge: 60 * 60 * 24 * 30
 			});
 
@@ -41,12 +42,13 @@ export const authController = new Elysia({ prefix: '/auth' })
 			const { email, password } = body;
 			const user = await authService.login(email, password);
 
+			const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
 			session.set({
 				value: user.email,
 				path: '/',
 				httpOnly: true,
-				sameSite: 'lax',
-				secure: false,
+				sameSite: isProduction ? 'none' : 'lax',
+				secure: isProduction,
 				maxAge: 60 * 60 * 24 * 30
 			});
 
