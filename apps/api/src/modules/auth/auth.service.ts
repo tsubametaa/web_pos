@@ -22,22 +22,19 @@ export class AuthService {
 			updatedAt: new Date()
 		}).returning();
 
-		// If settings table is empty, initialize business settings
-		const settingsCountResult = await db.select({ value: count() }).from(settings);
-		const settingsCount = settingsCountResult[0]?.value || 0;
-		if (settingsCount === 0) {
-			await db.insert(settings).values({
-				businessName,
-				ownerPasswordHash: passwordHash,
-				currency: 'IDR',
-				currencySymbol: 'Rp',
-				lowStockThreshold: 10,
-				taxRate: 0,
-				receiptFooter: 'Terima kasih atas kunjungan Anda!'
-			});
-		}
+		// Create initial business settings for the registered user
+		await db.insert(settings).values({
+			userId: newUser[0].id,
+			businessName,
+			ownerPasswordHash: passwordHash,
+			currency: 'IDR',
+			currencySymbol: 'Rp',
+			lowStockThreshold: 10,
+			taxRate: 0,
+			receiptFooter: 'Terima kasih atas kunjungan Anda!'
+		});
 
-		return { email: newUser[0].email, businessName: newUser[0].businessName };
+		return { id: newUser[0].id, email: newUser[0].email, businessName: newUser[0].businessName };
 	}
 
 	async login(email: string, password: string) {
@@ -53,7 +50,7 @@ export class AuthService {
 			throw new Error('Email atau password salah.');
 		}
 
-		return { email: user.email, businessName: user.businessName };
+		return { id: user.id, email: user.email, businessName: user.businessName };
 	}
 
 	async checkSetupNeeded() {

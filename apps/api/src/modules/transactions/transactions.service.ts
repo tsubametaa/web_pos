@@ -1,4 +1,4 @@
-import { eq, desc } from 'drizzle-orm';
+import { eq, and, desc, isNull, or } from 'drizzle-orm';
 import { db, products, transactions, transactionItems, settings } from '../../db';
 
 export interface CartItemInput {
@@ -14,8 +14,13 @@ export interface CheckoutInput {
 }
 
 export class TransactionsService {
-	async getTransactions() {
-		const transactionsList = await db.select().from(transactions).orderBy(desc(transactions.createdAt));
+	private getUserCondition(userId: string, field: any) {
+		return or(eq(field, userId), isNull(field));
+	}
+
+	async getTransactions(userId: string) {
+		const condition = this.getUserCondition(userId, transactions.userId);
+		const transactionsList = await db.select().from(transactions).where(condition).orderBy(desc(transactions.createdAt));
 		const allItems = await db.select().from(transactionItems);
 
 		// Map relational transactionItems back into nested array
@@ -25,15 +30,17 @@ export class TransactionsService {
 		}));
 	}
 
-	async getTransactionById(id: string) {
-		const txResult = await db.select().from(transactions).where(eq(transactions.id, id)).limit(1);
+	async getTransactionById(userId: string, id: string) {
+		const condition = this.getUserCondition(userId, transactions.userId);
+		const txResult = await db.select().from(transactions).where(and(eq(transactions.id, id), condition)).limit(1);
 		const transaction = txResult[0];
 		if (!transaction) {
 			throw new Error('Transaksi tidak ditemukan.');
 		}
 
 		const items = await db.select().from(transactionItems).where(eq(transactionItems.transactionId, id));
-		const settingsResult = await db.select().from(settings).limit(1);
+		const settingsCondition = this.getUserCondition(userId, settings.userId);
+		const settingsResult = await db.select().from(settings).where(settingsCondition).limit(1);
 		const shopSettings = settingsResult[0] || null;
 
 		return {
@@ -53,7 +60,7 @@ export class TransactionsService {
 		};
 	}
 
-	async createTransaction(data: CheckoutInput) {
+	async createTransaction(userId: string, data: CheckoutInput) {
 		const { items, paymentMethod, amountPaid, notes } = data;
 
 		if (!items || items.length === 0) {
@@ -65,9 +72,11 @@ export class TransactionsService {
 			let totalCost = 0;
 			const resolvedItems = [];
 
+			const prodUserCondition = this.getUserCondition(userId, products.userId);
+
 			// 1. Verify stock levels and gather snapshots
 			for (const cartItem of items) {
-				const prodList = await tx.select().from(products).where(eq(products.id, cartItem.productId)).limit(1);
+				const prodList = await tx.select().from(products).where(and(eq(products.id, cartItem.productId), prodUserCondition)).limit(1);
 				const product = prodList[0];
 
 				if (!product) {
@@ -110,7 +119,7 @@ export class TransactionsService {
 
 			// 3. Deduct stock levels atomically
 			for (const item of resolvedItems) {
-				const prodList = await tx.select().from(products).where(eq(products.id, item.productId)).limit(1);
+				const prodList = await tx.select().from(products).where(and(eq(products.id, item.productId), prodUserCondition)).limit(1);
 				const product = prodList[0];
 				if (!product) throw new Error('Produk tidak ditemukan');
 
@@ -137,6 +146,7 @@ export class TransactionsService {
 
 			// 4. Create Transaction log
 			const txResult = await tx.insert(transactions).values({
+				userId,
 				transactionCode,
 				totalAmount,
 				totalCost,
@@ -171,9 +181,10 @@ export class TransactionsService {
 		});
 	}
 
-	async voidTransaction(id: string) {
+	async voidTransaction(userId: string, id: string) {
+		const condition = this.getUserCondition(userId, transactions.userId);
 		return await db.transaction(async (tx) => {
-			const txList = await tx.select().from(transactions).where(eq(transactions.id, id)).limit(1);
+			const txList = await tx.select().from(transactions).where(and(eq(transactions.id, id), condition)).limit(1);
 			const transaction = txList[0];
 
 			if (!transaction) {

@@ -1,18 +1,25 @@
-import { eq, desc } from 'drizzle-orm';
+import { eq, and, desc, isNull, or } from 'drizzle-orm';
 import { db, products, transactions } from '../../db';
 
 export class DashboardService {
-	async getDashboardStats() {
-		// 1. Fetch completed transactions
+	private getUserCondition(userId: string, field: any) {
+		return or(eq(field, userId), isNull(field));
+	}
+
+	async getDashboardStats(userId: string) {
+		const txUserCondition = this.getUserCondition(userId, transactions.userId);
+		const prodUserCondition = this.getUserCondition(userId, products.userId);
+
+		// 1. Fetch completed transactions for user
 		const completedTransactions = await db.select()
 			.from(transactions)
-			.where(eq(transactions.status, 'completed'))
+			.where(and(eq(transactions.status, 'completed'), txUserCondition))
 			.orderBy(desc(transactions.createdAt));
 
-		// 2. Fetch all active products
+		// 2. Fetch all active products for user
 		const activeProducts = await db.select()
 			.from(products)
-			.where(eq(products.isActive, true));
+			.where(and(eq(products.isActive, true), prodUserCondition));
 
 		// 3. Aggregate totals for today's transactions
 		const startOfToday = new Date();
@@ -34,9 +41,10 @@ export class DashboardService {
 			(p) => p.stock <= (p.minStock !== null && p.minStock !== undefined ? p.minStock : 10)
 		);
 
-		// 5. Fetch 5 most recent transactions
+		// 5. Fetch 5 most recent transactions for user
 		const recentTransactions = await db.select()
 			.from(transactions)
+			.where(txUserCondition)
 			.orderBy(desc(transactions.createdAt))
 			.limit(5);
 

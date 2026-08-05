@@ -8,13 +8,14 @@ import { settingsController } from './modules/settings/settings.controller';
 import { dashboardController } from './modules/dashboard/dashboard.controller';
 import { etalaseController } from './modules/etalase/etalase.controller';
 import { uploadsController } from './modules/uploads/uploads.controller';
+import { getLandingPageHtml } from './views/landing';
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 const app = new Elysia()
 	.use(cors({
 		credentials: true,
-		origin: true // Enable CORS for development
+		origin: process.env.CORS_ORIGIN || true
 	}))
 	.onTransform(({ body, query }) => {
 		if (body && typeof body === 'object') {
@@ -30,8 +31,23 @@ const app = new Elysia()
 			}
 		}
 	})
+	.onError(({ code, error }) => {
+		console.error(`[Elysia Error ${code}]:`, error);
+		const message = error && typeof error === 'object' && 'message' in error
+			? String((error as any).message)
+			: 'Internal Server Error';
+		return {
+			success: false,
+			message
+		};
+	})
 	.group('/api', (api) =>
 		api
+			.get('/health', () => ({
+				status: 'healthy',
+				service: 'POS Elysia API',
+				timestamp: new Date().toISOString()
+			}))
 			.use(authController)
 			.use(productsController)
 			.use(transactionsController)
@@ -40,9 +56,15 @@ const app = new Elysia()
 			.use(etalaseController)
 			.use(uploadsController)
 	)
-	.get('/', () => ({ status: 'ok', service: 'POS Elysia API' }))
-	.listen(port);
+	.get('/', () => new Response(getLandingPageHtml(), {
+		headers: { 'Content-Type': 'text/html; charset=utf-8' }
+	}));
 
-console.log(
-	`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-);
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+	app.listen(port, () => {
+		console.log(`🦊 Elysia is running on http://localhost:${port}`);
+	});
+}
+
+export default app;
+

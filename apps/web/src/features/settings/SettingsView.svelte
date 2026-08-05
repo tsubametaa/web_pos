@@ -1,35 +1,47 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { toast } from "../../lib/utils/toast.svelte";
-  import Card from "../../components/ui/Card.svelte";
-  import Input from "../../components/ui/Input.svelte";
-  import Button from "../../components/ui/Button.svelte";
-  import { Store, KeyRound } from "lucide-svelte";
-  import { api } from "../../core/api";
-  import { appState } from "../../core/state.svelte";
-  import Spinner from "../../components/ui/Spinner.svelte";
+  import { onMount } from 'svelte';
+  import { toast } from '../../lib/utils/toast.svelte';
+  import {
+    Settings,
+    Store,
+    KeyRound,
+    Save,
+    Printer,
+    Check,
+    ShieldCheck,
+    Lock,
+    Phone,
+    MapPin,
+    Coins,
+    Percent,
+    Bell,
+    FileText,
+  } from 'lucide-svelte';
+  import { api } from '../../core/api';
+  import { appState } from '../../core/state.svelte';
+  import Spinner from '../../components/ui/Spinner.svelte';
 
   let loading = $state(true);
-  let activeTab = $state<"profile" | "security">("profile");
+  let activeTab = $state<'profile' | 'security'>('profile');
   let profileSaving = $state(false);
   let securitySaving = $state(false);
 
   // Settings Form Fields
-  let businessName = $state("");
-  let businessPhone = $state("");
-  let businessAddress = $state("");
-  let currencySymbol = $state("Rp");
+  let businessName = $state('');
+  let businessPhone = $state('');
+  let businessAddress = $state('');
+  let currencySymbol = $state('Rp');
   let taxRate = $state(0);
   let lowStockThreshold = $state(10);
-  let receiptFooter = $state("");
+  let receiptFooter = $state('');
 
   // Security Form Fields
-  let oldPassword = $state("");
-  let newPassword = $state("");
-  let confirmNewPassword = $state("");
+  let oldPassword = $state('');
+  let newPassword = $state('');
+  let confirmNewPassword = $state('');
 
-  // Live Preview Computations
-  const mockSubtotal = 43000;
+  // Live Preview Computations for thermal receipt
+  const mockSubtotal = 45000;
   const mockTax = $derived((mockSubtotal * (taxRate || 0)) / 100);
   const mockTotal = $derived(mockSubtotal + mockTax);
 
@@ -41,19 +53,19 @@
 
   async function loadSettings() {
     try {
-      const res = await api.get("/settings");
+      const res = await api.get('/settings');
       if (res.success && res.settings) {
         const s = res.settings;
-        businessName = s.businessName || "";
-        businessPhone = s.businessPhone || "";
-        businessAddress = s.businessAddress || "";
-        currencySymbol = s.currencySymbol || "Rp";
+        businessName = s.businessName || '';
+        businessPhone = s.businessPhone || '';
+        businessAddress = s.businessAddress || '';
+        currencySymbol = s.currencySymbol || 'Rp';
         taxRate = s.taxRate || 0;
         lowStockThreshold = s.lowStockThreshold ?? 10;
-        receiptFooter = s.receiptFooter || "";
+        receiptFooter = s.receiptFooter || '';
       }
     } catch (err) {
-      console.error("Error loading settings:", err);
+      console.error('Error loading settings:', err);
     } finally {
       loading = false;
     }
@@ -67,7 +79,7 @@
     e.preventDefault();
     profileSaving = true;
     try {
-      const res = await api.put("/settings", {
+      const res = await api.put('/settings', {
         businessName: businessName.trim(),
         businessAddress: businessAddress.trim() || undefined,
         businessPhone: businessPhone.trim() || undefined,
@@ -77,13 +89,13 @@
         receiptFooter: receiptFooter.trim() || undefined,
       });
       if (res.success) {
-        toast.success(res.message || "Profil bisnis berhasil diperbarui!");
+        toast.success(res.message || 'Profil bisnis berhasil diperbarui!');
         await appState.refreshSettings();
       } else {
-        throw new Error(res.error || "Gagal menyimpan.");
+        throw new Error(res.error || 'Gagal menyimpan.');
       }
     } catch (err: any) {
-      toast.error(err.message || "Gagal memperbarui profil.");
+      toast.error(err.message || 'Gagal memperbarui profil.');
     } finally {
       profileSaving = false;
     }
@@ -92,25 +104,25 @@
   async function handleUpdatePassword(e: SubmitEvent) {
     e.preventDefault();
     if (newPassword !== confirmNewPassword) {
-      toast.error("Konfirmasi password baru tidak cocok.");
+      toast.error('Konfirmasi password baru tidak cocok.');
       return;
     }
     securitySaving = true;
     try {
-      const res = await api.put("/settings/password", {
+      const res = await api.put('/settings/password', {
         oldPassword,
         newPassword,
       });
       if (res.success) {
-        toast.success("Password berhasil diperbarui!");
-        oldPassword = "";
-        newPassword = "";
-        confirmNewPassword = "";
+        toast.success('Password berhasil diperbarui!');
+        oldPassword = '';
+        newPassword = '';
+        confirmNewPassword = '';
       } else {
-        throw new Error(res.error || "Gagal memperbarui password.");
+        throw new Error(res.error || 'Gagal memperbarui password.');
       }
     } catch (err: any) {
-      toast.error(err.message || "Gagal mengubah password.");
+      toast.error(err.message || 'Gagal mengubah password.');
     } finally {
       securitySaving = false;
     }
@@ -118,257 +130,364 @@
 </script>
 
 {#if loading}
-  <div class="h-64 flex items-center justify-center">
+  <div class="h-96 flex flex-col items-center justify-center gap-3">
     <Spinner size="lg" />
+    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">
+      Memuat Pengaturan Toko...
+    </span>
   </div>
 {:else}
-  <div class="flex flex-col gap-6 w-full text-ink">
-    <div class="flex flex-col gap-1.5 pb-4 border-b border-sage-200/25">
-      <h1
-        class="text-xl font-black text-slate-800 dark:text-white tracking-tight"
-      >
-        Pengaturan Toko
-      </h1>
-      <p class="text-xs text-slate-500 dark:text-slate-350 font-medium">
-        Kelola informasi bisnis, mata uang, pajak, notifikasi stok, dan password
-        keamanan.
-      </p>
+  <div class="flex flex-col gap-6 text-ink w-full pb-8 select-none">
+    <!-- Header Banner -->
+    <div
+      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-base/90 dark:bg-surface/60 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl shadow-2xs"
+    >
+      <div class="space-y-1">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+            <Settings class="w-5 h-5" />
+          </div>
+          <h1 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+            Pengaturan Toko
+          </h1>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium">
+          Kelola profil bisnis, mata uang, pajak, notifikasi stok, format cetak struk, dan keamanan akun Anda.
+        </p>
+      </div>
     </div>
 
+    <!-- Navigation Tabs & Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      <!-- Sidebar Tabs Navigation -->
       <aside
-        class="flex lg:flex-col gap-1 bg-surface border border-sage-200/50 p-1.5 rounded-2xl overflow-x-auto lg:overflow-visible scrollbar-none"
+        class="flex lg:flex-col gap-1.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 p-2 rounded-2xl shadow-2xs overflow-x-auto lg:overflow-visible scrollbar-none"
       >
         <button
           type="button"
-          onclick={() => (activeTab = "profile")}
-          class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer select-none shrink-0 w-full bg-transparent border-0
+          onclick={() => (activeTab = 'profile')}
+          class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer select-none shrink-0 w-full border-0
 						{activeTab === 'profile'
-            ? 'bg-sage-500! text-white font-extrabold shadow-md'
-            : 'text-slate-650 hover:bg-base/40'}"
+            ? 'bg-emerald-600 text-white shadow-xs'
+            : 'text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
         >
-          <Store class="w-4 h-4" />
-          Profil Bisnis
+          <Store class="w-4 h-4 shrink-0" />
+          <span>Profil Bisnis & Kasir</span>
         </button>
+
         <button
           type="button"
-          onclick={() => (activeTab = "security")}
-          class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer select-none shrink-0 w-full bg-transparent border-0
+          onclick={() => (activeTab = 'security')}
+          class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer select-none shrink-0 w-full border-0
 						{activeTab === 'security'
-            ? 'bg-sage-500! text-white font-extrabold shadow-md'
-            : 'text-slate-650 hover:bg-base/40'}"
+            ? 'bg-emerald-600 text-white shadow-xs'
+            : 'text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
         >
-          <KeyRound class="w-4 h-4" />
-          Keamanan & Sandi
+          <ShieldCheck class="w-4 h-4 shrink-0" />
+          <span>Keamanan & Sandi</span>
         </button>
       </aside>
 
-      <div class="lg:col-span-3 flex flex-col gap-6">
-        {#if activeTab === "profile"}
+      <!-- Content Area -->
+      <div class="lg:col-span-3">
+        <!-- TAB 1: PROFIL BISNIS & KASIR -->
+        {#if activeTab === 'profile'}
           <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
-            <div class="xl:col-span-3 flex flex-col gap-6">
-              <Card class="p-6 bg-surface">
-                <form
-                  onsubmit={handleUpdateProfile}
-                  class="flex flex-col gap-5"
-                >
-                  <div class="flex flex-col gap-4">
-                    <div class="border-b border-sage-200/20 pb-2.5 mb-1">
-                      <h3
-                        class="font-extrabold text-slate-800 dark:text-white text-sm tracking-tight"
-                      >
-                        Informasi Dasar
-                      </h3>
-                      <p
-                        class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5"
-                      >
-                        Identitas toko Anda pada cetak struk/invoice.
-                      </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Input
-                        label="Nama"
-                        bind:value={businessName}
-                        placeholder="Contoh: Coffee Shop Kita"
-                        required
-                        disabled={profileSaving}
-                      />
-                      <Input
-                        label="Nomor Telepon Kontak"
-                        bind:value={businessPhone}
-                        placeholder="Contoh: 081234567890"
-                        disabled={profileSaving}
-                      />
-                    </div>
-
-                    <Input
-                      label="Alamat Lengkap Toko"
-                      bind:value={businessAddress}
-                      placeholder="Contoh: Jl. Diponegoro No. 45, Bandung"
-                      disabled={profileSaving}
-                    />
-                  </div>
-
-                  <div class="flex flex-col gap-4 mt-2">
-                    <div class="border-b border-sage-200/20 pb-2.5 mb-1">
-                      <h3
-                        class="font-extrabold text-slate-800 dark:text-white text-sm tracking-tight"
-                      >
-                        Kasir & Keuangan
-                      </h3>
-                      <p
-                        class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5"
-                      >
-                        Pengaturan standar transaksi dan inventori POS.
-                      </p>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <Input
-                        label="Mata Uang"
-                        bind:value={currencySymbol}
-                        placeholder="Rp"
-                        required
-                        disabled={profileSaving}
-                      />
-                      <Input
-                        type="number"
-                        label="Tarif PPN (%)"
-                        bind:value={taxRate}
-                        placeholder="0"
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        required
-                        disabled={profileSaving}
-                      />
-                      <Input
-                        type="number"
-                        label="Batas Stok Tipis"
-                        bind:value={lowStockThreshold}
-                        placeholder="10"
-                        min="0"
-                        required
-                        disabled={profileSaving}
-                      />
-                    </div>
-
-                    <Input
-                      label="Catatan Struk (Footer)"
-                      bind:value={receiptFooter}
-                      placeholder="Contoh: Terima kasih atas kunjungan Anda!"
-                      disabled={profileSaving}
-                    />
-                  </div>
-
-                  <div
-                    class="flex justify-end mt-4 pt-3 border-t border-sage-200/25"
-                  >
-                    <Button
-                      type="submit"
-                      loading={profileSaving}
-                      variant="primary"
-                      class="px-5 text-white"
-                    >
-                      Simpan Perubahan
-                    </Button>
-                  </div>
-                </form>
-              </Card>
-            </div>
-
-            <!-- Receipt Preview -->
-            <div class="xl:col-span-2 flex flex-col gap-4 xl:sticky xl:top-20">
-              <div
-                class="bg-surface border border-sage-200/40 rounded-2xl p-4 flex flex-col gap-3 shadow-xs"
+            <!-- Left: Profile Form Card -->
+            <div class="xl:col-span-3">
+              <form
+                onsubmit={handleUpdateProfile}
+                class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-6 shadow-2xs space-y-6"
               >
-                <div
-                  class="flex items-center justify-between border-b border-sage-200/20 pb-2"
-                >
-                  <span
-                    class="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider"
-                    >Live Preview Struk</span
-                  >
-                  <span
-                    class="text-[9px] bg-base text-slate-500 dark:text-slate-300 font-extrabold px-2 py-0.5 rounded-full select-none border border-sage-200/40"
-                    >Thermal 80mm</span
-                  >
+                <!-- Section 1: Informasi Bisnis -->
+                <div class="space-y-4">
+                  <div class="border-b border-slate-200/60 dark:border-emerald-950/60 pb-3">
+                    <h2 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">
+                      Informasi Profil Bisnis
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium mt-0.5">
+                      Identitas toko yang ditampilkan pada header struk dan laporan invoice.
+                    </p>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5"
+                        for="biz-name"
+                      >
+                        Nama Toko / Usaha *
+                      </label>
+                      <div class="relative">
+                        <input
+                          id="biz-name"
+                          type="text"
+                          bind:value={businessName}
+                          placeholder="Contoh: Coffee Shop Kita"
+                          required
+                          disabled={profileSaving}
+                          class="w-full px-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5"
+                        for="biz-phone"
+                      >
+                        Nomor Telepon Kontak
+                      </label>
+                      <div class="relative">
+                        <Phone class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        <input
+                          id="biz-phone"
+                          type="text"
+                          bind:value={businessPhone}
+                          placeholder="Contoh: 081234567890"
+                          disabled={profileSaving}
+                          class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5"
+                      for="biz-addr"
+                    >
+                      Alamat Lengkap Toko
+                    </label>
+                    <div class="relative">
+                      <MapPin class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                      <input
+                        id="biz-addr"
+                        type="text"
+                        bind:value={businessAddress}
+                        placeholder="Contoh: Jl. Diponegoro No. 45, Bandung"
+                        disabled={profileSaving}
+                        class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div
-                  class="bg-white text-slate-900 border border-slate-200 rounded-lg p-5 shadow-inner font-mono text-[9px] leading-relaxed flex flex-col w-full mx-auto select-none relative overflow-hidden"
-                >
-                  <div class="text-center font-bold mb-3 flex flex-col gap-0.5">
-                    <span class="text-xs block uppercase tracking-wide truncate"
-                      >{businessName || "NAMA TOKO"}</span
-                    >
-                    {#if businessAddress}
-                      <span
-                        class="font-normal block text-[8px] text-slate-500 truncate"
-                        >{businessAddress}</span
+                <!-- Section 2: Standar Kasir & Keuangan -->
+                <div class="space-y-4 pt-2 border-t border-slate-200/40 dark:border-emerald-950/40">
+                  <div class="border-b border-slate-200/60 dark:border-emerald-950/60 pb-3">
+                    <h2 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">
+                      Standar Kasir & Struk
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium mt-0.5">
+                      Pengaturan mata uang, PPN, notifikasi stok, dan footer pencetakan.
+                    </p>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label
+                        class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5"
+                        for="biz-curr"
                       >
+                        Simbol Mata Uang *
+                      </label>
+                      <div class="relative">
+                        <Coins class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        <input
+                          id="biz-curr"
+                          type="text"
+                          bind:value={currencySymbol}
+                          placeholder="Rp"
+                          required
+                          disabled={profileSaving}
+                          class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-mono font-bold text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5"
+                        for="biz-tax"
+                      >
+                        Tarif PPN (%) *
+                      </label>
+                      <div class="relative">
+                        <Percent class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        <input
+                          id="biz-tax"
+                          type="number"
+                          bind:value={taxRate}
+                          placeholder="0"
+                          min="0"
+                          max="100"
+                          step="0.1"
+                          required
+                          disabled={profileSaving}
+                          class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-mono font-bold text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5"
+                        for="biz-thresh"
+                      >
+                        Batas Stok Tipis *
+                      </label>
+                      <div class="relative">
+                        <Bell class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        <input
+                          id="biz-thresh"
+                          type="number"
+                          bind:value={lowStockThreshold}
+                          placeholder="10"
+                          min="0"
+                          required
+                          disabled={profileSaving}
+                          class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-mono font-bold text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5"
+                      for="biz-footer"
+                    >
+                      Catatan Struk Footer
+                    </label>
+                    <div class="relative">
+                      <FileText class="absolute left-3 top-3 w-3.5 h-3.5 text-slate-400" />
+                      <textarea
+                        id="biz-footer"
+                        bind:value={receiptFooter}
+                        rows="2"
+                        placeholder="Contoh: Terima kasih atas kunjungan Anda! Barang yang sudah dibeli tidak dapat ditukar."
+                        disabled={profileSaving}
+                        class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-3 border-t border-slate-200/60 dark:border-emerald-950/60 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={profileSaving}
+                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs hover:shadow"
+                  >
+                    {#if profileSaving}
+                      <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      <span>Menyimpan...</span>
+                    {:else}
+                      <Save class="w-4 h-4" />
+                      <span>Simpan Perubahan Profil</span>
+                    {/if}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Right: Real-time Live Receipt Preview Card -->
+            <div class="xl:col-span-2 xl:sticky xl:top-6">
+              <div
+                class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 flex flex-col gap-3 shadow-2xs"
+              >
+                <div
+                  class="flex items-center justify-between border-b border-slate-200/60 dark:border-emerald-950/60 pb-2.5"
+                >
+                  <div class="flex items-center gap-2">
+                    <Printer class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span class="text-xs font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">
+                      Live Preview Struk
+                    </span>
+                  </div>
+                  <span
+                    class="text-[10px] bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/20"
+                  >
+                    Thermal 80mm
+                  </span>
+                </div>
+
+                <!-- Physical Receipt Card Rendering -->
+                <div
+                  class="bg-white text-slate-900 border border-slate-200 rounded-xl p-5 shadow-sm font-mono text-[9px] leading-relaxed flex flex-col w-full mx-auto select-none overflow-hidden"
+                >
+                  <!-- Receipt Header -->
+                  <div class="text-center font-bold mb-3 flex flex-col gap-0.5">
+                    <span class="text-xs block uppercase tracking-wide truncate text-slate-900 font-black">
+                      {businessName || 'NAMA TOKO ANDA'}
+                    </span>
+                    {#if businessAddress}
+                      <span class="font-normal block text-[8px] text-slate-600 truncate">
+                        {businessAddress}
+                      </span>
                     {/if}
                     {#if businessPhone}
-                      <span
-                        class="font-normal block text-[8px] text-slate-500 truncate"
-                        >Telp: {businessPhone}</span
-                      >
+                      <span class="font-normal block text-[8px] text-slate-600 truncate">
+                        Telp: {businessPhone}
+                      </span>
                     {/if}
                   </div>
 
+                  <!-- Order Info -->
                   <div
-                    class="border-t border-b border-dashed border-slate-350 py-2 my-2 flex flex-col gap-1 text-[8px]"
+                    class="border-t border-b border-dashed border-slate-300 py-2 my-2 flex flex-col gap-1 text-[8px]"
                   >
                     <div class="flex justify-between">
-                      <span>No. Transaksi:</span>
-                      <span class="font-bold">TRX-20260604-0012</span>
+                      <span class="text-slate-600">No. Transaksi:</span>
+                      <span class="font-bold">TRX-20260805-001</span>
                     </div>
                     <div class="flex justify-between">
-                      <span>Tanggal:</span>
-                      <span>04/06/2026 21:00</span>
+                      <span class="text-slate-600">Tanggal:</span>
+                      <span>05/08/2026 21:00</span>
                     </div>
                   </div>
 
+                  <!-- Mock Sample Item -->
                   <div class="flex flex-col gap-1.5 my-2">
                     <div>
-                      <div class="flex justify-between font-bold">
-                        <span>Americano Ice Coffee</span>
-                        <span>{(25000).toLocaleString("id-ID")}</span>
+                      <div class="flex justify-between font-bold text-slate-900">
+                        <span>Kopi Susu Aren (Large)</span>
+                        <span>45.000</span>
                       </div>
-                      <div class="text-[8px] text-slate-450">
-                        1 x {(25000).toLocaleString("id-ID")}
+                      <div class="text-[8px] text-slate-500">
+                        1 &times; 45.000
                       </div>
                     </div>
                   </div>
 
-                  <div
-                    class="border-t border-dashed border-slate-350 pt-2 flex flex-col gap-1 text-[8px]"
-                  >
+                  <!-- Total Calculations -->
+                  <div class="border-t border-dashed border-slate-300 pt-2 flex flex-col gap-1 text-[8px]">
                     <div class="flex justify-between">
-                      <span>Subtotal:</span>
-                      <span>{(25000).toLocaleString("id-ID")}</span>
+                      <span class="text-slate-600">Subtotal:</span>
+                      <span class="font-bold">45.000</span>
                     </div>
-                    {#if parseFloat(taxRate.toString()) > 0}
+
+                    {#if Number(taxRate) > 0}
                       <div class="flex justify-between">
-                        <span>PPN ({taxRate}%):</span>
-                        <span>{mockTax.toLocaleString("id-ID")}</span>
+                        <span class="text-slate-600">PPN ({taxRate}%):</span>
+                        <span class="font-bold">{mockTax.toLocaleString('id-ID')}</span>
                       </div>
                     {/if}
+
                     <div
-                      class="flex justify-between font-bold text-[10px] border-t border-slate-200 pt-1 mt-1"
+                      class="flex justify-between font-black text-[10px] border-t border-slate-300 pt-1.5 mt-1 text-slate-900"
                     >
                       <span>TOTAL ({currencySymbol}):</span>
-                      <span
-                        >{currencySymbol}
-                        {mockTotal.toLocaleString("id-ID")}</span
-                      >
+                      <span>{currencySymbol} {mockTotal.toLocaleString('id-ID')}</span>
                     </div>
                   </div>
 
+                  <!-- Receipt Footer Note -->
                   {#if receiptFooter}
                     <div
-                      class="text-center text-[8px] text-slate-500 border-t border-dashed border-slate-300 pt-2.5 mt-3 whitespace-pre-line leading-normal"
+                      class="text-center text-[8px] text-slate-600 border-t border-dashed border-slate-300 pt-2.5 mt-3 whitespace-pre-line leading-normal font-medium"
                     >
                       {receiptFooter}
                     </div>
@@ -379,190 +498,183 @@
           </div>
         {/if}
 
-        {#if activeTab === "security"}
+        <!-- TAB 2: KEAMANAN & KATA SANDI -->
+        {#if activeTab === 'security'}
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            <!-- Left: Password Change Form -->
             <div class="md:col-span-2">
-              <Card class="p-6 bg-surface">
-                <form
-                  onsubmit={handleUpdatePassword}
-                  class="flex flex-col gap-5"
-                >
-                  <div
-                    class="border-b border-sage-200/20 pb-3 mb-1 flex items-start gap-3"
-                  >
-                    <div
-                      class="p-2 bg-rose-50 border border-rose-100 text-rose-600 rounded-xl"
-                    >
-                      <KeyRound class="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3
-                        class="font-extrabold text-slate-800 dark:text-white text-sm tracking-tight"
-                      >
-                        Kredensial Keamanan
-                      </h3>
-                      <p
-                        class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium"
-                      >
-                        Perbarui kunci akses utama kasir toko Anda secara
-                        berkala.
-                      </p>
-                    </div>
-                  </div>
-
-                  <Input
-                    type="password"
-                    label="Password Lama"
-                    bind:value={oldPassword}
-                    placeholder="Masukkan password lama"
-                    required
-                    disabled={securitySaving}
-                  />
-
-                  <Input
-                    type="password"
-                    label="Password Baru"
-                    bind:value={newPassword}
-                    placeholder="Masukkan password baru"
-                    required
-                    disabled={securitySaving}
-                  />
-
-                  <Input
-                    type="password"
-                    label="Konfirmasi Password Baru"
-                    bind:value={confirmNewPassword}
-                    placeholder="Ketik ulang password baru"
-                    required
-                    error={newPassword &&
-                    confirmNewPassword &&
-                    newPassword !== confirmNewPassword
-                      ? "Konfirmasi password tidak cocok"
-                      : undefined}
-                    disabled={securitySaving}
-                  />
-
-                  <div
-                    class="flex justify-end mt-4 pt-3 border-t border-sage-200/25"
-                  >
-                    <Button
-                      type="submit"
-                      loading={securitySaving}
-                      variant="danger"
-                      disabled={!oldPassword ||
-                        !newPassword ||
-                        newPassword !== confirmNewPassword ||
-                        !isNewPasswordValid}
-                      class="px-5 text-white bg-rose-600 hover:bg-rose-700"
-                    >
-                      Perbarui Password
-                    </Button>
-                  </div>
-                </form>
-              </Card>
-            </div>
-
-            <div class="md:col-span-1">
-              <div
-                class="bg-surface border border-sage-200/50 rounded-2xl p-5 flex flex-col gap-4 shadow-xs"
+              <form
+                onsubmit={handleUpdatePassword}
+                class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-6 shadow-2xs space-y-5"
               >
-                <div
-                  class="flex items-center gap-2 border-b border-sage-200/20 pb-2"
-                >
-                  <span
-                    class="text-xs font-black text-slate-700 dark:text-white uppercase tracking-wider"
-                    >Kriteria Password</span
-                  >
+                <div class="border-b border-slate-200/60 dark:border-emerald-950/60 pb-3 flex items-center gap-3">
+                  <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                    <KeyRound class="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">
+                      Kredensial Keamanan Akun
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium mt-0.5">
+                      Perbarui kata sandi utama toko Anda secara berkala untuk menjaga keamanan data.
+                    </p>
+                  </div>
                 </div>
 
-                <ul class="flex flex-col gap-3 text-xs text-slate-650">
+                <div>
+                  <label
+                    class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5"
+                    for="pass-old"
+                  >
+                    Password Saat Ini *
+                  </label>
+                  <div class="relative">
+                    <Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                    <input
+                      id="pass-old"
+                      type="password"
+                      bind:value={oldPassword}
+                      placeholder="Masukkan password lama"
+                      required
+                      disabled={securitySaving}
+                      class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5"
+                    for="pass-new"
+                  >
+                    Password Baru *
+                  </label>
+                  <div class="relative">
+                    <Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                    <input
+                      id="pass-new"
+                      type="password"
+                      bind:value={newPassword}
+                      placeholder="Masukkan password baru"
+                      required
+                      disabled={securitySaving}
+                      class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5"
+                    for="pass-confirm"
+                  >
+                    Konfirmasi Password Baru *
+                  </label>
+                  <div class="relative">
+                    <Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                    <input
+                      id="pass-confirm"
+                      type="password"
+                      bind:value={confirmNewPassword}
+                      placeholder="Ketik ulang password baru"
+                      required
+                      disabled={securitySaving}
+                      class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                    />
+                  </div>
+                  {#if newPassword && confirmNewPassword && newPassword !== confirmNewPassword}
+                    <p class="text-[11px] font-bold text-rose-500 mt-1">
+                      Konfirmasi password baru tidak cocok.
+                    </p>
+                  {/if}
+                </div>
+
+                <div class="pt-3 border-t border-slate-200/60 dark:border-emerald-950/60 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={securitySaving ||
+                      !oldPassword ||
+                      !newPassword ||
+                      newPassword !== confirmNewPassword ||
+                      !isNewPasswordValid}
+                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs disabled:pointer-events-none"
+                  >
+                    {#if securitySaving}
+                      <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      <span>Menyimpan...</span>
+                    {:else}
+                      <Save class="w-4 h-4" />
+                      <span>Perbarui Password</span>
+                    {/if}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Right: Password Criteria Card -->
+            <div class="md:col-span-1">
+              <div
+                class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-5 flex flex-col gap-4 shadow-2xs"
+              >
+                <div class="border-b border-slate-200/60 dark:border-emerald-950/60 pb-2.5">
+                  <span class="text-xs font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">
+                    Kriteria Keamanan Password
+                  </span>
+                </div>
+
+                <ul class="flex flex-col gap-3 text-xs">
                   <li class="flex items-center gap-2.5">
                     <div
-                      class="w-4 h-4 rounded-full flex items-center justify-center border transition-all duration-350
-											{hasMinLength
-                        ? 'bg-emerald-500 border-emerald-500 text-white'
-                        : 'bg-white border-slate-200 text-slate-400'}"
+                      class="w-4 h-4 rounded-full flex items-center justify-center border shrink-0 transition-colors
+												{hasMinLength
+                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        : 'bg-base dark:bg-base/60 border-slate-300 text-slate-400'}"
                     >
                       {#if hasMinLength}
-                        <svg
-                          class="w-2.5 h-2.5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          stroke-width="4"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
+                        <Check class="w-2.5 h-2.5 stroke-[3]" />
                       {:else}
-                        <span class="w-1 h-1 rounded-full bg-slate-350"></span>
+                        <span class="w-1 h-1 rounded-full bg-slate-400"></span>
                       {/if}
                     </div>
-                    <span
-                      class={hasMinLength ? "text-emerald-700 font-bold" : ""}
-                      >Minimal 6 karakter</span
-                    >
+                    <span class={hasMinLength ? 'text-emerald-700 dark:text-emerald-300 font-bold' : 'text-slate-500'}>
+                      Minimal 6 karakter
+                    </span>
                   </li>
+
                   <li class="flex items-center gap-2.5">
                     <div
-                      class="w-4 h-4 rounded-full flex items-center justify-center border transition-all duration-350
-											{hasLetter
-                        ? 'bg-emerald-500 border-emerald-500 text-white'
-                        : 'bg-white border-slate-200 text-slate-400'}"
+                      class="w-4 h-4 rounded-full flex items-center justify-center border shrink-0 transition-colors
+												{hasLetter
+                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        : 'bg-base dark:bg-base/60 border-slate-300 text-slate-400'}"
                     >
                       {#if hasLetter}
-                        <svg
-                          class="w-2.5 h-2.5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          stroke-width="4"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
+                        <Check class="w-2.5 h-2.5 stroke-[3]" />
                       {:else}
-                        <span class="w-1 h-1 rounded-full bg-slate-350"></span>
+                        <span class="w-1 h-1 rounded-full bg-slate-400"></span>
                       {/if}
                     </div>
-                    <span class={hasLetter ? "text-emerald-700 font-bold" : ""}
-                      >Mengandung huruf (A-Z, a-z)</span
-                    >
+                    <span class={hasLetter ? 'text-emerald-700 dark:text-emerald-300 font-bold' : 'text-slate-500'}>
+                      Mengandung huruf (A-Z, a-z)
+                    </span>
                   </li>
+
                   <li class="flex items-center gap-2.5">
                     <div
-                      class="w-4 h-4 rounded-full flex items-center justify-center border transition-all duration-350
-											{hasNumber
-                        ? 'bg-emerald-500 border-emerald-500 text-white'
-                        : 'bg-white border-slate-200 text-slate-400'}"
+                      class="w-4 h-4 rounded-full flex items-center justify-center border shrink-0 transition-colors
+												{hasNumber
+                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        : 'bg-base dark:bg-base/60 border-slate-300 text-slate-400'}"
                     >
                       {#if hasNumber}
-                        <svg
-                          class="w-2.5 h-2.5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          stroke-width="4"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
+                        <Check class="w-2.5 h-2.5 stroke-[3]" />
                       {:else}
-                        <span class="w-1 h-1 rounded-full bg-slate-350"></span>
+                        <span class="w-1 h-1 rounded-full bg-slate-400"></span>
                       {/if}
                     </div>
-                    <span class={hasNumber ? "text-emerald-700 font-bold" : ""}
-                      >Mengandung angka (0-9)</span
-                    >
+                    <span class={hasNumber ? 'text-emerald-700 dark:text-emerald-300 font-bold' : 'text-slate-500'}>
+                      Mengandung angka (0-9)
+                    </span>
                   </li>
                 </ul>
               </div>

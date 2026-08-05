@@ -7,9 +7,9 @@ const productsService = new ProductsService();
 export const productsController = new Elysia({ prefix: '/products' })
 	.use(authPlugin)
 	.guard({ requireAuth: true })
-	.get('/', async ({ query }) => {
+	.get('/', async ({ user, query }: any) => {
 		const activeOnly = query.active === 'true';
-		const list = await productsService.getProducts(query.category, activeOnly);
+		const list = await productsService.getProducts(user.id, query.category, activeOnly);
 		return { success: true, products: list };
 	}, {
 		query: t.Object({
@@ -17,9 +17,9 @@ export const productsController = new Elysia({ prefix: '/products' })
 			active: t.Optional(t.String())
 		})
 	})
-	.post('/', async ({ body, set }) => {
+	.post('/', async ({ user, body, set }: any) => {
 		try {
-			const product = await productsService.createProduct(body);
+			const product = await productsService.createProduct(user.id, body);
 			return { success: true, product };
 		} catch (err: any) {
 			set.status = 400;
@@ -38,7 +38,7 @@ export const productsController = new Elysia({ prefix: '/products' })
 			notes: t.Optional(t.String())
 		})
 	})
-	.put('/', async ({ body, set }) => {
+	.put('/', async ({ user, body, set }: any) => {
 		try {
 			const { id, stockAdjustment, adjustmentNotes, ...updateData } = body;
 			if (!id) {
@@ -54,12 +54,12 @@ export const productsController = new Elysia({ prefix: '/products' })
 					return { success: false, error: 'Jumlah penyesuaian stok harus angka.' };
 				}
 
-				const product = await productsService.adjustStock(id, adjustment, adjustmentNotes);
+				const product = await productsService.adjustStock(user.id, id, adjustment, adjustmentNotes);
 				return { success: true, product };
 			}
 
 			// Regular Product Update
-			const product = await productsService.updateProduct(id, updateData);
+			const product = await productsService.updateProduct(user.id, id, updateData);
 			return { success: true, product };
 		} catch (err: any) {
 			set.status = 400;
@@ -81,7 +81,7 @@ export const productsController = new Elysia({ prefix: '/products' })
 			adjustmentNotes: t.Optional(t.String())
 		})
 	})
-	.delete('/', async ({ query, set }) => {
+	.delete('/', async ({ user, query, set }: any) => {
 		try {
 			const id = query.id;
 			if (!id) {
@@ -89,7 +89,7 @@ export const productsController = new Elysia({ prefix: '/products' })
 				return { success: false, error: 'ID produk wajib disertakan.' };
 			}
 
-			const product = await productsService.toggleStatus(id);
+			const product = await productsService.toggleStatus(user.id, id);
 			return {
 				success: true,
 				message: `Status produk berhasil diubah menjadi ${product.isActive ? 'aktif' : 'non-aktif'}.`,

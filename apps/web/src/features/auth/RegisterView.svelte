@@ -28,7 +28,7 @@
       });
       if (res.success) {
         toast.success("Setup/Registrasi bisnis berhasil!");
-        appState.user = res.user;
+        appState.setUser(res.user);
         appState.needSetup = false;
         window.location.hash = "#/dashboard";
       }
@@ -52,7 +52,7 @@
     class="absolute bottom-1/4 right-1/3 w-80 h-80 bg-accent-soft/10 dark:bg-accent-soft/5 rounded-full blur-3xl -z-10 pointer-events-none"
   ></div>
 
-  <div class="w-full max-w-[420px] z-10 transition-all duration-300">
+  <div class="w-full max-w-1050 transition-all duration-300">
     <!-- Glass Panel Container -->
     <div
       class="glass-panel-glow border border-accent-soft/30 dark:border-accent-soft/20 rounded-3xl p-8 sm:p-10 shadow-xl flex flex-col gap-6"

@@ -5,13 +5,36 @@ import {
 	real
 } from 'drizzle-orm/sqlite-core';
 
+export function generateRandomId(length = 7): string {
+	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	let result = '';
+	const bytes = crypto.getRandomValues(new Uint8Array(length));
+	for (let i = 0; i < length; i++) {
+		result += chars[bytes[i] % chars.length];
+	}
+	return result;
+}
+
+// Users Table (defined first so references work seamlessly)
+export const users = sqliteTable('users', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => generateRandomId(7)),
+	email: text('email').notNull().unique(),
+	passwordHash: text('password_hash').notNull(),
+	businessName: text('business_name').notNull(),
+	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull()
+});
+
 // Products Table
 export const products = sqliteTable('products', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
+	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 	name: text('name').notNull(),
-	sku: text('sku').notNull().unique(),
+	sku: text('sku').notNull(),
 	category: text('category').notNull(),
 	unit: text('unit').notNull(),
 	costPrice: integer('cost_price').notNull(),
@@ -30,6 +53,7 @@ export const transactions = sqliteTable('transactions', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
+	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 	transactionCode: text('transaction_code').notNull().unique(),
 	totalAmount: integer('total_amount').notNull(),
 	totalCost: integer('total_cost').notNull(),
@@ -67,6 +91,7 @@ export const settings = sqliteTable('settings', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
+	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 	businessName: text('business_name').notNull(),
 	businessAddress: text('business_address'),
 	businessPhone: text('business_phone'),
@@ -76,16 +101,6 @@ export const settings = sqliteTable('settings', {
 	taxRate: real('tax_rate').notNull().default(0), // 0 - 100 percentage
 	receiptFooter: text('receipt_footer'),
 	ownerPasswordHash: text('owner_password_hash').notNull(),
-	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),
-	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull()
-});
-
-// Users Table
-export const users = sqliteTable('users', {
-	id: integer('id').primaryKey({ autoIncrement: true }),
-	email: text('email').notNull().unique(),
-	passwordHash: text('password_hash').notNull(),
-	businessName: text('business_name').notNull(),
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull()
 });

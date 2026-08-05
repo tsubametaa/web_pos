@@ -80,8 +80,6 @@
 	<!-- svelte-ignore a11y_interactive_supports_focus -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-xs p-4"
-		onclick={handleClose}
-		onkeydown={(e) => e.key === 'Escape' && handleClose()}
 		role="dialog"
 		aria-modal="true"
 		aria-label="Modal Pembayaran"

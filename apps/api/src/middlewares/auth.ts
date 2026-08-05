@@ -3,8 +3,19 @@ import { db, users } from '../db';
 import { eq } from 'drizzle-orm';
 
 export const authPlugin = new Elysia({ name: 'auth' })
-	.derive(async ({ cookie: { session } }) => {
-		const email = session?.value;
+	.derive(async ({ cookie: { session }, request }) => {
+		let email = session?.value;
+
+		// Fallback to Authorization header or X-User-Email if Cookie SameSite policy blocks cross-origin cookies
+		if (!email || typeof email !== 'string') {
+			const authHeader = request.headers.get('authorization');
+			if (authHeader && authHeader.startsWith('Bearer ')) {
+				email = authHeader.substring(7);
+			} else {
+				email = request.headers.get('x-user-email') || undefined;
+			}
+		}
+
 		if (!email || typeof email !== 'string') {
 			return { user: null };
 		}

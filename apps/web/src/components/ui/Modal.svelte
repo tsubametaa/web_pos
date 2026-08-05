@@ -47,7 +47,6 @@
 		<div
 			transition:fade={{ duration: 250 }}
 			class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm"
-			onclick={onclose}
 		></div>
 
 		<!-- Modal Content -->

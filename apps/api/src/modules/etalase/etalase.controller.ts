@@ -1,16 +1,24 @@
 import { Elysia, t } from 'elysia';
 import { EtalaseService } from './etalase.service';
+import { authPlugin } from '../../middlewares/auth';
 
 const etalaseService = new EtalaseService();
 
 export const etalaseController = new Elysia({ prefix: '/etalase' })
-	.get('/', async () => {
-		const data = await etalaseService.getCatalog();
+	.use(authPlugin)
+	.get('/', async ({ user, query }: any) => {
+		const userId = user?.id || query.userId || undefined;
+		const data = await etalaseService.getCatalog(userId);
 		return { success: true, ...data };
+	}, {
+		query: t.Object({
+			userId: t.Optional(t.String())
+		})
 	})
-	.get('/:id', async ({ params, set }) => {
+	.get('/:id', async ({ user, query, params, set }: any) => {
 		try {
-			const data = await etalaseService.getCatalogProductById(params.id);
+			const userId = user?.id || query.userId || undefined;
+			const data = await etalaseService.getCatalogProductById(params.id, userId);
 			return { success: true, ...data };
 		} catch (err: any) {
 			set.status = 404;
@@ -19,5 +27,8 @@ export const etalaseController = new Elysia({ prefix: '/etalase' })
 	}, {
 		params: t.Object({
 			id: t.String({ minLength: 1 })
+		}),
+		query: t.Object({
+			userId: t.Optional(t.String())
 		})
 	});

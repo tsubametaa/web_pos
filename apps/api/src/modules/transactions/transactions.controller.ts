@@ -7,13 +7,13 @@ const transactionsService = new TransactionsService();
 export const transactionsController = new Elysia({ prefix: '/transactions' })
 	.use(authPlugin)
 	.guard({ requireAuth: true })
-	.get('/', async () => {
-		const list = await transactionsService.getTransactions();
+	.get('/', async ({ user }: any) => {
+		const list = await transactionsService.getTransactions(user.id);
 		return { success: true, transactions: list };
 	})
-	.get('/:id', async ({ params, set }) => {
+	.get('/:id', async ({ user, params, set }: any) => {
 		try {
-			const data = await transactionsService.getTransactionById(params.id);
+			const data = await transactionsService.getTransactionById(user.id, params.id);
 			return { success: true, ...data };
 		} catch (err: any) {
 			set.status = 404;
@@ -24,9 +24,9 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 			id: t.String({ minLength: 1 })
 		})
 	})
-	.post('/', async ({ body, set }) => {
+	.post('/', async ({ user, body, set }: any) => {
 		try {
-			const transaction = await transactionsService.createTransaction(body);
+			const transaction = await transactionsService.createTransaction(user.id, body);
 			return { success: true, transaction };
 		} catch (err: any) {
 			set.status = 400;
@@ -46,10 +46,10 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 			notes: t.Optional(t.String())
 		})
 	})
-	.post('/void', async ({ body, set }) => {
+	.post('/void', async ({ user, body, set }: any) => {
 		try {
 			const { id } = body;
-			const transaction = await transactionsService.voidTransaction(id);
+			const transaction = await transactionsService.voidTransaction(user.id, id);
 			return { success: true, message: 'Transaksi berhasil dibatalkan dan stok dikembalikan.', transaction };
 		} catch (err: any) {
 			set.status = 400;

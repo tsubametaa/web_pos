@@ -1,260 +1,348 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { formatCurrency } from '../../lib/utils/currency';
-	import { Search, Store, Phone, MapPin, Filter, Rocket } from 'lucide-svelte';
-	import { api } from '../../core/api';
-	import Spinner from '../../components/ui/Spinner.svelte';
-	import ProductDetail from './components/ProductDetail.svelte';
-	import type { UIProduct, UISettings } from '../../types';
+  import { onMount } from 'svelte';
+  import { formatCurrency } from '../../lib/utils/currency';
+  import {
+    Search,
+    Store,
+    Phone,
+    MapPin,
+    Package,
+    Rocket,
+    X,
+    MessageCircle,
+    SlidersHorizontal,
+  } from 'lucide-svelte';
+  import { api } from '../../core/api';
+  import Spinner from '../../components/ui/Spinner.svelte';
+  import Dropdown from '../../components/ui/Dropdown.svelte';
+  import logoUrl from '../../assets/img/arthapos.svg';
+  import ProductDetail from './components/ProductDetail.svelte';
+  import type { UIProduct, UISettings } from '../../types';
 
-	let { productId }: { productId?: string } = $props();
+  let { productId }: { productId?: string } = $props();
 
-	let loading = $state(true);
-	let products = $state<UIProduct[]>([]);
-	let settings = $state<UISettings | null>(null);
+  let loading = $state(true);
+  let products = $state<UIProduct[]>([]);
+  let settings = $state<UISettings | null>(null);
 
-	let searchQuery = $state('');
-	let selectedCategory = $state('');
+  let searchQuery = $state('');
+  let selectedCategory = $state('');
+  let sortBy = $state<'newest' | 'price-asc' | 'price-desc' | 'stock-desc'>('newest');
 
-	const categories = $derived([...new Set(products.map((p) => p.category).filter(Boolean))]);
+  const sortOptions = [
+    { value: 'newest', label: 'Terbaru' },
+    { value: 'price-asc', label: 'Harga: Termurah' },
+    { value: 'price-desc', label: 'Harga: Tertinggi' },
+    { value: 'stock-desc', label: 'Stok: Terbanyak' },
+  ];
 
-	const filteredProducts = $derived(
-		products.filter((p) => {
-			const matchesSearch =
-				p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				p.sku.toLowerCase().includes(searchQuery.toLowerCase());
-			const matchesCategory = !selectedCategory || p.category === selectedCategory;
-			return matchesSearch && matchesCategory && p.isActive;
-		})
-	);
+  const categories = $derived([
+    ...new Set(products.map((p) => p.category).filter(Boolean)),
+  ]);
 
-	async function loadCatalog() {
-		try {
-			const res = await api.get('/etalase');
-			if (res.success) {
-				products = res.products || [];
-				settings = res.settings || null;
-			}
-		} catch (err) {
-			console.error('Error fetching etalase catalog:', err);
-		} finally {
-			loading = false;
-		}
-	}
+  const filteredProducts = $derived.by(() => {
+    let list = products.filter((p) => {
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        (p.sku && p.sku.toLowerCase().includes(q));
+      const matchesCategory = !selectedCategory || p.category === selectedCategory;
+      return matchesSearch && matchesCategory && p.isActive;
+    });
 
-	onMount(() => {
-		if (!productId) {
-			loadCatalog();
-		}
-	});
+    // Apply sorting
+    return list.sort((a, b) => {
+      if (sortBy === 'price-asc') return a.sellingPrice - b.sellingPrice;
+      if (sortBy === 'price-desc') return b.sellingPrice - a.sellingPrice;
+      if (sortBy === 'stock-desc') return b.stock - a.stock;
+      return 0; // Default newest order from DB
+    });
+  });
 
-	function getMockSold(id: string, stock: number) {
-		const seed = id ? id.charCodeAt(id.length - 1) : 0;
-		return (seed + stock * 2) % 65 + 10;
-	}
+  const isSearchActive = $derived(searchQuery.trim().length > 0);
 
-	function handleBackToCatalog() {
-		window.location.hash = '#/etalase';
-	}
+  function clearSearch() {
+    searchQuery = '';
+  }
+
+  async function loadCatalog() {
+    try {
+      const res = await api.get('/etalase');
+      if (res.success) {
+        products = res.products || [];
+        settings = res.settings || null;
+      }
+    } catch (err) {
+      console.error('Error fetching etalase catalog:', err);
+    } finally {
+      loading = false;
+    }
+  }
+
+  onMount(() => {
+    if (!productId) {
+      loadCatalog();
+    }
+  });
+
+  function handleBackToCatalog() {
+    window.location.hash = '#/etalase';
+  }
+
+  function getWhatsAppUrl(product: UIProduct) {
+    if (!settings?.businessPhone) return '#';
+    const biz = settings.businessName || 'Toko';
+    const link = `${window.location.origin}/#/etalase/${product.id}`;
+    const text = `Halo ${biz}, saya berminat untuk membeli produk berikut:\n\n*Nama:* ${product.name}\n*SKU:* ${product.sku || '-'}\n*Harga:* ${formatCurrency(product.sellingPrice)}\n*Link:* ${link}\n\nApakah stok masih tersedia?`;
+    return `https://wa.me/${settings.businessPhone.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
+  }
 </script>
 
 {#if productId}
-	<ProductDetail {productId} onBack={handleBackToCatalog} />
+  <ProductDetail {productId} onBack={handleBackToCatalog} />
 {:else if loading}
-	<div class="min-h-screen flex items-center justify-center bg-base text-ink">
-		<Spinner size="lg" />
-	</div>
+  <div class="min-h-screen flex items-center justify-center bg-base text-ink">
+    <Spinner size="lg" />
+  </div>
 {:else}
-	<div class="min-h-screen bg-base text-ink flex flex-col font-sans antialiased">
-		<!-- Tokopedia/Shopee-style Header -->
-		<header class="bg-white dark:bg-surface border-b border-sage-200/25 py-3.5 px-4 sticky top-0 z-30 shadow-xs">
-			<div class="max-w-6xl w-full mx-auto flex items-center gap-4 justify-between">
-				<!-- Logo & Store Info -->
-				<a href="#/etalase" class="flex items-center gap-2 shrink-0 group">
-					<div class="p-1.5 bg-sage-500 text-white rounded-lg shadow-sm">
-						<Store class="w-4 h-4" />
-					</div>
-					<div class="flex flex-col">
-						<span class="font-bold text-sm tracking-tight text-slate-800 dark:text-white leading-none">{settings?.businessName || 'Etalase'}</span>
-						<span class="text-[9px] font-extrabold text-sage-500 uppercase tracking-wider mt-0.5 select-none">Official Store</span>
-					</div>
-				</a>
+  <div class="min-h-screen bg-base text-ink flex flex-col font-sans antialiased select-none">
+    <!-- E-Commerce Minimalist Sticky Header Bar -->
+    <header
+      class="bg-base/90 dark:bg-surface/90 backdrop-blur-md border-b border-slate-200/80 dark:border-emerald-950/80 py-3.5 px-4 sm:px-6 sticky top-0 z-30 shadow-2xs"
+    >
+      <div class="max-w-7xl w-full mx-auto flex items-center gap-4 justify-between">
+        <!-- Store Brand Identity -->
+        <a href="#/etalase" class="flex items-center shrink-0 group">
+          <img src={logoUrl} alt="ArthaPOS Logo" class="h-9 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform" />
+        </a>
 
-				<!-- Search Box -->
-				<div class="flex-1 max-w-lg relative">
-					<Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-					<input
-						type="text"
-						bind:value={searchQuery}
-						placeholder="Cari di {settings?.businessName || 'toko kami'}..."
-						class="w-full pl-9 pr-4 py-2 bg-slate-100 dark:bg-base border border-transparent rounded-lg text-xs text-slate-805 dark:text-white placeholder-slate-400 focus:outline-none focus:bg-white focus:border-sage-500 transition-all"
-					/>
-				</div>
+        <!-- Search Input Bar -->
+        <div class="flex-1 max-w-md relative hidden sm:block">
+          <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            bind:value={searchQuery}
+            placeholder="Cari produk di {settings?.businessName || 'toko kami'}..."
+            class="w-full pl-10 pr-9 py-2 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none transition-all shadow-2xs"
+          />
+          {#if isSearchActive}
+            <button
+              type="button"
+              onclick={clearSearch}
+              class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+            >
+              <X class="w-3.5 h-3.5" />
+            </button>
+          {/if}
+        </div>
 
-				<!-- Contact Button -->
-				{#if settings?.businessPhone}
-					<a
-						href="https://wa.me/{settings.businessPhone.replace(/\D/g, '')}"
-						target="_blank"
-						class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-bold shadow-sm hover:bg-emerald-700 transition-colors shrink-0"
-					>
-						<Phone class="w-3.5 h-3.5" />
-						<span class="hidden sm:inline">Hubungi Toko</span>
-					</a>
-				{/if}
-			</div>
-		</header>
+        <!-- WhatsApp Store Contact Button -->
+        {#if settings?.businessPhone}
+          <a
+            href="https://wa.me/{settings.businessPhone.replace(/\D/g, '')}"
+            target="_blank"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs hover:shadow transition-all shrink-0 cursor-pointer"
+          >
+            <Phone class="w-4 h-4" />
+            <span class="hidden sm:inline">Hubungi Toko</span>
+          </a>
+        {/if}
+      </div>
 
-		<!-- Main Workspace Layout -->
-		<main class="flex-1 max-w-6xl w-full mx-auto px-4 py-5 flex flex-col gap-4">
-			<!-- Mobile Category Slider -->
-			<div class="lg:hidden flex flex-col gap-2">
-				<div class="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-					<button
-						type="button"
-						onclick={() => (selectedCategory = '')}
-						class="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 select-none
-							{!selectedCategory 
-								? 'bg-sage-500 border-sage-500 text-white' 
-								: 'bg-white dark:bg-surface border-slate-200 text-slate-600 dark:text-slate-300'}"
-					>Semua</button>
-					{#each categories as cat}
-						<button
-							type="button"
-							onclick={() => (selectedCategory = cat)}
-							class="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all shrink-0 select-none
-								{selectedCategory === cat 
-									? 'bg-sage-500 border-sage-500 text-white' 
-									: 'bg-white dark:bg-surface border-slate-200 text-slate-600 dark:text-slate-300'}"
-						>{cat}</button>
-					{/each}
-				</div>
-			</div>
+      <!-- Mobile Search Bar -->
+      <div class="sm:hidden mt-3 relative w-full">
+        <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <input
+          type="text"
+          bind:value={searchQuery}
+          placeholder="Cari produk..."
+          class="w-full pl-10 pr-9 py-2 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none transition-all shadow-2xs"
+        />
+        {#if isSearchActive}
+          <button
+            type="button"
+            onclick={clearSearch}
+            class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+          >
+            <X class="w-3.5 h-3.5" />
+          </button>
+        {/if}
+      </div>
+    </header>
 
-			<div class="flex gap-4 items-start">
-				<!-- Desktop Category Sidebar -->
-				<aside class="hidden lg:block w-52 bg-surface border border-sage-200/50 rounded-xl p-4 shrink-0 shadow-xs sticky top-20">
-					<div class="flex items-center gap-1.5 pb-3 border-b border-sage-200/20 mb-3 text-slate-800 dark:text-white">
-						<Filter class="w-4 h-4 text-sage-500" />
-						<h3 class="text-xs font-bold uppercase tracking-wider">Kategori</h3>
-					</div>
-					<nav class="flex flex-col gap-1">
-						<button
-							type="button"
-							onclick={() => (selectedCategory = '')}
-							class="w-full text-left px-2.5 py-2 rounded-lg text-xs font-semibold transition-all select-none bg-transparent border-0
-								{!selectedCategory 
-									? 'bg-sage-500/10 text-sage-500 dark:text-accent font-bold' 
-									: 'text-slate-600 dark:text-slate-300 hover:bg-base/40'}"
-						>
-							Semua Produk
-						</button>
-						{#each categories as cat}
-							<button
-								type="button"
-								onclick={() => (selectedCategory = cat)}
-								class="w-full text-left px-2.5 py-2 rounded-lg text-xs font-semibold transition-all select-none bg-transparent border-0
-									{selectedCategory === cat 
-										? 'bg-sage-500/10 text-sage-500 dark:text-accent font-bold' 
-										: 'text-slate-600 dark:text-slate-300 hover:bg-base/40'}"
-							>
-								{cat}
-							</button>
-						{/each}
-					</nav>
-				</aside>
+    <!-- Main Content Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5">
+      <!-- Toolbar Strip: Category Pills & Sorting Dropdown -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 w-full border-b border-slate-200/60 dark:border-emerald-950/60 pb-4">
+        <!-- Category Filter Pills Bar -->
+        <div class="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 min-w-0">
+          <button
+            type="button"
+            onclick={() => (selectedCategory = '')}
+            class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-150 shrink-0 cursor-pointer select-none
+							{!selectedCategory
+              ? 'bg-emerald-600 text-white shadow-xs'
+              : 'bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
+          >
+            Semua Produk
+          </button>
 
-				<!-- Desktop/Mobile Grid Area -->
-				<div class="flex-1">
-					{#if filteredProducts.length > 0}
-						<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-							{#each filteredProducts as product (product.id)}
-								{@const sold = getMockSold(product.id, product.stock)}
-								<a
-									href={`#/etalase/${product.id}`}
-									class="flex flex-col bg-surface rounded-lg border border-sage-200/50 hover:shadow-md hover:border-sage-350 transition-all duration-200 overflow-hidden cursor-pointer"
-								>
-									<!-- Image Block -->
-									<div class="aspect-square w-full bg-base overflow-hidden flex items-center justify-center relative border-b border-sage-200/10">
-										{#if product.imageUrl}
-											<img src={product.imageUrl} alt={product.name} class="w-full h-full object-cover" />
-										{:else}
-											<span class="text-2xl font-black text-slate-200 dark:text-slate-650 uppercase tracking-widest">{product.name.slice(0, 2)}</span>
-										{/if}
-										{#if product.stock <= 0}
-											<div class="absolute inset-0 bg-black/35 flex items-center justify-center select-none">
-												<span class="text-white text-[10px] font-extrabold bg-red-500 px-2 py-0.5 rounded uppercase tracking-wider">Habis</span>
-											</div>
-										{/if}
-									</div>
+          {#each categories as cat}
+            <button
+              type="button"
+              onclick={() => (selectedCategory = cat)}
+              class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-150 shrink-0 cursor-pointer select-none
+								{selectedCategory === cat
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
+            >
+              {cat}
+            </button>
+          {/each}
+        </div>
 
-									<!-- Card Body -->
-									<div class="p-2.5 flex flex-col gap-1 flex-1 justify-between bg-surface">
-										<div class="flex flex-col gap-0.5">
-											<span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">{product.category}</span>
-											<h4 class="text-[12px] text-slate-750 dark:text-white font-medium line-clamp-2 leading-tight h-8">
-												{product.name}
-											</h4>
-										</div>
-										<div class="flex flex-col mt-2">
-											<span class="text-xs font-mono font-extrabold text-sage-500 dark:text-accent">
-												{formatCurrency(product.sellingPrice)}
-											</span>
-											<span class="text-[9px] text-slate-400 dark:text-slate-400 font-bold block mt-1 select-none">
-												{settings?.businessName || 'Toko'}
-											</span>
-											<span class="text-[9px] text-slate-400 dark:text-slate-400 block mt-0.5 select-none font-mono">
-												Stok {product.stock} • Terjual {sold}
-											</span>
-										</div>
-									</div>
-								</a>
-							{/each}
-						</div>
-					{:else}
-						<div class="py-20 text-center text-slate-400 bg-surface rounded-xl border border-sage-200/50">
-							<p class="text-xs font-bold">Tidak ada produk ditemukan</p>
-						</div>
-					{/if}
-				</div>
-			</div>
-		</main>
+        <!-- Sort Selector Dropdown & Products Counter -->
+        <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+          <span class="text-xs font-semibold text-slate-400">
+            <span class="font-bold text-emerald-600 dark:text-emerald-400">{filteredProducts.length}</span> produk
+          </span>
 
-		<!-- Footer -->
-		<footer class="bg-white dark:bg-surface border-t border-sage-200/25 py-8 px-4 mt-12 text-slate-550">
-			<div class="max-w-6xl w-full mx-auto flex flex-col md:flex-row justify-between items-start gap-6">
-				<div class="flex flex-col gap-1.5">
-					<div class="flex items-center gap-1.5 text-slate-800 dark:text-white">
-						<Store class="w-5 h-5 text-sage-500" />
-						<span class="font-bold text-sm tracking-tight">{settings?.businessName || 'Kasir Kita'}</span>
-					</div>
-					<p class="text-xs text-slate-400 max-w-sm leading-relaxed">
-						Katalog resmi e-commerce online shop. Hubungi kami secara langsung untuk melakukan pembelian grosir atau konsultasi stok.
-					</p>
-				</div>
-				
-				<div class="flex flex-col gap-2 text-xs text-slate-400">
-					<span class="font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider text-[9px]">Kontak & Alamat</span>
-					{#if settings?.businessAddress}
-						<div class="flex items-start gap-1.5">
-							<MapPin class="w-3.5 h-3.5 shrink-0 text-slate-400 mt-0.5" />
-							<span>{settings.businessAddress}</span>
-						</div>
-					{/if}
-					{#if settings?.businessPhone}
-						<div class="flex items-center gap-1.5">
-							<Phone class="w-3.5 h-3.5 text-slate-400" />
-							<span>{settings.businessPhone}</span>
-						</div>
-					{/if}
-				</div>
-			</div>
-			<div class="max-w-6xl w-full mx-auto border-t border-sage-200/20 mt-8 pt-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-[10px] text-sage-400">
-				<span>&copy; {new Date().getFullYear()} {settings?.businessName || 'Kasir Kita'}. Hak Cipta Dilindungi.</span>
-				<span class="font-bold flex items-center gap-1">
-					Powered by <span class="text-slate-800 dark:text-white font-extrabold tracking-tight inline-flex items-center gap-1">Kasir Kita <Rocket class="w-3.5 h-3.5 text-sage-500 dark:text-accent" /></span>
-				</span>
-			</div>
-		</footer>
-	</div>
+          <Dropdown
+            options={sortOptions}
+            bind:value={sortBy}
+            placeholder="Urutkan..."
+          />
+        </div>
+      </div>
+
+      <!-- Search Counter Banner if Search Query Active -->
+      {#if isSearchActive}
+        <div class="text-[11px] font-semibold text-slate-400 -mt-2">
+          Menampilkan <span class="font-bold text-emerald-600 dark:text-emerald-400">{filteredProducts.length}</span> hasil pencarian untuk "{searchQuery}"
+        </div>
+      {/if}
+
+      <!-- Clean Product Cards Grid -->
+      {#if filteredProducts.length > 0}
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {#each filteredProducts as product (product.id)}
+            <div
+              class="group flex flex-col bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl overflow-hidden shadow-2xs hover:shadow-md hover:border-emerald-500/50 transition-all duration-200"
+            >
+              <!-- Aspect 1:1 Image Box (Clickable to detail page) -->
+              <a
+                href={`#/etalase/${product.id}`}
+                class="aspect-square w-full bg-emerald-500/5 overflow-hidden flex items-center justify-center relative border-b border-slate-200/40 dark:border-emerald-950/40 cursor-pointer"
+              >
+                {#if product.imageUrl}
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                {:else}
+                  <Package class="w-10 h-10 text-emerald-600/60 dark:text-emerald-400/60 stroke-[1.2]" />
+                {/if}
+
+                <!-- Out of Stock Overlay -->
+                {#if product.stock <= 0}
+                  <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-2xs flex items-center justify-center">
+                    <span class="text-white text-[10px] font-extrabold bg-rose-600 px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-xs">
+                      Stok Habis
+                    </span>
+                  </div>
+                {/if}
+              </a>
+
+              <!-- Product Info Body -->
+              <div class="p-3.5 flex flex-col justify-between flex-1 gap-3">
+                <div class="space-y-1">
+                  <span class="text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                    {product.category || 'Umum'}
+                  </span>
+                  <a
+                    href={`#/etalase/${product.id}`}
+                    class="block text-xs font-bold text-slate-800 dark:text-slate-100 line-clamp-2 leading-snug hover:text-emerald-600 transition-colors"
+                  >
+                    {product.name}
+                  </a>
+                </div>
+
+                <div class="pt-2.5 border-t border-slate-200/40 dark:border-emerald-950/40 flex flex-col gap-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm font-black font-mono text-emerald-600 dark:text-emerald-400">
+                      {formatCurrency(product.sellingPrice)}
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-medium">
+                      Stok {product.stock}
+                    </span>
+                  </div>
+
+                  <!-- Direct 1-Click WhatsApp Purchase Button -->
+                  {#if settings?.businessPhone}
+                    <a
+                      href={getWhatsAppUrl(product)}
+                      target="_blank"
+                      class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold shadow-2xs hover:shadow transition-all cursor-pointer"
+                    >
+                      <MessageCircle class="w-3.5 h-3.5" />
+                      <span>Beli via WA</span>
+                    </a>
+                  {/if}
+                </div>
+              </div>
+            </div>
+          {/each}
+        </div>
+      {:else}
+        <div class="py-24 text-center bg-base/90 dark:bg-surface/50 rounded-2xl border border-slate-200/80 dark:border-emerald-950/80 shadow-2xs">
+          <p class="text-xs font-bold text-slate-400">
+            {isSearchActive
+              ? `Tidak ada produk cocok dengan "${searchQuery}"`
+              : 'Belum ada produk terdaftar di etalase'}
+          </p>
+        </div>
+      {/if}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-base/90 dark:bg-surface/60 border-t border-slate-200/80 dark:border-emerald-950/80 py-8 px-4 sm:px-6 mt-12">
+      <div class="max-w-7xl w-full mx-auto flex flex-col md:flex-row justify-between items-start gap-6">
+        <div class="space-y-2 max-w-md">
+          <div class="flex items-center">
+            <img src={logoUrl} alt="ArthaPOS Logo" class="h-7 w-auto object-contain shrink-0" />
+          </div>
+          <p class="text-xs text-slate-500 dark:text-emerald-500/70 leading-relaxed font-medium">
+            Katalog resmi toko online. Hubungi kami secara langsung untuk pembelian grosir atau konsultasi persediaan produk.
+          </p>
+        </div>
+
+        <div class="space-y-2 text-xs text-slate-500 dark:text-emerald-500/70 font-medium">
+          <span class="font-bold text-slate-800 dark:text-white uppercase tracking-wider text-[10px]">
+            Kontak Toko
+          </span>
+          {#if settings?.businessAddress}
+            <div class="flex items-center gap-2">
+              <MapPin class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>{settings.businessAddress}</span>
+            </div>
+          {/if}
+          {#if settings?.businessPhone}
+            <div class="flex items-center gap-2">
+              <Phone class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>{settings.businessPhone}</span>
+            </div>
+          {/if}
+        </div>
+      </div>
+
+      <div class="max-w-7xl w-full mx-auto border-t border-slate-200/60 dark:border-emerald-950/60 mt-8 pt-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-[11px] text-slate-400 font-medium">
+        <span>&copy; {new Date().getFullYear()} {settings?.businessName || 'ArthaPOS'}. Hak Cipta Dilindungi.</span>
+        <span class="flex items-center gap-1 font-bold">
+          Powered by <span class="text-slate-800 dark:text-white font-black inline-flex items-center gap-1">ArthaPOS <Rocket class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /></span>
+        </span>
+      </div>
+    </footer>
+  </div>
 {/if}

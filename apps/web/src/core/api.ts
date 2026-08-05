@@ -1,13 +1,21 @@
-const API_BASE_URL = 'http://localhost:3000/api';
+export const API_BASE_URL = (import.meta.env.VITE_API_URL as string) || 'http://localhost:3000/api';
+
 
 class ApiClient {
 	private async request(method: string, path: string, body?: any) {
 		const url = `${API_BASE_URL}${path}`;
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json'
+		};
+
+		const savedEmail = typeof localStorage !== 'undefined' ? localStorage.getItem('auth_email') : null;
+		if (savedEmail) {
+			headers['Authorization'] = `Bearer ${savedEmail}`;
+		}
+
 		const options: RequestInit = {
 			method,
-			headers: {
-				'Content-Type': 'application/json'
-			},
+			headers,
 			credentials: 'include'
 		};
 

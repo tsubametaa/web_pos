@@ -23,7 +23,6 @@
 {#if show && transaction}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-xs p-4"
-		onclick={onclose}
 		role="dialog"
 		aria-modal="true"
 		aria-label="Struk Transaksi"

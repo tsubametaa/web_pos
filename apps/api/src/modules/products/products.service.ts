@@ -1,4 +1,4 @@
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, isNull, or } from 'drizzle-orm';
 import { db, products } from '../../db';
 
 export interface ProductInput {
@@ -14,8 +14,10 @@ export interface ProductInput {
 }
 
 export class ProductsService {
-	async getProducts(category?: string, activeOnly?: boolean) {
-		const conditions = [];
+	async getProducts(userId: string, category?: string, activeOnly?: boolean) {
+		const userCondition = or(eq(products.userId, userId), isNull(products.userId));
+
+		const conditions = [userCondition];
 		if (category) {
 			conditions.push(eq(products.category, category));
 		}
@@ -23,15 +25,14 @@ export class ProductsService {
 			conditions.push(eq(products.isActive, true));
 		}
 
-		const selectQuery = db.select().from(products);
-		const list = await (conditions.length > 0
-			? selectQuery.where(and(...conditions)).orderBy(desc(products.createdAt))
-			: selectQuery.orderBy(desc(products.createdAt)));
+		const list = await db.select().from(products)
+			.where(and(...conditions))
+			.orderBy(desc(products.createdAt));
 
 		return list;
 	}
 
-	async createProduct(data: ProductInput) {
+	async createProduct(userId: string, data: ProductInput) {
 		// Generate SKU
 		let isUnique = false;
 		let attempts = 0;
@@ -39,7 +40,7 @@ export class ProductsService {
 		while (!isUnique && attempts < 20) {
 			const rand = Math.floor(1000 + Math.random() * 9000);
 			const tempSku = `PRD-${rand}`;
-			const existing = await db.select().from(products).where(eq(products.sku, tempSku)).limit(1);
+			const existing = await db.select().from(products).where(and(eq(products.sku, tempSku), eq(products.userId, userId))).limit(1);
 			if (existing.length === 0) {
 				sku = tempSku;
 				isUnique = true;
@@ -51,6 +52,7 @@ export class ProductsService {
 		}
 
 		const result = await db.insert(products).values({
+			userId,
 			name: data.name,
 			category: data.category,
 			unit: data.unit,
@@ -66,8 +68,10 @@ export class ProductsService {
 		return result[0];
 	}
 
-	async updateProduct(id: string, updateData: Partial<ProductInput>) {
-		const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
+	async updateProduct(userId: string, id: string, updateData: Partial<ProductInput>) {
+		const userCondition = or(eq(products.userId, userId), isNull(products.userId));
+
+		const result = await db.select().from(products).where(and(eq(products.id, id), userCondition)).limit(1);
 		const product = result[0];
 		if (!product) {
 			throw new Error('Produk tidak ditemukan.');
@@ -76,6 +80,7 @@ export class ProductsService {
 		const updateRes = await db.update(products)
 			.set({
 				...updateData,
+				userId: product.userId || userId,
 				updatedAt: new Date()
 			})
 			.where(eq(products.id, id))
@@ -84,8 +89,10 @@ export class ProductsService {
 		return updateRes[0];
 	}
 
-	async adjustStock(id: string, adjustment: number, notes?: string) {
-		const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
+	async adjustStock(userId: string, id: string, adjustment: number, notes?: string) {
+		const userCondition = or(eq(products.userId, userId), isNull(products.userId));
+
+		const result = await db.select().from(products).where(and(eq(products.id, id), userCondition)).limit(1);
 		const product = result[0];
 		if (!product) {
 			throw new Error('Produk tidak ditemukan.');
@@ -105,6 +112,7 @@ export class ProductsService {
 			.set({
 				stock: targetStock,
 				notes: updatedNotes,
+				userId: product.userId || userId,
 				updatedAt: new Date()
 			})
 			.where(eq(products.id, id))
@@ -113,8 +121,10 @@ export class ProductsService {
 		return updateRes[0];
 	}
 
-	async toggleStatus(id: string) {
-		const result = await db.select().from(products).where(eq(products.id, id)).limit(1);
+	async toggleStatus(userId: string, id: string) {
+		const userCondition = or(eq(products.userId, userId), isNull(products.userId));
+
+		const result = await db.select().from(products).where(and(eq(products.id, id), userCondition)).limit(1);
 		const product = result[0];
 		if (!product) {
 			throw new Error('Produk tidak ditemukan.');
@@ -123,6 +133,7 @@ export class ProductsService {
 		const updateRes = await db.update(products)
 			.set({
 				isActive: !product.isActive,
+				userId: product.userId || userId,
 				updatedAt: new Date()
 			})
 			.where(eq(products.id, id))
