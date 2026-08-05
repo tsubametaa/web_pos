@@ -16,7 +16,7 @@
     Package,
     Plus,
     History,
-    ChevronRight,
+    Settings,
   } from "lucide-svelte";
   import SalesChart from "./components/SalesChart.svelte";
 
@@ -405,7 +405,7 @@
               <div
                 class="p-2.5 bg-slate-700 text-white rounded-xl shadow-2xs group-hover:scale-110 transition-transform"
               >
-                <ChevronRight class="w-4 h-4" />
+                <Settings class="w-4 h-4" />
               </div>
               <span class="text-xs font-bold">Pengaturan</span>
             </a>
