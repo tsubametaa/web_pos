@@ -1,5 +1,5 @@
 import { Elysia, t } from 'elysia';
-import { authPlugin } from '../../middlewares/auth';
+import { requireAuthPlugin } from '../../middlewares/auth';
 import { join } from 'path';
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
 
@@ -40,9 +40,8 @@ export const uploadsController = new Elysia({ prefix: '/uploads' })
 		});
 	})
 	// Protected route: upload a file (requires login)
-	.use(authPlugin)
-	.guard({ requireAuth: true })
-	.post('/upload', async ({ body, set, request }) => {
+	.use(requireAuthPlugin)
+	.post('/upload', async ({ body, set, request }: any) => {
 		try {
 			const file = (body as any).file as File | undefined;
 

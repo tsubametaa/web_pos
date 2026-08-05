@@ -40,3 +40,13 @@ export const authPlugin = new Elysia({ name: 'auth' })
 			});
 		}
 	}));
+
+// More reliable auth guard using onBeforeHandle directly
+export const requireAuthPlugin = new Elysia({ name: 'requireAuth' })
+	.use(authPlugin)
+	.onBeforeHandle(({ user, set }: any) => {
+		if (!user || !user.id) {
+			set.status = 401;
+			return { success: false, error: 'Sesi tidak valid atau belum login.' };
+		}
+	});

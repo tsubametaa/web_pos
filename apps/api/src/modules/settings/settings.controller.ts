@@ -1,12 +1,11 @@
 import { Elysia, t } from 'elysia';
 import { SettingsService } from './settings.service';
-import { authPlugin } from '../../middlewares/auth';
+import { requireAuthPlugin } from '../../middlewares/auth';
 
 const settingsService = new SettingsService();
 
 export const settingsController = new Elysia({ prefix: '/settings' })
-	.use(authPlugin)
-	.guard({ requireAuth: true })
+	.use(requireAuthPlugin)
 	.get('/', async ({ user }: any) => {
 		const data = await settingsService.getSettings(user.id);
 		return { success: true, settings: data };

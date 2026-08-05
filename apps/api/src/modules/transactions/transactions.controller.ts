@@ -1,12 +1,11 @@
 import { Elysia, t } from 'elysia';
 import { TransactionsService } from './transactions.service';
-import { authPlugin } from '../../middlewares/auth';
+import { requireAuthPlugin } from '../../middlewares/auth';
 
 const transactionsService = new TransactionsService();
 
 export const transactionsController = new Elysia({ prefix: '/transactions' })
-	.use(authPlugin)
-	.guard({ requireAuth: true })
+	.use(requireAuthPlugin)
 	.get('/', async ({ user }: any) => {
 		const list = await transactionsService.getTransactions(user.id);
 		return { success: true, transactions: list };

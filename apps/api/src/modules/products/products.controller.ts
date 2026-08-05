@@ -1,12 +1,11 @@
 import { Elysia, t } from 'elysia';
 import { ProductsService } from './products.service';
-import { authPlugin } from '../../middlewares/auth';
+import { requireAuthPlugin } from '../../middlewares/auth';
 
 const productsService = new ProductsService();
 
 export const productsController = new Elysia({ prefix: '/products' })
-	.use(authPlugin)
-	.guard({ requireAuth: true })
+	.use(requireAuthPlugin)
 	.get('/', async ({ user, query }: any) => {
 		const activeOnly = query.active === 'true';
 		const list = await productsService.getProducts(user.id, query.category, activeOnly);
