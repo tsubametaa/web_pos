@@ -1,15 +1,40 @@
-# Elysia with Bun runtime
+# 🚀 ArthaPOS Backend API (Elysia + Bun)
 
-## Getting Started
-To get started with this template, simply paste this command into your terminal:
-```bash
-bun create elysia ./elysia-example
+Backend REST API untuk sistem Kasir POS ArthaPOS, mendukung integrasi Web Frontend (Svelte) dan Mobile App (Android / iOS / Flutter / React Native).
+
+---
+
+## 📚 Dokumen Spesifikasi API & Integrasi Mobile
+
+- 🌐 **Interactive Swagger UI**: [http://localhost:3000/swagger](http://localhost:3000/swagger)
+- 📱 **Panduan Lengkap Mobile Developer**: [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
+
+---
+
+## 🛠️ Cara Menjalankan (Development)
+
+1. **Install Dependensi**:
+   ```bash
+   bun install
+   ```
+
+2. **Jalankan Server Development**:
+   ```bash
+   bun run dev
+   ```
+
+3. **Akses API & Swagger**:
+   - Health Check: [http://localhost:3000/api/health](http://localhost:3000/api/health)
+   - Interactive OpenAPI / Swagger UI: [http://localhost:3000/swagger](http://localhost:3000/swagger)
+
+---
+
+## 📦 Skema Autentikasi Header
+
+Setiap request terproteksi wajib menyertakan header:
+```http
+Content-Type: application/json
+Authorization: Bearer <email_user>
 ```
 
-## Development
-To start the development server run:
-```bash
-bun run dev
-```
-
-Open http://localhost:3000/ with your browser to see the result.
+Lihat [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) untuk rincian payload JSON dan contoh kode integrasi Mobile (Flutter / React Native / Kotlin).

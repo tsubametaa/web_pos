@@ -5,6 +5,8 @@ export type AuthUser = {
 	id: string;
 	email: string;
 	businessName: string;
+	role: string;
+	createdById?: string | null;
 };
 
 let migrationTriggered = false;
@@ -58,7 +60,14 @@ export async function resolveUser(request: Request): Promise<AuthUser | null> {
 		return null;
 	}
 
-	return userList[0] as AuthUser;
+	const user = userList[0];
+	return {
+		id: user.id,
+		email: user.email,
+		businessName: user.businessName,
+		role: user.role || 'super_admin',
+		createdById: user.createdById || null
+	};
 }
 
 export function unauthorized(set: any) {

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { api } from '../../core/api';
+  import { appState } from '../../core/state.svelte';
   import { toast } from '../../lib/utils/toast.svelte';
   import { formatCurrency } from '../../lib/utils/currency';
   import Spinner from '../../components/ui/Spinner.svelte';
@@ -15,6 +16,8 @@
 
   let selectedTransaction = $state<UITransaction | null>(null);
   let showDetailModal = $state(false);
+
+  const isSuperAdmin = $derived(appState.user?.role === 'super_admin');
 
   async function loadSalesData() {
     try {
@@ -107,7 +110,7 @@
     </div>
 
     <!-- Summary KPI Cards Row -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 {isSuperAdmin ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4">
       <!-- Omset Penjualan -->
       <div
         class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
@@ -125,22 +128,24 @@
         </span>
       </div>
 
-      <!-- Total Profit -->
-      <div
-        class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
-      >
-        <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Profit / Laba
-          </span>
-          <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-            <TrendingUp class="w-4 h-4" />
+      <!-- Total Profit (Super Admin only) -->
+      {#if isSuperAdmin}
+        <div
+          class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Profit / Laba
+            </span>
+            <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+              <TrendingUp class="w-4 h-4" />
+            </div>
           </div>
+          <span class="text-xl sm:text-2xl font-black text-slate-800 dark:text-white font-mono truncate">
+            {formatCurrency(totalProfit)}
+          </span>
         </div>
-        <span class="text-xl sm:text-2xl font-black text-slate-800 dark:text-white font-mono truncate">
-          {formatCurrency(totalProfit)}
-        </span>
-      </div>
+      {/if}
 
       <!-- Transaksi Selesai -->
       <div

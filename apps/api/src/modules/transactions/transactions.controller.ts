@@ -19,7 +19,8 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 		const user = await getUser(request, set);
 		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
-		const list = await transactionsService.getTransactions(user.id);
+		const ownerId = user.createdById || user.id;
+		const list = await transactionsService.getTransactions(ownerId);
 		return { success: true, transactions: list };
 	})
 	.get('/:id', async ({ params, set, request }: any) => {
@@ -27,7 +28,8 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
-			const data = await transactionsService.getTransactionById(user.id, params.id);
+			const ownerId = user.createdById || user.id;
+			const data = await transactionsService.getTransactionById(ownerId, params.id);
 			return { success: true, ...data };
 		} catch (err: any) {
 			set.status = 404;
@@ -43,7 +45,8 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
-			const transaction = await transactionsService.createTransaction(user.id, body);
+			const ownerId = user.createdById || user.id;
+			const transaction = await transactionsService.createTransaction(ownerId, body);
 			return { success: true, transaction };
 		} catch (err: any) {
 			set.status = 400;
@@ -68,8 +71,9 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
+			const ownerId = user.createdById || user.id;
 			const { id } = body;
-			const transaction = await transactionsService.voidTransaction(user.id, id);
+			const transaction = await transactionsService.voidTransaction(ownerId, id);
 			return { success: true, message: 'Transaksi berhasil dibatalkan dan stok dikembalikan.', transaction };
 		} catch (err: any) {
 			set.status = 400;

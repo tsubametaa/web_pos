@@ -12,6 +12,7 @@
     ChevronLeft,
     ChevronRight,
     Shield,
+    Users,
   } from 'lucide-svelte';
 
   interface Props {
@@ -30,59 +31,73 @@
     onCloseMobile,
   }: Props = $props();
 
-  const menuGroups = [
-    {
-      title: 'Utama',
-      items: [
-        {
-          name: 'Dashboard',
-          path: '#/dashboard',
-          key: 'dashboard',
-          icon: LayoutDashboard,
-        },
-        {
-          name: 'POS Kasir',
-          path: '#/pos',
-          key: 'pos',
-          icon: ShoppingCart,
-        },
-      ],
-    },
-    {
-      title: 'Manajemen',
-      items: [
-        {
-          name: 'Inventori',
-          path: '#/inventory',
-          key: 'inventory',
-          icon: Package,
-        },
-        {
-          name: 'Riwayat Transaksi',
-          path: '#/sales',
-          key: 'sales',
-          icon: History,
-        },
-        {
-          name: 'HPP & Margin',
-          path: '#/hpp',
-          key: 'hpp',
-          icon: TrendingUp,
-        },
-      ],
-    },
-    {
-      title: 'Sistem',
-      items: [
-        {
-          name: 'Pengaturan',
-          path: '#/settings',
-          key: 'settings',
-          icon: Settings,
-        },
-      ],
-    },
-  ];
+  const menuGroups = $derived.by(() => {
+    const isSuperAdmin = appState.user?.role === 'super_admin';
+    const systemItems = [
+      {
+        name: 'Pengaturan',
+        path: '#/settings',
+        key: 'settings',
+        icon: Settings,
+      },
+    ];
+
+    if (isSuperAdmin) {
+      systemItems.push({
+        name: 'Manajemen User',
+        path: '#/users',
+        key: 'users',
+        icon: Users,
+      });
+    }
+
+    return [
+      {
+        title: 'Utama',
+        items: [
+          {
+            name: 'Dashboard',
+            path: '#/dashboard',
+            key: 'dashboard',
+            icon: LayoutDashboard,
+          },
+          {
+            name: 'POS Kasir',
+            path: '#/pos',
+            key: 'pos',
+            icon: ShoppingCart,
+          },
+        ],
+      },
+      {
+        title: 'Manajemen',
+        items: [
+          {
+            name: 'Inventori',
+            path: '#/inventory',
+            key: 'inventory',
+            icon: Package,
+          },
+          {
+            name: 'Riwayat Transaksi',
+            path: '#/sales',
+            key: 'sales',
+            icon: History,
+          },
+          {
+            name: 'HPP & Margin',
+            path: '#/hpp',
+            key: 'hpp',
+            icon: TrendingUp,
+          },
+        ],
+      },
+      {
+        title: 'Sistem',
+        items: systemItems,
+      },
+    ];
+  });
 
   const userDisplayName = $derived(
     appState.user?.businessName || appState.user?.email || 'Admin'
@@ -126,7 +141,11 @@
   </button>
 
   <!-- Top Header & Brand Area -->
-  <div class="flex flex-col flex-1 min-h-0 overflow-y-auto scrollbar-none">
+  <div
+    class="flex flex-col flex-1 min-h-0 {isCollapsed
+      ? 'lg:overflow-visible overflow-y-auto'
+      : 'overflow-y-auto'} scrollbar-none"
+  >
     <div
       class="h-16 px-5 flex items-center border-b border-slate-200/60 dark:border-emerald-950/60 transition-all duration-200
 			{isCollapsed ? 'lg:justify-center' : 'justify-start'}"
@@ -185,7 +204,7 @@
               <!-- Hover Tooltip for Collapsed Desktop Mode -->
               {#if isCollapsed}
                 <div
-                  class="hidden lg:block absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 dark:bg-slate-950 text-slate-100 text-xs font-semibold rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-150 whitespace-nowrap z-50 border border-slate-800"
+                  class="hidden lg:block absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-1.5 bg-slate-900 dark:bg-slate-950 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-150 whitespace-nowrap z-50 border border-slate-800/80 shadow-slate-950/40"
                 >
                   {item.name}
                   <div
@@ -238,9 +257,9 @@
             <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
               {userDisplayName}
             </span>
-            <span class="text-[10px] text-slate-400 dark:text-slate-400 truncate flex items-center gap-1">
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold truncate flex items-center gap-1">
               <Shield class="w-2.5 h-2.5 text-emerald-500 inline" />
-              {appState.user?.email || 'Administrator'}
+              {appState.user?.role === 'super_admin' ? 'Super Admin' : 'Admin Biasa'}
             </span>
           </div>
         </div>
@@ -268,9 +287,9 @@
             <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
               {userDisplayName}
             </span>
-            <span class="text-[10px] text-slate-400 dark:text-slate-400 truncate flex items-center gap-1">
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold truncate flex items-center gap-1">
               <Shield class="w-2.5 h-2.5 text-emerald-500 inline" />
-              {appState.user?.email || 'Administrator'}
+              {appState.user?.role === 'super_admin' ? 'Super Admin' : 'Admin Biasa'}
             </span>
           </div>
         </div>

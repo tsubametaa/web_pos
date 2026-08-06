@@ -51,19 +51,19 @@
 
 		<!-- Modal Content -->
 		<div
-			transition:scale={{ duration: 300, start: 0.96 }}
-			class="relative w-full glass-panel-glow border border-sage-200/40 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] z-50 {sizes[size]}"
+			transition:scale={{ duration: 250, start: 0.96 }}
+			class="relative w-full bg-base dark:bg-surface border border-slate-200/80 dark:border-emerald-950/80 text-ink rounded-3xl shadow-2xl flex flex-col max-h-[90vh] z-50 overflow-hidden {sizes[size]}"
 			role="dialog"
 			aria-modal="true"
 		>
 			<!-- Header -->
-			<div class="flex items-center justify-between px-6 py-4.5 border-b border-sage-200/30">
-				<h3 class="text-base font-bold tracking-tight">{title}</h3>
+			<div class="flex items-center justify-between px-6 py-4.5 border-b border-slate-200/60 dark:border-emerald-950/60 bg-base/50 dark:bg-surface/50">
+				<h3 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">{title}</h3>
 				{#if onclose}
 					<button
 						type="button"
 						onclick={onclose}
-						class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-sage-50 transition-colors cursor-pointer"
+						class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1.5 rounded-xl hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
 					>
 						<X class="w-4 h-4" />
 					</button>
@@ -71,7 +71,7 @@
 			</div>
 
 			<!-- Body -->
-			<div class="flex-1 overflow-y-auto px-6 py-5.5 text-slate-700">
+			<div class="flex-1 overflow-y-auto px-6 py-5.5 text-slate-800 dark:text-slate-100">
 				{#if children}
 					{@render children()}
 				{/if}
@@ -80,7 +80,7 @@
 			<!-- Footer -->
 			{#if footer}
 				<div
-					class="flex items-center justify-end gap-3 px-6 py-4.5 border-t border-sage-200/30 bg-sage-50/20 rounded-b-2xl"
+					class="flex items-center justify-end gap-3 px-6 py-4.5 border-t border-slate-200/60 dark:border-emerald-950/60 bg-base/50 dark:bg-surface/50 rounded-b-3xl"
 				>
 					{@render footer()}
 				</div>

@@ -10,7 +10,8 @@ export const dashboardController = new Elysia({ prefix: '/dashboard' })
 			const user = await resolveUser(request);
 			if (!user) return unauthorized(set);
 
-			const stats = await dashboardService.getDashboardStats(user.id);
+			const ownerId = user.createdById || user.id;
+			const stats = await dashboardService.getDashboardStats(ownerId);
 			return { success: true, ...stats };
 		} catch (err: any) {
 			console.error('[dashboard/stats] Error:', err);

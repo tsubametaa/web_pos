@@ -114,17 +114,10 @@
         </Button>
       </form>
 
-      <!-- Toggle Login/Register & Footer Links -->
+      <!-- Footer Links -->
       <div
         class="flex flex-col gap-4 pt-4 border-t border-accent-soft/20 dark:border-accent-soft/10 text-center"
       >
-        <a
-          href="#/register"
-          class="text-xs text-accent hover:text-accent-hover font-bold transition-colors duration-150"
-        >
-          Belum punya akun? Daftar Bisnis Baru
-        </a>
-
         <a
           href="#/etalase"
           class="text-xs text-ink hover:text-accent font-bold transition-colors duration-150 inline-flex items-center justify-center gap-1"

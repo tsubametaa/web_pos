@@ -1,6 +1,7 @@
 <script lang="ts">
   import { formatCurrency } from "../../../lib/utils/currency";
   import { formatDate } from "../../../lib/utils/date";
+  import { appState } from "../../../core/state.svelte";
   import {
     Search,
     Eye,
@@ -26,6 +27,8 @@
 
   let searchQuery = $state("");
   let filterMethod = $state("");
+
+  const isSuperAdmin = $derived(appState.user?.role === 'super_admin');
 
   const dropdownOptions = [
     { value: "", label: "Semua Metode Pembayaran" },
@@ -152,11 +155,13 @@
             >
               Total Belanja
             </th>
-            <th
-              class="text-right px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider hidden lg:table-cell"
-            >
-              Profit
-            </th>
+            {#if isSuperAdmin}
+              <th
+                class="text-right px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider hidden lg:table-cell"
+              >
+                Profit
+              </th>
+            {/if}
             <th
               class="text-center px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider hidden sm:table-cell"
             >
@@ -216,12 +221,14 @@
                 </span>
               </td>
 
-              <!-- Profit -->
-              <td class="px-5 py-3.5 text-right hidden lg:table-cell font-mono">
-                <span class="font-bold text-slate-700 dark:text-slate-300">
-                  {formatCurrency(trx.profit || 0)}
-                </span>
-              </td>
+              <!-- Profit (Super Admin only) -->
+              {#if isSuperAdmin}
+                <td class="px-5 py-3.5 text-right hidden lg:table-cell font-mono">
+                  <span class="font-bold text-slate-700 dark:text-slate-300">
+                    {formatCurrency(trx.profit || 0)}
+                  </span>
+                </td>
+              {/if}
 
               <!-- Status -->
               <td class="px-5 py-3.5 text-center hidden sm:table-cell">
@@ -266,7 +273,7 @@
           {:else}
             <tr>
               <td
-                colspan="7"
+                colspan={isSuperAdmin ? 7 : 6}
                 class="py-16 text-center text-slate-400 font-semibold"
               >
                 {isSearchActive

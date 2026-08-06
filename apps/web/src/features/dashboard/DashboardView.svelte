@@ -108,40 +108,50 @@
       "Pengguna",
   );
 
-  const stats = $derived([
-    {
-      label: "Penjualan Hari Ini",
-      value: formatCurrency(data?.stats?.todaySales ?? 0),
-      icon: TrendingUp,
-      color: "text-emerald-600 dark:text-emerald-400",
-      badgeBg:
-        "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
-    },
-    {
-      label: "Profit Hari Ini",
-      value: formatCurrency(data?.stats?.todayProfit ?? 0),
-      icon: Coins,
-      color: "text-emerald-600 dark:text-emerald-400",
-      badgeBg:
-        "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
-    },
-    {
-      label: "Transaksi Hari Ini",
-      value: `${data?.stats?.todayTransactions ?? 0} Transaksi`,
-      icon: ShoppingBag,
-      color: "text-blue-600 dark:text-blue-400",
-      badgeBg:
-        "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
-    },
-    {
-      label: "Stok Perlu Perhatian",
-      value: `${data?.stats?.lowStockCount ?? 0} Produk`,
-      icon: AlertTriangle,
-      color: "text-amber-600 dark:text-amber-400",
-      badgeBg:
-        "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
-    },
-  ]);
+  const stats = $derived.by(() => {
+    const list = [
+      {
+        label: "Penjualan Hari Ini",
+        value: formatCurrency(data?.stats?.todaySales ?? 0),
+        icon: TrendingUp,
+        color: "text-emerald-600 dark:text-emerald-400",
+        badgeBg:
+          "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+      },
+    ];
+
+    if (appState.user?.role === "super_admin") {
+      list.push({
+        label: "Profit Hari Ini",
+        value: formatCurrency(data?.stats?.todayProfit ?? 0),
+        icon: Coins,
+        color: "text-emerald-600 dark:text-emerald-400",
+        badgeBg:
+          "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+      });
+    }
+
+    list.push(
+      {
+        label: "Transaksi Hari Ini",
+        value: `${data?.stats?.todayTransactions ?? 0} Transaksi`,
+        icon: ShoppingBag,
+        color: "text-blue-600 dark:text-blue-400",
+        badgeBg:
+          "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
+      },
+      {
+        label: "Stok Perlu Perhatian",
+        value: `${data?.stats?.lowStockCount ?? 0} Produk`,
+        icon: AlertTriangle,
+        color: "text-amber-600 dark:text-amber-400",
+        badgeBg:
+          "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
+      }
+    );
+
+    return list;
+  });
 </script>
 
 {#if loading}
@@ -211,7 +221,7 @@
     </div>
 
     <!-- Stats Cards Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 {stats.length === 3 ? 'sm:grid-cols-3 lg:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4'} gap-4">
       {#each stats as stat}
         {@const Icon = stat.icon}
         <div

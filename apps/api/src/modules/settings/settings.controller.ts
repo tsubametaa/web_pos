@@ -19,7 +19,8 @@ export const settingsController = new Elysia({ prefix: '/settings' })
 		const user = await getUser(request, set);
 		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
-		const data = await settingsService.getSettings(user.id);
+		const ownerId = user.createdById || user.id;
+		const data = await settingsService.getSettings(ownerId);
 		return { success: true, settings: data };
 	})
 	.put('/', async ({ body, set, request }: any) => {
@@ -27,7 +28,8 @@ export const settingsController = new Elysia({ prefix: '/settings' })
 		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
-			const data = await settingsService.updateSettings(user.id, body, user.email);
+			const ownerId = user.createdById || user.id;
+			const data = await settingsService.updateSettings(ownerId, body, user.email);
 			return { success: true, settings: data, message: 'Profil bisnis berhasil diperbarui!' };
 		} catch (err: any) {
 			set.status = 400;

@@ -8,13 +8,13 @@
 
   // Views & Pages
   import Login from "./pages/Login.svelte";
-  import Register from "./pages/Register.svelte";
   import Dashboard from "./pages/Dashboard.svelte";
   import Pos from "./pages/Pos.svelte";
   import Inventory from "./pages/Inventory.svelte";
   import Sales from "./pages/Sales.svelte";
   import Hpp from "./pages/Hpp.svelte";
   import Settings from "./pages/Settings.svelte";
+  import Users from "./pages/Users.svelte";
   import Etalase from "./pages/Etalase.svelte";
   import Invoice from "./pages/Invoice.svelte";
 
@@ -26,6 +26,7 @@
     History,
     TrendingUp,
     Settings as SettingsIcon,
+    Users as UsersIcon,
   } from "lucide-svelte";
 
   let currentRoute = $state("#/dashboard");
@@ -57,8 +58,8 @@
     if (hash === "#/login") {
       return { name: "login", params: {} };
     }
-    if (hash === "#/register") {
-      return { name: "register", params: {} };
+    if (hash === "#/users") {
+      return { name: "users", params: {} };
     }
 
     const name = hash.replace("#/", "");
@@ -89,7 +90,6 @@
 
   const requiresAuth = $derived(
     parsedRoute.name !== "login" &&
-      parsedRoute.name !== "register" &&
       parsedRoute.name !== "etalase",
   );
 
@@ -100,14 +100,11 @@
   // Handle routing auth guard
   $effect(() => {
     if (appState.initialized) {
-      if (appState.needSetup && parsedRoute.name !== "register") {
-        window.location.hash = "#/register";
-      } else if (requiresAuth && !appState.user) {
+      if (requiresAuth && !appState.user) {
         window.location.hash = "#/login";
-      } else if (
-        appState.user &&
-        (parsedRoute.name === "login" || parsedRoute.name === "register")
-      ) {
+      } else if (appState.user && parsedRoute.name === "login") {
+        window.location.hash = "#/dashboard";
+      } else if (parsedRoute.name === "users" && appState.user?.role !== "super_admin") {
         window.location.hash = "#/dashboard";
       }
     }
@@ -118,24 +115,37 @@
     localStorage.setItem("sidebar_collapsed", String(isCollapsed));
   }
 
-  const menuItems = [
-    {
-      name: "Dashboard",
-      path: "#/dashboard",
-      key: "dashboard",
-      icon: LayoutDashboard,
-    },
-    { name: "POS Kasir", path: "#/pos", key: "pos", icon: ShoppingCart },
-    { name: "Inventori", path: "#/inventory", key: "inventory", icon: Package },
-    { name: "Riwayat Transaksi", path: "#/sales", key: "sales", icon: History },
-    { name: "HPP & Margin", path: "#/hpp", key: "hpp", icon: TrendingUp },
-    {
-      name: "Pengaturan",
-      path: "#/settings",
-      key: "settings",
-      icon: SettingsIcon,
-    },
-  ];
+  const menuItems = $derived.by(() => {
+    const items = [
+      {
+        name: "Dashboard",
+        path: "#/dashboard",
+        key: "dashboard",
+        icon: LayoutDashboard,
+      },
+      { name: "POS Kasir", path: "#/pos", key: "pos", icon: ShoppingCart },
+      { name: "Inventori", path: "#/inventory", key: "inventory", icon: Package },
+      { name: "Riwayat Transaksi", path: "#/sales", key: "sales", icon: History },
+      { name: "HPP & Margin", path: "#/hpp", key: "hpp", icon: TrendingUp },
+      {
+        name: "Pengaturan",
+        path: "#/settings",
+        key: "settings",
+        icon: SettingsIcon,
+      },
+    ];
+
+    if (appState.user?.role === "super_admin") {
+      items.push({
+        name: "Manajemen User",
+        path: "#/users",
+        key: "users",
+        icon: UsersIcon,
+      });
+    }
+
+    return items;
+  });
 
   const activeMenuItem = $derived(
     menuItems.find((item) => parsedRoute.name === item.key),
@@ -162,8 +172,6 @@
   {/if}
 {:else if parsedRoute.name === "login"}
   <Login />
-{:else if parsedRoute.name === "register"}
-  <Register />
 {:else}
   <!-- Admin Panel Layout Shell -->
   <div
@@ -201,6 +209,8 @@
           <Hpp />
         {:else if parsedRoute.name === "settings"}
           <Settings />
+        {:else if parsedRoute.name === "users"}
+          <Users />
         {:else}
           <Dashboard />
         {/if}

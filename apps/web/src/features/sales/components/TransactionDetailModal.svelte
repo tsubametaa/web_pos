@@ -1,6 +1,7 @@
 <script lang="ts">
   import { formatCurrency } from '../../../lib/utils/currency';
   import { formatDate } from '../../../lib/utils/date';
+  import { appState } from '../../../core/state.svelte';
   import { X, Printer, Ban, Receipt, CheckCircle2, AlertCircle } from 'lucide-svelte';
   import type { UITransaction, UISettings } from '../../../types';
 
@@ -12,6 +13,8 @@
   }
 
   let { transaction, settings, onclose, onvoid }: Props = $props();
+
+  const isSuperAdmin = $derived(appState.user?.role === 'super_admin');
 
   function openInvoice() {
     if (transaction?.id) {
@@ -112,7 +115,7 @@
         <!-- Financial Summary Breakdown -->
         <div class="space-y-2">
           <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-emerald-500/70">
-            Rincian Pembayaran & Keuntungan
+            Rincian Pembayaran
           </h3>
 
           <div class="bg-white/50 dark:bg-base/40 rounded-2xl border border-slate-200/60 dark:border-emerald-950/60 p-3.5 space-y-2.5 text-xs">
@@ -123,19 +126,21 @@
               </span>
             </div>
 
-            <div class="flex justify-between items-center">
-              <span class="font-medium text-slate-500 dark:text-slate-400">Estimasi HPP (Modal)</span>
-              <span class="font-mono font-bold text-slate-600 dark:text-slate-300">
-                {formatCurrency(transaction.totalCost || 0)}
-              </span>
-            </div>
+            {#if isSuperAdmin}
+              <div class="flex justify-between items-center">
+                <span class="font-medium text-slate-500 dark:text-slate-400">Estimasi HPP (Modal)</span>
+                <span class="font-mono font-bold text-slate-600 dark:text-slate-300">
+                  {formatCurrency(transaction.totalCost || 0)}
+                </span>
+              </div>
 
-            <div class="flex justify-between items-center">
-              <span class="font-medium text-slate-500 dark:text-slate-400">Estimasi Profit / Laba</span>
-              <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                {formatCurrency(transaction.profit || 0)}
-              </span>
-            </div>
+              <div class="flex justify-between items-center">
+                <span class="font-medium text-slate-500 dark:text-slate-400">Estimasi Profit / Laba</span>
+                <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  {formatCurrency(transaction.profit || 0)}
+                </span>
+              </div>
+            {/if}
 
             <div class="border-t border-dashed border-slate-200 dark:border-slate-800 my-1"></div>
 

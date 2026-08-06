@@ -28,7 +28,10 @@ export async function ensureDbMigrations() {
 		'ALTER TABLE products ADD COLUMN notes TEXT;',
 		'ALTER TABLE products ADD COLUMN image_url TEXT;',
 		'ALTER TABLE products ADD COLUMN min_stock INTEGER DEFAULT 10;',
-		'ALTER TABLE products ADD COLUMN is_active INTEGER DEFAULT 1;'
+		'ALTER TABLE products ADD COLUMN is_active INTEGER DEFAULT 1;',
+		'ALTER TABLE users ADD COLUMN role TEXT DEFAULT "super_admin";',
+		'ALTER TABLE users ADD COLUMN created_by_id TEXT;',
+		'UPDATE users SET role = "super_admin" WHERE role IS NULL OR role = "";'
 	];
 
 	for (const sql of safeMigrations) {

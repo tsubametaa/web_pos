@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
+import { swagger } from '@elysiajs/swagger';
 import { sanitizeInput } from './middlewares/sanitizer';
 import { authController } from './modules/auth/auth.controller';
 import { productsController } from './modules/products/products.controller';
@@ -8,11 +9,32 @@ import { settingsController } from './modules/settings/settings.controller';
 import { dashboardController } from './modules/dashboard/dashboard.controller';
 import { etalaseController } from './modules/etalase/etalase.controller';
 import { uploadsController } from './modules/uploads/uploads.controller';
+import { usersController } from './modules/users/users.controller';
 import { getLandingPageHtml } from './views/landing';
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 const app = new Elysia()
+	.use(swagger({
+		path: '/swagger',
+		documentation: {
+			info: {
+				title: 'ArthaPOS REST API Documentation',
+				version: '1.0.0',
+				description: 'Spesifikasi REST API ArthaPOS untuk integrasi aplikasi Web & Mobile (Android / iOS)'
+			},
+			tags: [
+				{ name: 'Auth', description: 'Autentikasi & Sesi Pengguna' },
+				{ name: 'Products', description: 'Manajemen Produk & Inventori Toko' },
+				{ name: 'Transactions', description: 'Transaksi Kasir POS & Void' },
+				{ name: 'Dashboard', description: 'Statistik & Ringkasan Laporan Performa Toko' },
+				{ name: 'Users', description: 'Manajemen Staff Admin Biasa (Khusus Super Admin)' },
+				{ name: 'Etalase', description: 'Katalog Publik Toko (Bebas Akses)' },
+				{ name: 'Settings', description: 'Pengaturan Profil Toko' },
+				{ name: 'Uploads', description: 'Unggah Berkas / Gambar Produk' },
+			]
+		}
+	}))
 	.use(cors({
 		credentials: true,
 		origin: (request) => {
@@ -39,7 +61,15 @@ const app = new Elysia()
 			}
 		}
 	})
-	.onError(({ code, error }) => {
+	.onError(({ code, error, set }) => {
+		if (code === 'NOT_FOUND') {
+			set.status = 404;
+			return {
+				success: false,
+				error: 'Endpoint tidak ditemukan.'
+			};
+		}
+
 		console.error(`[Elysia Error ${code}]:`, error);
 		const message = error && typeof error === 'object' && 'message' in error
 			? String((error as any).message)
@@ -63,6 +93,7 @@ const app = new Elysia()
 			.use(dashboardController)
 			.use(etalaseController)
 			.use(uploadsController)
+			.use(usersController)
 	)
 	.get('/', () => new Response(getLandingPageHtml(), {
 		headers: { 'Content-Type': 'text/html; charset=utf-8' }

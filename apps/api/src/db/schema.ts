@@ -23,6 +23,8 @@ export const users = sqliteTable('users', {
 	email: text('email').notNull().unique(),
 	passwordHash: text('password_hash').notNull(),
 	businessName: text('business_name').notNull(),
+	role: text('role').notNull().default('super_admin'),
+	createdById: text('created_by_id'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull()
 });

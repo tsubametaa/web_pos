@@ -8,6 +8,9 @@ class AppState {
 	theme = $state<'light' | 'dark'>('light');
 
 	setUser(user: any) {
+		if (user && !user.role) {
+			user.role = 'super_admin';
+		}
 		this.user = user;
 		if (typeof localStorage !== 'undefined') {
 			if (user && user.email) {
@@ -26,7 +29,9 @@ class AppState {
 			const storedUser = localStorage.getItem('auth_user');
 			if (storedUser) {
 				try {
-					this.user = JSON.parse(storedUser);
+					const parsed = JSON.parse(storedUser);
+					if (parsed && !parsed.role) parsed.role = 'super_admin';
+					this.user = parsed;
 				} catch {
 					this.user = null;
 				}
@@ -43,15 +48,7 @@ class AppState {
 			}
 		}
 
-		// Step 2: Check if initial setup is needed (non-critical, ignore errors)
-		try {
-			const setupRes = await api.get('/auth/setup-needed');
-			this.needSetup = setupRes.needSetup ?? false;
-		} catch {
-			// Not critical — keep previous needSetup value
-		}
-
-		// Step 3: Verify session with backend
+		// Step 2: Verify session with backend
 		// CRITICAL RULE: Only clear local session if the server EXPLICITLY returns 401.
 		// Network errors, timeouts, or cold-start failures must NOT clear the session —
 		// the user should remain logged in and retry on next page load.

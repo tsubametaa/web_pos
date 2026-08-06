@@ -19,8 +19,9 @@ export const productsController = new Elysia({ prefix: '/products' })
 		const user = await getUser(request, set);
 		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
+		const ownerId = user.createdById || user.id;
 		const activeOnly = query.active === 'true';
-		const list = await productsService.getProducts(user.id, query.category, activeOnly);
+		const list = await productsService.getProducts(ownerId, query.category, activeOnly);
 		return { success: true, products: list };
 	}, {
 		query: t.Object({
@@ -33,7 +34,8 @@ export const productsController = new Elysia({ prefix: '/products' })
 		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
-			const product = await productsService.createProduct(user.id, body);
+			const ownerId = user.createdById || user.id;
+			const product = await productsService.createProduct(ownerId, body);
 			return { success: true, product };
 		} catch (err: any) {
 			set.status = 400;
@@ -58,6 +60,7 @@ export const productsController = new Elysia({ prefix: '/products' })
 		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
+			const ownerId = user.createdById || user.id;
 			const { id, stockAdjustment, adjustmentNotes, ...updateData } = body;
 			if (!id) {
 				set.status = 400;
@@ -72,12 +75,12 @@ export const productsController = new Elysia({ prefix: '/products' })
 					return { success: false, error: 'Jumlah penyesuaian stok harus angka.' };
 				}
 
-				const product = await productsService.adjustStock(user.id, id, adjustment, adjustmentNotes);
+				const product = await productsService.adjustStock(ownerId, id, adjustment, adjustmentNotes);
 				return { success: true, product };
 			}
 
 			// Regular Product Update
-			const product = await productsService.updateProduct(user.id, id, updateData);
+			const product = await productsService.updateProduct(ownerId, id, updateData);
 			return { success: true, product };
 		} catch (err: any) {
 			set.status = 400;
@@ -105,13 +108,14 @@ export const productsController = new Elysia({ prefix: '/products' })
 		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
+			const ownerId = user.createdById || user.id;
 			const id = query.id;
 			if (!id) {
 				set.status = 400;
 				return { success: false, error: 'ID produk wajib disertakan.' };
 			}
 
-			const product = await productsService.toggleStatus(user.id, id);
+			const product = await productsService.toggleStatus(ownerId, id);
 			return {
 				success: true,
 				message: `Status produk berhasil diubah menjadi ${product.isActive ? 'aktif' : 'non-aktif'}.`,
