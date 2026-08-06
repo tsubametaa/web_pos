@@ -202,65 +202,88 @@
 
   <!-- User Profile Footer Area -->
   <div class="p-3 border-t border-slate-200/60 dark:border-emerald-950/60 bg-base/60 dark:bg-base/40">
-    <div
-      class="flex items-center transition-all duration-200
-			{isCollapsed ? 'lg:justify-center' : 'justify-between gap-3'}"
-    >
-      <div class="flex items-center gap-3 overflow-hidden">
-        <!-- User Avatar Box -->
-        <div
-          class="w-9 h-9 shrink-0 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-xs ring-2 ring-emerald-500/20"
-          title={userDisplayName}
-        >
-          {userInitials()}
-        </div>
-
-        <!-- User Info Text -->
-        <div
-          class="flex flex-col truncate transition-all duration-200
-					{isCollapsed ? 'lg:hidden' : 'block'}"
-        >
-          <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
-            {userDisplayName}
-          </span>
-          <span class="text-[10px] text-slate-400 dark:text-slate-400 truncate flex items-center gap-1">
-            <Shield class="w-2.5 h-2.5 text-emerald-500 inline" />
-            {appState.user?.email || 'Administrator'}
-          </span>
-        </div>
-      </div>
-
-      <!-- Logout Button -->
-      <button
-        type="button"
-        onclick={() => appState.logout()}
-        class="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer transition-colors duration-150 shrink-0
-				{isCollapsed ? 'lg:hidden' : 'block'}"
-        aria-label="Keluar Akun"
-        title="Keluar Akun"
-      >
-        <LogOut class="w-4 h-4" />
-      </button>
-
-      <!-- Collapsed Logout Icon & Tooltip -->
-      {#if isCollapsed}
+    {#if isCollapsed}
+      <!-- Collapsed Desktop Mode: ONLY Clean Centered Logout Button -->
+      <div class="hidden lg:flex items-center justify-center">
         <button
           type="button"
           onclick={() => appState.logout()}
-          class="hidden lg:flex p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer transition-colors duration-150 relative group"
+          class="w-10 h-10 rounded-xl text-slate-400 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 bg-emerald-500/5 dark:bg-emerald-950/30 hover:bg-rose-500/15 dark:hover:bg-rose-950/40 border border-slate-200/60 dark:border-emerald-950/60 hover:border-rose-500/30 cursor-pointer transition-all duration-150 relative group flex items-center justify-center shadow-2xs"
           aria-label="Keluar Akun"
         >
-          <LogOut class="w-4.5 h-4.5" />
+          <LogOut class="w-4.5 h-4.5 stroke-[2]" />
+          <!-- Floating Tooltip -->
           <div
-            class="absolute left-full ml-3 px-2.5 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded-lg shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-150 whitespace-nowrap z-50"
+            class="absolute left-full ml-3 px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-150 whitespace-nowrap z-50 flex flex-col gap-0.5"
           >
-            Keluar Akun
+            <span>Keluar Akun</span>
+            <span class="text-[10px] font-normal text-rose-100">{userDisplayName}</span>
             <div
               class="absolute right-full top-1/2 -translate-y-1/2 border-[5px] border-transparent border-r-rose-600"
             ></div>
           </div>
         </button>
-      {/if}
-    </div>
+      </div>
+
+      <!-- Mobile Fallback Mode -->
+      <div class="flex lg:hidden items-center justify-between gap-3">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div
+            class="w-9 h-9 shrink-0 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-xs ring-2 ring-emerald-500/20"
+            title={userDisplayName}
+          >
+            {userInitials()}
+          </div>
+          <div class="flex flex-col truncate">
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+              {userDisplayName}
+            </span>
+            <span class="text-[10px] text-slate-400 dark:text-slate-400 truncate flex items-center gap-1">
+              <Shield class="w-2.5 h-2.5 text-emerald-500 inline" />
+              {appState.user?.email || 'Administrator'}
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick={() => appState.logout()}
+          class="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer transition-colors duration-150 shrink-0"
+          aria-label="Keluar Akun"
+          title="Keluar Akun"
+        >
+          <LogOut class="w-4 h-4" />
+        </button>
+      </div>
+    {:else}
+      <!-- Expanded Mode: Full User Profile & Logout -->
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div
+            class="w-9 h-9 shrink-0 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-xs ring-2 ring-emerald-500/20"
+            title={userDisplayName}
+          >
+            {userInitials()}
+          </div>
+          <div class="flex flex-col truncate">
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+              {userDisplayName}
+            </span>
+            <span class="text-[10px] text-slate-400 dark:text-slate-400 truncate flex items-center gap-1">
+              <Shield class="w-2.5 h-2.5 text-emerald-500 inline" />
+              {appState.user?.email || 'Administrator'}
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick={() => appState.logout()}
+          class="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 cursor-pointer transition-colors duration-150 shrink-0"
+          aria-label="Keluar Akun"
+          title="Keluar Akun"
+        >
+          <LogOut class="w-4 h-4" />
+        </button>
+      </div>
+    {/if}
   </div>
 </aside>
