@@ -2,8 +2,9 @@
   import { cart } from '../logic/cart.svelte';
   import { formatCurrency } from '../../../lib/utils/currency';
   import { createProductFuse, fuzzySearchProducts } from '../../../lib/utils/fuzzy-search';
-  import { Search, AlertCircle, Package, X, Plus, Barcode as BarcodeIcon, Camera } from 'lucide-svelte';
+  import { Search, AlertCircle, Package, X, Plus, Barcode as BarcodeIcon, Camera, Filter } from 'lucide-svelte';
   import { toast } from '../../../lib/utils/toast.svelte';
+  import Dropdown, { type DropdownOption } from '../../../components/ui/Dropdown.svelte';
   import CameraScannerModal from './CameraScannerModal.svelte';
   import type { UIProduct } from '../../../types';
 
@@ -18,6 +19,11 @@
   let searchQuery = $state('');
   let selectedCategory = $state('');
   let showCameraModal = $state(false);
+
+  const categoryOptions = $derived<DropdownOption[]>([
+    { value: '', label: 'Semua Kategori', icon: Filter },
+    ...categories.map((cat) => ({ value: cat, label: cat })),
+  ]);
 
   const fuse = $derived(createProductFuse(products));
 
@@ -122,32 +128,14 @@
       </button>
     </div>
 
-    <!-- Scrollable Category Pills -->
-    <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
-      <button
-        type="button"
-        onclick={() => (selectedCategory = '')}
-        class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-150 shrink-0 cursor-pointer select-none
-					{!selectedCategory
-          ? 'bg-emerald-600 text-white shadow-xs'
-          : 'bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
-      >
-        Semua
-      </button>
-
-      {#each categories as cat}
-        <button
-          type="button"
-          onclick={() => (selectedCategory = cat)}
-          class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-150 shrink-0 cursor-pointer select-none
-						{selectedCategory === cat
-            ? 'bg-emerald-600 text-white shadow-xs'
-            : 'bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
-        >
-          {cat}
-        </button>
-      {/each}
-    </div>
+    <!-- Category Filter Dropdown -->
+    {#if categories.length > 0}
+      <Dropdown
+        options={categoryOptions}
+        bind:value={selectedCategory}
+        placeholder="Semua Kategori"
+      />
+    {/if}
   </div>
 
   <!-- Search Result Status Indicator -->
