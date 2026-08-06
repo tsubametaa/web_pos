@@ -1,12 +1,23 @@
 import { Elysia, t } from 'elysia';
 import { ProductsService } from './products.service';
-import { resolveUser, unauthorized } from '../../middlewares/resolveUser';
+import { resolveUser, unauthorized, serviceUnavailable } from '../../middlewares/resolveUser';
 
 const productsService = new ProductsService();
 
+async function getUser(request: Request, set: any) {
+	try {
+		return await resolveUser(request);
+	} catch (err) {
+		console.error('[products] resolveUser DB error:', err);
+		serviceUnavailable(set);
+		return undefined; // undefined = DB error (set.status already set)
+	}
+}
+
 export const productsController = new Elysia({ prefix: '/products' })
 	.get('/', async ({ query, set, request }: any) => {
-		const user = await resolveUser(request);
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		const activeOnly = query.active === 'true';
 		const list = await productsService.getProducts(user.id, query.category, activeOnly);
@@ -18,7 +29,8 @@ export const productsController = new Elysia({ prefix: '/products' })
 		})
 	})
 	.post('/', async ({ body, set, request }: any) => {
-		const user = await resolveUser(request);
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
 			const product = await productsService.createProduct(user.id, body);
@@ -42,7 +54,8 @@ export const productsController = new Elysia({ prefix: '/products' })
 		})
 	})
 	.put('/', async ({ body, set, request }: any) => {
-		const user = await resolveUser(request);
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
 			const { id, stockAdjustment, adjustmentNotes, ...updateData } = body;
@@ -88,7 +101,8 @@ export const productsController = new Elysia({ prefix: '/products' })
 		})
 	})
 	.delete('/', async ({ query, set, request }: any) => {
-		const user = await resolveUser(request);
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
 			const id = query.id;

@@ -67,7 +67,15 @@ export const authController = new Elysia({ prefix: '/auth' })
 		return { success: true, message: 'Logout berhasil!' };
 	})
 	.get('/me', async ({ set, request }: any) => {
-		const user = await resolveUser(request);
+		let user;
+		try {
+			user = await resolveUser(request);
+		} catch (err) {
+			// DB error — return 503 so frontend knows to retry, not to clear session
+			console.error('[auth/me] DB error resolving user:', err);
+			set.status = 503;
+			return { success: false, error: 'Server sedang bermasalah, coba beberapa saat lagi.' };
+		}
 		if (!user) {
 			set.status = 401;
 			return { success: false, error: 'Belum login.' };
@@ -81,3 +89,4 @@ export const authController = new Elysia({ prefix: '/auth' })
 			}
 		};
 	});
+

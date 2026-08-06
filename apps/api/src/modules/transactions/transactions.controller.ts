@@ -1,18 +1,30 @@
 import { Elysia, t } from 'elysia';
 import { TransactionsService } from './transactions.service';
-import { resolveUser, unauthorized } from '../../middlewares/resolveUser';
+import { resolveUser, unauthorized, serviceUnavailable } from '../../middlewares/resolveUser';
 
 const transactionsService = new TransactionsService();
 
+async function getUser(request: Request, set: any) {
+	try {
+		return await resolveUser(request);
+	} catch (err) {
+		console.error('[transactions] resolveUser DB error:', err);
+		serviceUnavailable(set);
+		return undefined;
+	}
+}
+
 export const transactionsController = new Elysia({ prefix: '/transactions' })
 	.get('/', async ({ set, request }: any) => {
-		const user = await resolveUser(request);
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		const list = await transactionsService.getTransactions(user.id);
 		return { success: true, transactions: list };
 	})
 	.get('/:id', async ({ params, set, request }: any) => {
-		const user = await resolveUser(request);
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
 			const data = await transactionsService.getTransactionById(user.id, params.id);
@@ -27,7 +39,8 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 		})
 	})
 	.post('/', async ({ body, set, request }: any) => {
-		const user = await resolveUser(request);
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
 			const transaction = await transactionsService.createTransaction(user.id, body);
@@ -51,7 +64,8 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 		})
 	})
 	.post('/void', async ({ body, set, request }: any) => {
-		const user = await resolveUser(request);
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
 			const { id } = body;

@@ -21,13 +21,13 @@ class AppState {
 	}
 
 	async initialize() {
-		// Load cached user from localStorage first to prevent flash of login screen
+		// Step 1: Immediately load cached user from localStorage to prevent login flash
 		if (typeof localStorage !== 'undefined') {
 			const storedUser = localStorage.getItem('auth_user');
 			if (storedUser) {
 				try {
 					this.user = JSON.parse(storedUser);
-				} catch (e) {
+				} catch {
 					this.user = null;
 				}
 			}
@@ -43,30 +43,50 @@ class AppState {
 			}
 		}
 
+		// Step 2: Check if initial setup is needed (non-critical, ignore errors)
 		try {
-			// Check if setup is needed
-			const setupRes = await api.get('/auth/setup-needed').catch(() => ({ needSetup: false }));
-			this.needSetup = setupRes.needSetup;
-
-			// Verify auth session with backend
-			const meRes = await api.get('/auth/me');
-			if (meRes && meRes.success) {
-				this.setUser(meRes.user);
-			} else {
-				this.setUser(null);
-			}
-		} catch (err) {
-			console.warn('[appState] Session check error:', err);
+			const setupRes = await api.get('/auth/setup-needed');
+			this.needSetup = setupRes.needSetup ?? false;
+		} catch {
+			// Not critical — keep previous needSetup value
 		}
 
+		// Step 3: Verify session with backend
+		// CRITICAL RULE: Only clear local session if the server EXPLICITLY returns 401.
+		// Network errors, timeouts, or cold-start failures must NOT clear the session —
+		// the user should remain logged in and retry on next page load.
 		try {
-			// Fetch settings
-			const settingsRes = await api.get('/settings');
-			if (settingsRes.success) {
-				this.settings = settingsRes.settings;
+			const meRes = await api.get('/auth/me');
+			if (meRes && meRes.success && meRes.user) {
+				// Session confirmed — update local storage with fresh data
+				this.setUser(meRes.user);
+			} else if (meRes && !meRes.success) {
+				// Server explicitly says session is invalid
+				console.warn('[appState] Server rejected session — clearing local auth.');
+				this.setUser(null);
 			}
-		} catch (err) {
-			this.settings = null;
+			// If meRes is null/undefined for any reason, keep existing user from localStorage
+		} catch (err: any) {
+			// If it's a server-confirmed 401, clear session
+			if (err?.isAuthError || err?.status === 401) {
+				console.warn('[appState] 401 from server — clearing local auth.');
+				this.setUser(null);
+			} else {
+				// Network error / timeout / cold start — keep the user logged in!
+				console.warn('[appState] Session check failed (network/timeout), keeping cached session:', err?.message);
+			}
+		}
+
+		// Step 4: Fetch settings (non-critical — keep null on error)
+		if (this.user) {
+			try {
+				const settingsRes = await api.get('/settings');
+				if (settingsRes?.success) {
+					this.settings = settingsRes.settings;
+				}
+			} catch {
+				// Settings are nice-to-have; don't crash the app
+			}
 		}
 
 		this.initialized = true;
@@ -76,7 +96,7 @@ class AppState {
 	async refreshSettings() {
 		try {
 			const settingsRes = await api.get('/settings');
-			if (settingsRes.success) {
+			if (settingsRes?.success) {
 				this.settings = settingsRes.settings;
 			}
 		} catch (err) {

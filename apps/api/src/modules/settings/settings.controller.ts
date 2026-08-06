@@ -1,18 +1,30 @@
 import { Elysia, t } from 'elysia';
 import { SettingsService } from './settings.service';
-import { resolveUser, unauthorized } from '../../middlewares/resolveUser';
+import { resolveUser, unauthorized, serviceUnavailable } from '../../middlewares/resolveUser';
 
 const settingsService = new SettingsService();
 
+async function getUser(request: Request, set: any) {
+	try {
+		return await resolveUser(request);
+	} catch (err) {
+		console.error('[settings] resolveUser DB error:', err);
+		serviceUnavailable(set);
+		return undefined;
+	}
+}
+
 export const settingsController = new Elysia({ prefix: '/settings' })
 	.get('/', async ({ set, request }: any) => {
-		const user = await resolveUser(request);
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		const data = await settingsService.getSettings(user.id);
 		return { success: true, settings: data };
 	})
 	.put('/', async ({ body, set, request }: any) => {
-		const user = await resolveUser(request);
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
 			const data = await settingsService.updateSettings(user.id, body, user.email);
@@ -33,7 +45,8 @@ export const settingsController = new Elysia({ prefix: '/settings' })
 		})
 	})
 	.put('/password', async ({ body, set, request }: any) => {
-		const user = await resolveUser(request);
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		try {
 			await settingsService.updatePassword(user.id, user.email, body.oldPassword, body.newPassword);
