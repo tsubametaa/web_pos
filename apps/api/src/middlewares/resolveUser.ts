@@ -1,4 +1,4 @@
-import { db, users } from '../db';
+import { db, users, ensureDbMigrations } from '../db';
 import { eq } from 'drizzle-orm';
 
 export type AuthUser = {
@@ -7,8 +7,15 @@ export type AuthUser = {
 	businessName: string;
 };
 
+let migrationTriggered = false;
 
 export async function resolveUser(request: Request): Promise<AuthUser | null> {
+	// Guarantee DB auto-migrations (like adding missing barcode column to products) on first request
+	if (!migrationTriggered) {
+		migrationTriggered = true;
+		ensureDbMigrations().catch((err) => console.error('[resolveUser] Migration error:', err));
+	}
+
 	let email: string | null = null;
 
 	// 1. Authorization: Bearer <email>
@@ -40,7 +47,6 @@ export async function resolveUser(request: Request): Promise<AuthUser | null> {
 		return null;
 	}
 
-	// Lookup user in DB — let DB errors propagate (they'll become 500, not 401)
 	const userList = await db
 		.select()
 		.from(users)
@@ -48,7 +54,6 @@ export async function resolveUser(request: Request): Promise<AuthUser | null> {
 		.limit(1);
 
 	if (!userList || userList.length === 0) {
-		// Email provided but user not found in DB → invalid credential
 		console.warn(`[resolveUser] No user found for email: ${email}`);
 		return null;
 	}
@@ -56,9 +61,6 @@ export async function resolveUser(request: Request): Promise<AuthUser | null> {
 	return userList[0] as AuthUser;
 }
 
-/**
- * Helper to return a 401 response object.
- */
 export function unauthorized(set: any) {
 	set.status = 401;
 	return { success: false, error: 'Sesi tidak valid atau belum login.' };
