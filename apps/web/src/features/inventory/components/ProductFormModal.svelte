@@ -244,18 +244,30 @@
   >
     <!-- Modal Header -->
     <div
-      class="flex items-center justify-between px-6 py-4.5 border-b border-slate-200/60 dark:border-emerald-950/60 bg-base/50 dark:bg-surface/50"
+      class="flex items-center justify-between px-6 py-4.5 border-b border-slate-200/60 dark:border-emerald-950/60 bg-base/80 dark:bg-surface/80"
     >
-      <div class="flex items-center gap-3">
-        <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 shrink-0">
           <Package class="w-5 h-5" />
         </div>
-        <div>
-          <h2 class="text-base font-extrabold dark:text-white tracking-tight">
-            {isEdit ? 'Edit Informasi Produk' : 'Tambah Produk Baru'}
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium">
-            Lengkapi detail produk untuk dimasukkan ke katalog toko.
+        <div class="min-w-0 space-y-0.5">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h2 class="text-base font-black text-slate-900 dark:text-white tracking-tight">
+              {isEdit ? 'Edit Produk' : 'Tambah Produk Baru'}
+            </h2>
+            {#if isEdit && (product?.name || name)}
+              <span
+                class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-bold truncate max-w-[220px]"
+                title={product?.name || name}
+              >
+                {product?.name || name}
+              </span>
+            {/if}
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            {isEdit
+              ? `Perbarui rincian data dan persediaan untuk katalog toko.`
+              : 'Lengkapi detail produk untuk dimasukkan ke katalog toko.'}
           </p>
         </div>
       </div>
@@ -263,7 +275,7 @@
       <button
         type="button"
         onclick={onclose}
-        class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+        class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 cursor-pointer transition-colors shrink-0"
         aria-label="Tutup modal"
       >
         <X class="w-5 h-5" />
