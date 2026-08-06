@@ -37,6 +37,7 @@ export const productsController = new Elysia({ prefix: '/products' })
 			stock: t.Optional(t.Union([t.Number({ minimum: 0 }), t.Null()])),
 			minStock: t.Optional(t.Union([t.Number({ minimum: 0 }), t.Null()])),
 			imageUrl: t.Optional(t.Union([t.String(), t.Null()])),
+			barcode: t.Optional(t.Union([t.String(), t.Null()])),
 			notes: t.Optional(t.Union([t.String(), t.Null()]))
 		})
 	})
@@ -80,6 +81,7 @@ export const productsController = new Elysia({ prefix: '/products' })
 			stock: t.Optional(t.Number({ minimum: 0 })),
 			minStock: t.Optional(t.Number({ minimum: 0 })),
 			imageUrl: t.Optional(t.String()),
+			barcode: t.Optional(t.String()),
 			notes: t.Optional(t.String()),
 			stockAdjustment: t.Optional(t.Union([t.Number(), t.String()])),
 			adjustmentNotes: t.Optional(t.String())

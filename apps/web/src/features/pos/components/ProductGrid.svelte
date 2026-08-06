@@ -2,7 +2,8 @@
   import { cart } from '../logic/cart.svelte';
   import { formatCurrency } from '../../../lib/utils/currency';
   import { createProductFuse, fuzzySearchProducts } from '../../../lib/utils/fuzzy-search';
-  import { Search, AlertCircle, Package, X } from 'lucide-svelte';
+  import { Search, AlertCircle, Package, X, Plus, Barcode as BarcodeIcon } from 'lucide-svelte';
+  import { toast } from '../../../lib/utils/toast.svelte';
   import type { UIProduct } from '../../../types';
 
   interface Props {
@@ -29,29 +30,69 @@
   function clearSearch() {
     searchQuery = '';
   }
+
+  function handleSearchKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Enter') {
+      const q = searchQuery.trim().toLowerCase();
+      if (!q) return;
+
+      // Find exact match by Barcode or SKU
+      const exactMatch = products.find(
+        (p) =>
+          p.isActive &&
+          ((p.barcode && p.barcode.toLowerCase() === q) ||
+            (p.sku && p.sku.toLowerCase() === q))
+      );
+
+      if (exactMatch) {
+        const cartItem = cart.items.find((item) => item.product.id === exactMatch.id);
+        const availableStock = exactMatch.stock - (cartItem?.qty || 0);
+
+        if (availableStock > 0) {
+          onselect(exactMatch);
+          searchQuery = '';
+          toast.success(`+1 ${exactMatch.name} ditambahkan!`);
+        } else {
+          toast.error(`Stok ${exactMatch.name} sudah habis.`);
+        }
+      }
+    }
+  }
 </script>
 
 <div class="flex flex-col gap-4 h-full text-ink">
   <!-- Search & Category Filters Header -->
   <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between w-full">
-    <!-- Search Bar -->
+    <!-- Search & Barcode Scanner Input Bar -->
     <div class="relative flex-1 min-w-[220px]">
-      <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      <div class="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-slate-400">
+        <Search class="w-4 h-4" />
+      </div>
       <input
         type="text"
         bind:value={searchQuery}
-        placeholder="Cari SKU atau nama produk..."
-        class="w-full pl-10 pr-9 py-2.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none transition-all shadow-2xs"
+        onkeydown={handleSearchKeyDown}
+        placeholder="Scan Barcode atau cari nama/SKU..."
+        class="w-full pl-10 pr-20 py-2.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none transition-all shadow-2xs"
       />
-      {#if isSearchActive}
-        <button
-          type="button"
-          onclick={clearSearch}
-          class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+      <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+        {#if isSearchActive}
+          <button
+            type="button"
+            onclick={clearSearch}
+            class="p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+          >
+            <X class="w-3.5 h-3.5" />
+          </button>
+        {/if}
+        <span
+          class="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
+          title="Siap terima scan dari scanner barcode USB/Bluetooth"
         >
-          <X class="w-3.5 h-3.5" />
-        </button>
-      {/if}
+          <BarcodeIcon class="w-3 h-3" />
+          <span>Scanner Ready</span>
+        </span>
+      </div>
     </div>
 
     <!-- Scrollable Category Pills -->
@@ -167,10 +208,19 @@
               {product.name}
             </h4>
 
-            <!-- Product Selling Price -->
-            <span class="font-mono font-black text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 mt-1 block">
-              {formatCurrency(product.sellingPrice)}
-            </span>
+            <!-- Product Selling Price & Quick Add Button -->
+            <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-200/40 dark:border-emerald-950/40 w-full">
+              <span class="font-mono font-black text-xs sm:text-sm text-emerald-600 dark:text-emerald-400">
+                {formatCurrency(product.sellingPrice)}
+              </span>
+
+              <div
+                class="p-1.5 rounded-xl bg-emerald-600 text-white shadow-2xs group-hover:scale-110 group-hover:bg-emerald-700 transition-all flex items-center justify-center shrink-0"
+                title="Tambah ke keranjang"
+              >
+                <Plus class="w-3.5 h-3.5 stroke-[2.5]" />
+              </div>
+            </div>
           </button>
         {/each}
       </div>

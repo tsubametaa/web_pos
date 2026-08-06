@@ -9,6 +9,7 @@ export interface UIProduct {
 	stock: number;
 	minStock: number;
 	imageUrl?: string;
+	barcode?: string;
 	isActive: boolean;
 	notes?: string;
 	createdAt?: string | Date;

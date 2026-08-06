@@ -42,6 +42,7 @@ export const products = sqliteTable('products', {
 	stock: integer('stock').notNull().default(0),
 	minStock: integer('min_stock').notNull().default(10),
 	imageUrl: text('image_url'),
+	barcode: text('barcode'),
 	isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
 	notes: text('notes'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),

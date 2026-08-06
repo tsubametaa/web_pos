@@ -10,6 +10,7 @@ export interface ProductInput {
 	stock?: number;
 	minStock?: number;
 	imageUrl?: string;
+	barcode?: string;
 	notes?: string;
 }
 
@@ -51,6 +52,8 @@ export class ProductsService {
 			sku = `PRD-${Date.now().toString().slice(-4)}`;
 		}
 
+		const barcode = data.barcode ? data.barcode.trim() : sku;
+
 		const result = await db.insert(products).values({
 			userId,
 			name: data.name,
@@ -61,6 +64,7 @@ export class ProductsService {
 			stock: Number(data.stock) || 0,
 			minStock: Number(data.minStock) || 0,
 			imageUrl: data.imageUrl || null,
+			barcode,
 			notes: data.notes || null,
 			sku
 		}).returning();

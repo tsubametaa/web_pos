@@ -12,6 +12,8 @@
     onBack: () => void;
   }
 
+  import Barcode from '../../../components/ui/Barcode.svelte';
+
   let { productId, onBack }: Props = $props();
 
   let loading = $state(true);
@@ -21,6 +23,12 @@
   const urlParams = new URLSearchParams(window.location.search);
   const printMode = $derived(
     urlParams.get('print') === 'label' || window.location.hash.includes('print=label')
+  );
+  const showBarcodeParam = $derived(
+    urlParams.get('barcode') !== '0' && !window.location.hash.includes('barcode=0')
+  );
+  const showQrParam = $derived(
+    urlParams.get('qr') !== '0' && !window.location.hash.includes('qr=0')
   );
 
   const shareUrl = $derived(
@@ -80,9 +88,17 @@
         {settings?.businessName || 'ARTHAPOS'}
       </h5>
 
-      <img src={qrCodeUrl} alt="QR Code Label" class="w-28 h-28 my-1" />
+      {#if showQrParam}
+        <img src={qrCodeUrl} alt="QR Code Label" class="w-24 h-24 my-1" />
+      {/if}
 
-      <span class="text-[8px] font-mono font-bold tracking-widest">{product.sku || '-'}</span>
+      {#if showBarcodeParam}
+        <div class="my-1 max-w-full">
+          <Barcode value={product.barcode || product.sku} height={36} showText={false} />
+        </div>
+      {/if}
+
+      <span class="text-[8px] font-mono font-bold tracking-widest">{product.barcode || product.sku || '-'}</span>
       <h4 class="text-[10px] font-bold mt-0.5 max-w-full leading-tight truncate px-1">
         {product.name}
       </h4>

@@ -26,6 +26,7 @@
   let stock = $state(0);
   let minStock = $state(10);
   let imageUrl = $state('');
+  let barcode = $state('');
   let notes = $state('');
   let isFocused = $state(false);
   let fileInput = $state<HTMLInputElement | null>(null);
@@ -124,6 +125,7 @@
       stock = product.stock ?? 0;
       minStock = product.minStock ?? 10;
       imageUrl = product.imageUrl ?? '';
+      barcode = product.barcode ?? product.sku ?? '';
       notes = product.notes ?? '';
     } else {
       name = '';
@@ -136,6 +138,7 @@
       stock = 0;
       minStock = 10;
       imageUrl = '';
+      barcode = '';
       notes = '';
     }
   });
@@ -218,6 +221,7 @@
       sellingPrice: isFinite(Number(sellingPrice)) ? Number(sellingPrice) : 0,
       stock: isFinite(Number(stock)) ? Number(stock) : 0,
       minStock: isFinite(Number(minStock)) ? Number(minStock) : 0,
+      ...(barcode.trim() ? { barcode: barcode.trim() } : {}),
       ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
       ...(notes.trim() ? { notes: notes.trim() } : {}),
     });
@@ -274,18 +278,33 @@
           Informasi Utama Produk
         </h3>
 
-        <!-- Nama Produk -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5" for="prod-name">
-            Nama Produk *
-          </label>
-          <input
-            id="prod-name"
-            type="text"
-            bind:value={name}
-            placeholder="Contoh: Kopi Susu Gula Aren"
-            class="w-full px-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
-          />
+        <!-- Nama Produk & Kode Barcode -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5" for="prod-name">
+              Nama Produk *
+            </label>
+            <input
+              id="prod-name"
+              type="text"
+              bind:value={name}
+              placeholder="Contoh: Kopi Susu Gula Aren"
+              class="w-full px-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5" for="prod-barcode">
+              Kode Barcode / EAN
+            </label>
+            <input
+              id="prod-barcode"
+              type="text"
+              bind:value={barcode}
+              placeholder="Kosongkan jika samakan SKU"
+              class="w-full px-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-mono font-bold text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+            />
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

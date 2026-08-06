@@ -366,7 +366,7 @@
                         id="biz-footer"
                         bind:value={receiptFooter}
                         rows="2"
-                        placeholder="Contoh: Terima kasih atas kunjungan Anda! Barang yang sudah dibeli tidak dapat ditukar."
+                        placeholder="Contoh: Barang yang sudah dibeli tidak dapat ditukar."
                         disabled={profileSaving}
                         class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
                       ></textarea>

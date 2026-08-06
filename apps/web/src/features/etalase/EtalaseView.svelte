@@ -40,6 +40,11 @@
     ...new Set(products.map((p) => p.category).filter(Boolean)),
   ]);
 
+  const categoryOptions = $derived([
+    { value: '', label: 'Semua Kategori' },
+    ...categories.map((cat) => ({ value: cat, label: cat })),
+  ]);
+
   const filteredProducts = $derived.by(() => {
     let list = products.filter((p) => {
       const q = searchQuery.trim().toLowerCase();
@@ -173,33 +178,15 @@
 
     <!-- Main Content Workspace -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5">
-      <!-- Toolbar Strip: Category Pills & Sorting Dropdown -->
+      <!-- Toolbar Strip: Category Dropdown & Sorting Dropdown -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 w-full border-b border-slate-200/60 dark:border-emerald-950/60 pb-4">
-        <!-- Category Filter Pills Bar -->
-        <div class="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 min-w-0">
-          <button
-            type="button"
-            onclick={() => (selectedCategory = '')}
-            class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-150 shrink-0 cursor-pointer select-none
-							{!selectedCategory
-              ? 'bg-emerald-600 text-white shadow-xs'
-              : 'bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
-          >
-            Semua Produk
-          </button>
-
-          {#each categories as cat}
-            <button
-              type="button"
-              onclick={() => (selectedCategory = cat)}
-              class="px-4 py-2 rounded-xl text-xs font-bold transition-all duration-150 shrink-0 cursor-pointer select-none
-								{selectedCategory === cat
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
-            >
-              {cat}
-            </button>
-          {/each}
+        <!-- Category Filter Dropdown -->
+        <div class="flex items-center gap-3">
+          <Dropdown
+            options={categoryOptions}
+            bind:value={selectedCategory}
+            placeholder="Semua Kategori"
+          />
         </div>
 
         <!-- Sort Selector Dropdown & Products Counter -->
