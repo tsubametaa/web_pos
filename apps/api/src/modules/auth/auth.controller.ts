@@ -1,11 +1,10 @@
 import { Elysia, t } from 'elysia';
 import { AuthService } from './auth.service';
-import { authPlugin } from '../../middlewares/auth';
+import { resolveUser } from '../../middlewares/resolveUser';
 
 const authService = new AuthService();
 
 export const authController = new Elysia({ prefix: '/auth' })
-	.use(authPlugin)
 	.get('/setup-needed', async () => {
 		const needSetup = await authService.checkSetupNeeded();
 		return { success: true, needSetup };
@@ -67,7 +66,8 @@ export const authController = new Elysia({ prefix: '/auth' })
 		session.remove();
 		return { success: true, message: 'Logout berhasil!' };
 	})
-	.get('/me', ({ user, set }: any) => {
+	.get('/me', async ({ set, request }: any) => {
+		const user = await resolveUser(request);
 		if (!user) {
 			set.status = 401;
 			return { success: false, error: 'Belum login.' };

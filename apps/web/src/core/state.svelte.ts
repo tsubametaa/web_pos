@@ -45,19 +45,18 @@ class AppState {
 
 		try {
 			// Check if setup is needed
-			const setupRes = await api.get('/auth/setup-needed');
+			const setupRes = await api.get('/auth/setup-needed').catch(() => ({ needSetup: false }));
 			this.needSetup = setupRes.needSetup;
 
 			// Verify auth session with backend
 			const meRes = await api.get('/auth/me');
-			if (meRes.success) {
+			if (meRes && meRes.success) {
 				this.setUser(meRes.user);
 			} else {
 				this.setUser(null);
 			}
 		} catch (err) {
-			// If session is truly invalid / unauthenticated
-			console.warn('[appState] Session check failed:', err);
+			console.warn('[appState] Session check error:', err);
 		}
 
 		try {
