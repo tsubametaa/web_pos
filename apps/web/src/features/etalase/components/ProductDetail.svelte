@@ -88,15 +88,9 @@
         {settings?.businessName || 'ARTHAPOS'}
       </h5>
 
-      {#if showQrParam}
-        <img src={qrCodeUrl} alt="QR Code Label" class="w-24 h-24 my-1" />
-      {/if}
-
-      {#if showBarcodeParam}
-        <div class="my-1 max-w-full">
-          <Barcode value={product.barcode || product.sku} height={36} showText={false} />
-        </div>
-      {/if}
+      <div class="my-1.5 max-w-full flex flex-col items-center">
+        <Barcode value={product.barcode || product.sku} height={42} showText={false} />
+      </div>
 
       <span class="text-[8px] font-mono font-bold tracking-widest">{product.barcode || product.sku || '-'}</span>
       <h4 class="text-[10px] font-bold mt-0.5 max-w-full leading-tight truncate px-1">

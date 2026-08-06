@@ -1,6 +1,6 @@
 <script lang="ts">
-	/* ProductShareModal.svelte - Share modal with QR Code, 1D Barcode, and Print Label options */
-	import { X, Link, QrCode, Barcode as BarcodeIcon, Printer } from 'lucide-svelte';
+	/* ProductShareModal.svelte - Label Barcode Produk modal with 1D Barcode & Print Label options */
+	import { X, Link, Barcode as BarcodeIcon, Printer } from 'lucide-svelte';
 	import Barcode from '../../../components/ui/Barcode.svelte';
 	import type { UIProduct } from '../../../types';
 
@@ -11,16 +11,10 @@
 
 	let { product, onclose }: Props = $props();
 
-	let showBarcode = $state(true);
-	let showQrCode = $state(true);
-
 	const barcodeValue = $derived(product.barcode || product.sku || 'PRD-0000');
 
 	const shareUrl = $derived(
 		typeof window !== 'undefined' ? `${window.location.origin}/#/etalase/${product.id}` : ''
-	);
-	const qrCodeUrl = $derived(
-		`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`
 	);
 
 	function copyLink() {
@@ -30,9 +24,7 @@
 	}
 
 	function printLabel() {
-		const barcodeFlag = showBarcode ? '1' : '0';
-		const qrFlag = showQrCode ? '1' : '0';
-		window.open(`#/etalase/${product.id}?print=label&barcode=${barcodeFlag}&qr=${qrFlag}`, '_blank');
+		window.open(`#/etalase/${product.id}?print=label&barcode=1&qr=0`, '_blank');
 	}
 </script>
 
@@ -50,7 +42,7 @@
 		<div class="flex items-center justify-between px-6 py-4 border-b border-sage-200/25 bg-base/20">
 			<div class="flex items-center gap-2">
 				<BarcodeIcon class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-				<h2 class="text-sm font-extrabold text-slate-800 dark:text-white">Label & Bagikan Produk</h2>
+				<h2 class="text-sm font-extrabold text-slate-800 dark:text-white">Barcode Produk</h2>
 			</div>
 			<button
 				type="button"
@@ -74,52 +66,10 @@
 			</div>
 
 			<!-- Visual Preview Box -->
-			<div class="w-full p-4 bg-white border border-slate-200/80 rounded-2xl shadow-inner flex flex-col items-center justify-center gap-3">
-				{#if showQrCode && shareUrl}
-					<div class="flex flex-col items-center gap-1">
-						<img src={qrCodeUrl} alt="QR Code Produk" class="w-32 h-32" />
-						<span class="text-[10px] text-slate-400 font-medium">QR Etalase</span>
-					</div>
-				{/if}
-
-				{#if showBarcode}
-					<div class="flex flex-col items-center w-full px-2">
-						<Barcode value={barcodeValue} height={42} showText={true} />
-					</div>
-				{/if}
-
-				{#if !showBarcode && !showQrCode}
-					<p class="text-xs text-slate-400 font-bold py-6">Aktifkan sakelar di bawah untuk menampilkan label</p>
-				{/if}
-			</div>
-
-			<!-- Toggles Barcode & QR Code Switch -->
-			<div class="w-full grid grid-cols-2 gap-3 p-3 bg-base/60 dark:bg-base/30 rounded-2xl border border-slate-200/60 dark:border-emerald-950/60">
-				<!-- Toggle Barcode -->
-				<label class="flex items-center justify-between gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
-					<span class="flex items-center gap-1.5">
-						<BarcodeIcon class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-						<span>Barcode 1D</span>
-					</span>
-					<input
-						type="checkbox"
-						bind:checked={showBarcode}
-						class="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
-					/>
-				</label>
-
-				<!-- Toggle QR Code -->
-				<label class="flex items-center justify-between gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer select-none">
-					<span class="flex items-center gap-1.5">
-						<QrCode class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-						<span>QR Etalase</span>
-					</span>
-					<input
-						type="checkbox"
-						bind:checked={showQrCode}
-						class="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
-					/>
-				</label>
+			<div class="w-full p-6 bg-white border border-slate-200/80 rounded-2xl shadow-inner flex flex-col items-center justify-center gap-3">
+				<div class="flex flex-col items-center w-full px-2">
+					<Barcode value={barcodeValue} height={54} showText={true} />
+				</div>
 			</div>
 
 			<!-- Public Etalase Link -->

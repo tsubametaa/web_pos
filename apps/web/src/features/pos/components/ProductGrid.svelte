@@ -2,8 +2,9 @@
   import { cart } from '../logic/cart.svelte';
   import { formatCurrency } from '../../../lib/utils/currency';
   import { createProductFuse, fuzzySearchProducts } from '../../../lib/utils/fuzzy-search';
-  import { Search, AlertCircle, Package, X, Plus, Barcode as BarcodeIcon } from 'lucide-svelte';
+  import { Search, AlertCircle, Package, X, Plus, Barcode as BarcodeIcon, Camera } from 'lucide-svelte';
   import { toast } from '../../../lib/utils/toast.svelte';
+  import CameraScannerModal from './CameraScannerModal.svelte';
   import type { UIProduct } from '../../../types';
 
   interface Props {
@@ -16,6 +17,7 @@
 
   let searchQuery = $state('');
   let selectedCategory = $state('');
+  let showCameraModal = $state(false);
 
   const fuse = $derived(createProductFuse(products));
 
@@ -29,6 +31,18 @@
 
   function clearSearch() {
     searchQuery = '';
+  }
+
+  function handleCameraScan(product: UIProduct) {
+    const cartItem = cart.items.find((item) => item.product.id === product.id);
+    const availableStock = product.stock - (cartItem?.qty || 0);
+
+    if (availableStock > 0) {
+      onselect(product);
+      toast.success(`+1 ${product.name} ditambahkan!`);
+    } else {
+      toast.error(`Stok ${product.name} sudah habis.`);
+    }
   }
 
   function handleSearchKeyDown(e: KeyboardEvent) {
@@ -64,35 +78,48 @@
   <!-- Search & Category Filters Header -->
   <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between w-full">
     <!-- Search & Barcode Scanner Input Bar -->
-    <div class="relative flex-1 min-w-[220px]">
-      <div class="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-slate-400">
-        <Search class="w-4 h-4" />
-      </div>
-      <input
-        type="text"
-        bind:value={searchQuery}
-        onkeydown={handleSearchKeyDown}
-        placeholder="Scan Barcode atau cari nama/SKU..."
-        class="w-full pl-10 pr-20 py-2.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none transition-all shadow-2xs"
-      />
-      <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-        {#if isSearchActive}
-          <button
-            type="button"
-            onclick={clearSearch}
-            class="p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+    <div class="flex items-center gap-2 flex-1 min-w-0">
+      <div class="relative flex-1 min-w-[200px]">
+        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-slate-400">
+          <Search class="w-4 h-4" />
+        </div>
+        <input
+          type="text"
+          bind:value={searchQuery}
+          onkeydown={handleSearchKeyDown}
+          placeholder="Scan Barcode atau cari nama/SKU..."
+          class="w-full pl-10 pr-20 py-2.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none transition-all shadow-2xs"
+        />
+        <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+          {#if isSearchActive}
+            <button
+              type="button"
+              onclick={clearSearch}
+              class="p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+            >
+              <X class="w-3.5 h-3.5" />
+            </button>
+          {/if}
+          <span
+            class="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
+            title="Siap terima scan dari scanner barcode USB/Bluetooth"
           >
-            <X class="w-3.5 h-3.5" />
-          </button>
-        {/if}
-        <span
-          class="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
-          title="Siap terima scan dari scanner barcode USB/Bluetooth"
-        >
-          <BarcodeIcon class="w-3 h-3" />
-          <span>Scanner Ready</span>
-        </span>
+            <BarcodeIcon class="w-3 h-3" />
+            <span>Scanner Ready</span>
+          </span>
+        </div>
       </div>
+
+      <!-- Camera Scanner Trigger Button -->
+      <button
+        type="button"
+        onclick={() => (showCameraModal = true)}
+        class="inline-flex items-center gap-1.5 px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl shadow-xs hover:shadow transition-all duration-150 cursor-pointer shrink-0"
+        title="Buka Scanner Kamera POS"
+      >
+        <Camera class="w-4 h-4" />
+        <span class="hidden xs:inline">Scan Kamera</span>
+      </button>
     </div>
 
     <!-- Scrollable Category Pills -->
@@ -233,4 +260,13 @@
       </div>
     {/if}
   </div>
+
+  <!-- Camera Scanner Modal Popup -->
+  {#if showCameraModal}
+    <CameraScannerModal
+      {products}
+      onscan={handleCameraScan}
+      onclose={() => (showCameraModal = false)}
+    />
+  {/if}
 </div>

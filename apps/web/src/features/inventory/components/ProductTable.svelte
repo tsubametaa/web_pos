@@ -11,7 +11,9 @@
     AlertTriangle,
     X,
     Package,
+    Filter,
   } from 'lucide-svelte';
+  import Dropdown, { type DropdownOption } from '../../../components/ui/Dropdown.svelte';
   import type { UIProduct } from '../../../types';
 
   interface Props {
@@ -28,6 +30,11 @@
   let searchQuery = $state('');
   let selectedCategory = $state('');
   let showInactive = $state(false);
+
+  const categoryOptions = $derived<DropdownOption[]>([
+    { value: '', label: 'Semua Kategori', icon: Filter },
+    ...categories.map((cat) => ({ value: cat, label: cat })),
+  ]);
 
   const filteredProducts = $derived(() => {
     // 1. Filter by active status
@@ -48,9 +55,9 @@
 </script>
 
 <div class="flex flex-col gap-4 text-ink">
-  <!-- Search, Category Pills & Filters Bar -->
+  <!-- Search, Category Dropdown & Filters Bar -->
   <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between w-full">
-    <!-- Left: Search & Category Pills -->
+    <!-- Left: Search & Category Dropdown -->
     <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center flex-1 min-w-0">
       <!-- Search Input -->
       <div class="relative flex-1 max-w-md">
@@ -72,33 +79,12 @@
         {/if}
       </div>
 
-      <!-- Category Filter Pills -->
       {#if categories.length > 0}
-        <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5">
-          <button
-            type="button"
-            onclick={() => (selectedCategory = '')}
-            class="px-3 py-2 rounded-xl text-xs font-bold transition-all duration-150 shrink-0 cursor-pointer select-none
-							{!selectedCategory
-              ? 'bg-emerald-600 text-white shadow-xs'
-              : 'bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
-          >
-            Semua
-          </button>
-
-          {#each categories as cat}
-            <button
-              type="button"
-              onclick={() => (selectedCategory = cat)}
-              class="px-3 py-2 rounded-xl text-xs font-bold transition-all duration-150 shrink-0 cursor-pointer select-none
-								{selectedCategory === cat
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
-            >
-              {cat}
-            </button>
-          {/each}
-        </div>
+        <Dropdown
+          options={categoryOptions}
+          bind:value={selectedCategory}
+          placeholder="Semua Kategori"
+        />
       {/if}
     </div>
 
