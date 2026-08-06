@@ -48,9 +48,11 @@
   };
 
   let loading = $state(true);
+  let loadError = $state<string | null>(null);
   let data = $state<any>(defaultStats);
 
   async function loadDashboardData() {
+    loadError = null;
     try {
       const res = await api.get("/dashboard/stats");
       if (res && res.success) {
@@ -69,12 +71,19 @@
               ? res.salesTrend
               : generateEmptySalesTrend(),
         };
-      } else {
-        data = defaultStats;
+        loadError = null;
+      } else if (res && !res.success) {
+        // Server returned an explicit error — show error but don't wipe data
+        loadError = res.error || 'Gagal memuat data dashboard.';
+        console.warn('[Dashboard] API returned error:', res.error);
       }
-    } catch (err) {
-      console.error("Error fetching dashboard stats:", err);
-      data = defaultStats;
+    } catch (err: any) {
+      // Network error / auth error — keep existing data, show retry banner
+      console.error("[Dashboard] Error fetching stats:", err);
+      if (!err?.isAuthError) {
+        // Non-auth error: keep showing data, just show a banner
+        loadError = 'Koneksi ke server bermasalah. Data mungkin belum terkini.';
+      }
     } finally {
       loading = false;
     }
@@ -144,7 +153,25 @@
   </div>
 {:else}
   <div class="flex flex-col gap-6 text-ink w-full pb-8">
+
+    {#if loadError}
+      <!-- Connection error banner - non-blocking, shows retry button -->
+      <div class="flex items-center justify-between gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-xl text-sm">
+        <div class="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+          <AlertTriangle class="w-4 h-4 shrink-0" />
+          <span class="font-medium">{loadError}</span>
+        </div>
+        <button
+          onclick={loadDashboardData}
+          class="shrink-0 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer"
+        >
+          Coba Lagi
+        </button>
+      </div>
+    {/if}
+
     <!-- Welcome Header Banner displaying user / business name from DB -->
+
     <div
       class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-base/90 dark:bg-surface/60 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl shadow-2xs"
     >

@@ -1,4 +1,4 @@
-import { eq, and, desc, isNull, or } from 'drizzle-orm';
+import { eq, and, desc, isNull, or, gte } from 'drizzle-orm';
 import { db, products } from '../../db';
 
 export interface ProductInput {
@@ -15,44 +15,35 @@ export interface ProductInput {
 }
 
 export class ProductsService {
+	private userCondition(userId: string) {
+		return or(eq(products.userId, userId), isNull(products.userId));
+	}
+
 	async getProducts(userId: string, category?: string, activeOnly?: boolean) {
-		const userCondition = or(eq(products.userId, userId), isNull(products.userId));
+		const conditions: any[] = [this.userCondition(userId)];
+		if (category) conditions.push(eq(products.category, category));
+		if (activeOnly) conditions.push(eq(products.isActive, true));
 
-		const conditions = [userCondition];
-		if (category) {
-			conditions.push(eq(products.category, category));
-		}
-		if (activeOnly) {
-			conditions.push(eq(products.isActive, true));
-		}
-
-		const list = await db.select().from(products)
+		return db.select()
+			.from(products)
 			.where(and(...conditions))
 			.orderBy(desc(products.createdAt));
-
-		return list;
 	}
 
 	async createProduct(userId: string, data: ProductInput) {
-		// Generate SKU
-		let isUnique = false;
-		let attempts = 0;
+		// Generate unique SKU
 		let sku = '';
-		while (!isUnique && attempts < 20) {
+		for (let attempts = 0; attempts < 20; attempts++) {
 			const rand = Math.floor(1000 + Math.random() * 9000);
 			const tempSku = `PRD-${rand}`;
-			const existing = await db.select().from(products).where(and(eq(products.sku, tempSku), eq(products.userId, userId))).limit(1);
-			if (existing.length === 0) {
-				sku = tempSku;
-				isUnique = true;
-			}
-			attempts++;
+			const existing = await db.select().from(products)
+				.where(and(eq(products.sku, tempSku), eq(products.userId, userId)))
+				.limit(1);
+			if (existing.length === 0) { sku = tempSku; break; }
 		}
-		if (!sku) {
-			sku = `PRD-${Date.now().toString().slice(-4)}`;
-		}
+		if (!sku) sku = `PRD-${Date.now().toString().slice(-4)}`;
 
-		const barcode = data.barcode ? data.barcode.trim() : sku;
+		const barcode = data.barcode?.trim() || sku;
 
 		const result = await db.insert(products).values({
 			userId,
@@ -73,39 +64,44 @@ export class ProductsService {
 	}
 
 	async updateProduct(userId: string, id: string, updateData: Partial<ProductInput>) {
-		const userCondition = or(eq(products.userId, userId), isNull(products.userId));
+		const existing = await db.select().from(products)
+			.where(and(eq(products.id, id), this.userCondition(userId)))
+			.limit(1);
+		const product = existing[0];
+		if (!product) throw new Error('Produk tidak ditemukan.');
 
-		const result = await db.select().from(products).where(and(eq(products.id, id), userCondition)).limit(1);
-		const product = result[0];
-		if (!product) {
-			throw new Error('Produk tidak ditemukan.');
-		}
+		const safeUpdate: Record<string, any> = {
+			userId,
+			updatedAt: new Date()
+		};
+		if (updateData.name !== undefined)         safeUpdate.name = updateData.name;
+		if (updateData.category !== undefined)     safeUpdate.category = updateData.category;
+		if (updateData.unit !== undefined)         safeUpdate.unit = updateData.unit;
+		if (updateData.costPrice !== undefined)    safeUpdate.costPrice = Number(updateData.costPrice) || 0;
+		if (updateData.sellingPrice !== undefined) safeUpdate.sellingPrice = Number(updateData.sellingPrice) || 0;
+		if (updateData.stock !== undefined)        safeUpdate.stock = Number(updateData.stock) || 0;
+		if (updateData.minStock !== undefined)     safeUpdate.minStock = Number(updateData.minStock) || 0;
+		if (updateData.imageUrl !== undefined)     safeUpdate.imageUrl = updateData.imageUrl || null;
+		if (updateData.notes !== undefined)        safeUpdate.notes = updateData.notes || null;
+		if (updateData.barcode !== undefined)      safeUpdate.barcode = updateData.barcode?.trim() || product.barcode || product.sku;
 
 		const updateRes = await db.update(products)
-			.set({
-				...updateData,
-				userId: product.userId || userId,
-				updatedAt: new Date()
-			})
-			.where(eq(products.id, id))
+			.set(safeUpdate)
+			.where(and(eq(products.id, id), this.userCondition(userId)))
 			.returning();
 
 		return updateRes[0];
 	}
 
 	async adjustStock(userId: string, id: string, adjustment: number, notes?: string) {
-		const userCondition = or(eq(products.userId, userId), isNull(products.userId));
-
-		const result = await db.select().from(products).where(and(eq(products.id, id), userCondition)).limit(1);
-		const product = result[0];
-		if (!product) {
-			throw new Error('Produk tidak ditemukan.');
-		}
+		const existing = await db.select().from(products)
+			.where(and(eq(products.id, id), this.userCondition(userId)))
+			.limit(1);
+		const product = existing[0];
+		if (!product) throw new Error('Produk tidak ditemukan.');
 
 		const targetStock = product.stock + adjustment;
-		if (targetStock < 0) {
-			throw new Error('Penyesuaian menyebabkan stok negatif.');
-		}
+		if (targetStock < 0) throw new Error('Penyesuaian menyebabkan stok negatif.');
 
 		let updatedNotes = product.notes || '';
 		if (notes) {
@@ -116,31 +112,29 @@ export class ProductsService {
 			.set({
 				stock: targetStock,
 				notes: updatedNotes,
-				userId: product.userId || userId,
+				userId,
 				updatedAt: new Date()
 			})
-			.where(eq(products.id, id))
+			.where(and(eq(products.id, id), this.userCondition(userId)))
 			.returning();
 
 		return updateRes[0];
 	}
 
 	async toggleStatus(userId: string, id: string) {
-		const userCondition = or(eq(products.userId, userId), isNull(products.userId));
-
-		const result = await db.select().from(products).where(and(eq(products.id, id), userCondition)).limit(1);
-		const product = result[0];
-		if (!product) {
-			throw new Error('Produk tidak ditemukan.');
-		}
+		const existing = await db.select().from(products)
+			.where(and(eq(products.id, id), this.userCondition(userId)))
+			.limit(1);
+		const product = existing[0];
+		if (!product) throw new Error('Produk tidak ditemukan.');
 
 		const updateRes = await db.update(products)
 			.set({
 				isActive: !product.isActive,
-				userId: product.userId || userId,
+				userId,         // Claim ownership if previously null
 				updatedAt: new Date()
 			})
-			.where(eq(products.id, id))
+			.where(and(eq(products.id, id), this.userCondition(userId)))
 			.returning();
 
 		return updateRes[0];
