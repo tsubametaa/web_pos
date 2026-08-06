@@ -6,6 +6,26 @@ export class DashboardService {
 		return or(eq(field, userId), isNull(field));
 	}
 
+	private parseDate(val: any): Date {
+		if (!val) return new Date(0);
+		if (val instanceof Date) {
+			return isNaN(val.getTime()) ? new Date(0) : val;
+		}
+		if (typeof val === 'number') {
+			// If Unix timestamp in seconds (< 1e11), convert to ms
+			return new Date(val < 100000000000 ? val * 1000 : val);
+		}
+		if (typeof val === 'string') {
+			const num = Number(val);
+			if (!isNaN(num)) {
+				return new Date(num < 100000000000 ? num * 1000 : num);
+			}
+			const parsed = new Date(val);
+			return isNaN(parsed.getTime()) ? new Date(0) : parsed;
+		}
+		return new Date(0);
+	}
+
 	async getDashboardStats(userId: string) {
 		const txUserCondition = this.getUserCondition(userId, transactions.userId);
 		const prodUserCondition = this.getUserCondition(userId, products.userId);
@@ -28,17 +48,17 @@ export class DashboardService {
 		endOfToday.setHours(23, 59, 59, 999);
 
 		const todayTrxs = completedTransactions.filter((t) => {
-			const date = new Date(t.createdAt);
+			const date = this.parseDate(t.createdAt);
 			return date >= startOfToday && date <= endOfToday;
 		});
 
-		const todaySales = todayTrxs.reduce((sum, t) => sum + t.totalAmount, 0);
-		const todayProfit = todayTrxs.reduce((sum, t) => sum + t.profit, 0);
+		const todaySales = todayTrxs.reduce((sum, t) => sum + (Number(t.totalAmount) || 0), 0);
+		const todayProfit = todayTrxs.reduce((sum, t) => sum + (Number(t.profit) || 0), 0);
 		const todayTransactionsCount = todayTrxs.length;
 
 		// 4. Filter low-stock products (stock <= minStock)
 		const lowStockProducts = activeProducts.filter(
-			(p) => p.stock <= (p.minStock !== null && p.minStock !== undefined ? p.minStock : 10)
+			(p) => (Number(p.stock) || 0) <= (p.minStock !== null && p.minStock !== undefined ? Number(p.minStock) : 10)
 		);
 
 		// 5. Fetch 5 most recent transactions for user
@@ -61,12 +81,12 @@ export class DashboardService {
 			endOfDay.setHours(23, 59, 59, 999);
 
 			const dayTrxs = completedTransactions.filter((t) => {
-				const date = new Date(t.createdAt);
+				const date = this.parseDate(t.createdAt);
 				return date >= startOfDay && date <= endOfDay;
 			});
 
-			const amount = dayTrxs.reduce((sum, t) => sum + t.totalAmount, 0);
-			const profit = dayTrxs.reduce((sum, t) => sum + t.profit, 0);
+			const amount = dayTrxs.reduce((sum, t) => sum + (Number(t.totalAmount) || 0), 0);
+			const profit = dayTrxs.reduce((sum, t) => sum + (Number(t.profit) || 0), 0);
 
 			salesTrend.push({
 				dateStr,

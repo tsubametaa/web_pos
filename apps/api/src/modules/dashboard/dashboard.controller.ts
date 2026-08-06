@@ -6,14 +6,15 @@ const dashboardService = new DashboardService();
 
 export const dashboardController = new Elysia({ prefix: '/dashboard' })
 	.get('/stats', async ({ set, request }: any) => {
-		let user;
 		try {
-			user = await resolveUser(request);
-		} catch (err) {
-			console.error('[dashboard] resolveUser DB error:', err);
-			return serviceUnavailable(set);
+			const user = await resolveUser(request);
+			if (!user) return unauthorized(set);
+
+			const stats = await dashboardService.getDashboardStats(user.id);
+			return { success: true, ...stats };
+		} catch (err: any) {
+			console.error('[dashboard/stats] Error:', err);
+			set.status = 500;
+			return { success: false, error: err.message || 'Gagal mengambil data statistik dashboard.' };
 		}
-		if (!user) return unauthorized(set);
-		const stats = await dashboardService.getDashboardStats(user.id);
-		return { success: true, ...stats };
 	});

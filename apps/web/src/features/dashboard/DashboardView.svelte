@@ -82,7 +82,7 @@
       console.error("[Dashboard] Error fetching stats:", err);
       if (!err?.isAuthError) {
         // Non-auth error: keep showing data, just show a banner
-        loadError = 'Koneksi ke server bermasalah. Data mungkin belum terkini.';
+        loadError = err?.message || 'Koneksi ke server bermasalah. Data mungkin belum terkini.';
       }
     } finally {
       loading = false;

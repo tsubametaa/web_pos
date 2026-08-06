@@ -57,11 +57,11 @@ class ApiClient {
 
 				// Other 4xx errors — do not retry, throw immediately
 				if (response.status >= 400 && response.status < 500) {
-					throw new Error(errorData.error || `HTTP ${response.status}`);
+					throw new Error(errorData.error || errorData.message || `HTTP ${response.status}`);
 				}
 
 				// 5xx errors — retry
-				lastError = new Error(errorData.error || `HTTP ${response.status}`);
+				lastError = new Error(errorData.error || errorData.message || `HTTP ${response.status}`);
 				if (attempt < retries) {
 					console.warn(`[API] ${method} ${path} — server error ${response.status}, retrying in ${(attempt + 1) * 500}ms...`);
 					await sleep((attempt + 1) * 500);
