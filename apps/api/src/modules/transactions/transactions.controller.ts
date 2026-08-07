@@ -78,7 +78,8 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 			items: t.Array(
 				t.Object({
 					productId: t.String({ minLength: 1 }),
-					qty: t.Number({ minimum: 1, error: 'Jumlah item minimal 1.' })
+					qty: t.Number({ minimum: 1, error: 'Jumlah item minimal 1.' }),
+					customPrice: t.Optional(t.Number())
 				}),
 				{ minItems: 1, error: 'Keranjang belanja tidak boleh kosong.' }
 			),
@@ -87,7 +88,9 @@ export const transactionsController = new Elysia({ prefix: '/transactions' })
 			notes: t.Optional(t.String()),
 			recipientName: t.Optional(t.String()),
 			recipientPhone: t.Optional(t.String()),
-			recipientAddress: t.Optional(t.String())
+			recipientAddress: t.Optional(t.String()),
+			memberId: t.Optional(t.String()),
+			isMemberTransaction: t.Optional(t.Boolean())
 		})
 	})
 	.post('/void', async ({ body, set, request }: any) => {

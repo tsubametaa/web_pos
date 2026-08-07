@@ -159,15 +159,6 @@
           Kelola katalog produk, pantau persediaan stok, dan atur harga jual serta HPP toko Anda.
         </p>
       </div>
-
-      <button
-        type="button"
-        onclick={handleAdd}
-        class="inline-flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-xs font-extrabold rounded-xl shadow-xs hover:shadow transition-all duration-150 group shrink-0 cursor-pointer"
-      >
-        <Plus class="w-4 h-4 group-hover:rotate-90 transition-transform" />
-        <span>Tambah Produk Baru</span>
-      </button>
     </div>
 
     <!-- Summary KPI Cards -->
@@ -241,6 +232,7 @@
     <ProductTable
       {products}
       {categories}
+      onadd={handleAdd}
       onedit={handleEdit}
       onadjust={handleAdjustStock}
       onshare={handleShare}

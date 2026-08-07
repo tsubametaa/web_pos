@@ -1,5 +1,5 @@
 import { eq, and, desc, isNull, or, gte, lte, inArray } from 'drizzle-orm';
-import { db, products, transactions, transactionItems, settings, stores } from '../../db';
+import { db, products, transactions, transactionItems, settings, stores, members } from '../../db';
 import type { CartItemInput, CheckoutInput } from '../../types';
 
 export class TransactionsService {
@@ -36,12 +36,14 @@ export class TransactionsService {
 		const fetchLimit = Math.min(options.limit || 1000, 2000);
 		const fetchOffset = Math.max(options.offset || 0, 0);
 
-		// Optimized Drizzle Selection (selective columns + indexed lookup)
-		const transactionsList = await db
+		// Optimized Drizzle Selection
+		const rawTransactions = await db
 			.select({
 				id: transactions.id,
 				userId: transactions.userId,
 				storeId: transactions.storeId,
+				memberId: transactions.memberId,
+				isMemberTransaction: transactions.isMemberTransaction,
 				transactionCode: transactions.transactionCode,
 				recipientName: transactions.recipientName,
 				recipientPhone: transactions.recipientPhone,
@@ -55,26 +57,29 @@ export class TransactionsService {
 				notes: transactions.notes,
 				status: transactions.status,
 				createdAt: transactions.createdAt,
-				updatedAt: transactions.updatedAt
+				updatedAt: transactions.updatedAt,
+				memberName: members.name,
+				memberPhone: members.phone
 			})
 			.from(transactions)
+			.leftJoin(members, eq(transactions.memberId, members.id))
 			.where(and(...conditions))
 			.orderBy(desc(transactions.createdAt))
 			.limit(fetchLimit)
 			.offset(fetchOffset);
 
-		if (transactionsList.length === 0) {
+		if (rawTransactions.length === 0) {
 			return [];
 		}
 
-		// Batch fetch items ONLY for the returned transaction IDs (zero memory bloat)
-		const txIds = transactionsList.map((tx) => tx.id);
+		// Batch fetch items ONLY for the returned transaction IDs
+		const txIds = rawTransactions.map((tx) => tx.id);
 		const relevantItems = await db
 			.select()
 			.from(transactionItems)
 			.where(inArray(transactionItems.transactionId, txIds));
 
-		// Efficient Map grouping
+		// Map grouping for items
 		const itemsByTxId = new Map<string, typeof relevantItems>();
 		for (const item of relevantItems) {
 			if (!itemsByTxId.has(item.transactionId)) {
@@ -83,7 +88,7 @@ export class TransactionsService {
 			itemsByTxId.get(item.transactionId)!.push(item);
 		}
 
-		return transactionsList.map((tx) => ({
+		return rawTransactions.map((tx) => ({
 			...tx,
 			items: itemsByTxId.get(tx.id) || []
 		}));
@@ -91,7 +96,35 @@ export class TransactionsService {
 
 	async getTransactionById(userId: string, storeId: string | null | undefined, id: string) {
 		const condition = this.getUserCondition(userId, storeId, transactions.userId);
-		const txResult = await db.select().from(transactions).where(and(eq(transactions.id, id), condition)).limit(1);
+		const txResult = await db
+			.select({
+				id: transactions.id,
+				userId: transactions.userId,
+				storeId: transactions.storeId,
+				memberId: transactions.memberId,
+				isMemberTransaction: transactions.isMemberTransaction,
+				transactionCode: transactions.transactionCode,
+				recipientName: transactions.recipientName,
+				recipientPhone: transactions.recipientPhone,
+				recipientAddress: transactions.recipientAddress,
+				totalAmount: transactions.totalAmount,
+				totalCost: transactions.totalCost,
+				profit: transactions.profit,
+				paymentMethod: transactions.paymentMethod,
+				amountPaid: transactions.amountPaid,
+				change: transactions.change,
+				notes: transactions.notes,
+				status: transactions.status,
+				createdAt: transactions.createdAt,
+				updatedAt: transactions.updatedAt,
+				memberName: members.name,
+				memberPhone: members.phone
+			})
+			.from(transactions)
+			.leftJoin(members, eq(transactions.memberId, members.id))
+			.where(and(eq(transactions.id, id), condition))
+			.limit(1);
+
 		const transaction = txResult[0];
 		if (!transaction) {
 			throw new Error('Transaksi tidak ditemukan.');
@@ -142,7 +175,7 @@ export class TransactionsService {
 	}
 
 	async createTransaction(userId: string, storeId: string | null | undefined, data: CheckoutInput) {
-		const { items, paymentMethod, amountPaid, notes, recipientName, recipientPhone, recipientAddress } = data;
+		const { items, paymentMethod, amountPaid, notes, recipientName, recipientPhone, recipientAddress, memberId, isMemberTransaction } = data;
 
 		if (!items || items.length === 0) {
 			throw new Error('Keranjang belanja kosong.');
@@ -174,7 +207,8 @@ export class TransactionsService {
 					throw new Error(`Stok produk "${product.name}" tidak mencukupi (Tersedia: ${product.stock}, Diminta: ${cartItem.qty}).`);
 				}
 
-				const subtotal = cartItem.qty * product.sellingPrice;
+				const sellingPrice = (cartItem.customPrice && cartItem.customPrice > 0) ? cartItem.customPrice : product.sellingPrice;
+				const subtotal = cartItem.qty * sellingPrice;
 				totalAmount += subtotal;
 				totalCost += cartItem.qty * product.costPrice;
 
@@ -184,7 +218,7 @@ export class TransactionsService {
 					sku: product.sku,
 					qty: cartItem.qty,
 					costPrice: product.costPrice,
-					sellingPrice: product.sellingPrice,
+					sellingPrice,
 					subtotal
 				});
 			}
@@ -231,6 +265,8 @@ export class TransactionsService {
 			const txResult = await tx.insert(transactions).values({
 				userId,
 				storeId: storeId || null,
+				memberId: memberId || null,
+				isMemberTransaction: Boolean(memberId || isMemberTransaction),
 				transactionCode,
 				recipientName: recipientName || null,
 				recipientPhone: recipientPhone || null,
@@ -246,6 +282,17 @@ export class TransactionsService {
 			}).returning();
 
 			const insertedTx = txResult[0];
+
+			// Fetch member info if memberId attached
+			let memberName: string | undefined;
+			let memberPhone: string | undefined;
+			if (insertedTx.memberId) {
+				const memberResult = await tx.select().from(members).where(eq(members.id, insertedTx.memberId)).limit(1);
+				if (memberResult[0]) {
+					memberName = memberResult[0].name;
+					memberPhone = memberResult[0].phone;
+				}
+			}
 
 			// 5. Insert Transaction Items in bulk
 			const itemsToInsert = resolvedItems.map((item) => ({
@@ -263,6 +310,8 @@ export class TransactionsService {
 
 			return {
 				...insertedTx,
+				memberName,
+				memberPhone,
 				items: itemsToInsert
 			};
 		});

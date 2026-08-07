@@ -18,7 +18,6 @@
   let { activeMenuItem, sidebarOpen, onToggleSidebar }: Props = $props();
 
   const activeIcon = $derived(activeMenuItem?.icon);
-  const isSuperAdmin = $derived(appState.user?.role === 'super_admin');
   let dropdownOpen = $state(false);
 
   onMount(() => {
@@ -81,7 +80,7 @@
   <!-- Right Side: Brand Switcher, Etalase Link & Theme Switcher -->
   <div class="flex items-center gap-2.5">
     <!-- Custom Interactive Brand Dropdown UI -->
-    {#if isSuperAdmin && activeStore.stores.length > 0}
+    {#if activeStore.stores.length > 0}
       <div id="brand-dropdown-container" class="relative">
         <button
           type="button"

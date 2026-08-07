@@ -50,6 +50,7 @@ export interface SettingsInput {
 export interface CartItemInput {
 	productId: string;
 	qty: number;
+	customPrice?: number;
 }
 
 export interface CheckoutInput {
@@ -60,6 +61,8 @@ export interface CheckoutInput {
 	recipientName?: string;
 	recipientPhone?: string;
 	recipientAddress?: string;
+	memberId?: string;
+	isMemberTransaction?: boolean;
 }
 
 export interface CreateUserInput {

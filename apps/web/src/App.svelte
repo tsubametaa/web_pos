@@ -15,6 +15,7 @@
   import Hpp from "./pages/Hpp.svelte";
   import Settings from "./pages/Settings.svelte";
   import Users from "./pages/Users.svelte";
+  import Members from "./pages/Members.svelte";
   import Etalase from "./pages/Etalase.svelte";
   import Invoice from "./pages/Invoice.svelte";
   import SuratJalan from "./pages/SuratJalan.svelte";
@@ -111,6 +112,8 @@
         window.location.hash = "#/dashboard";
       } else if (parsedRoute.name === "users" && appState.user?.role !== "super_admin") {
         window.location.hash = "#/dashboard";
+      } else if (parsedRoute.name === "hpp" && appState.user?.role !== "super_admin") {
+        window.location.hash = "#/dashboard";
       }
     }
   });
@@ -121,6 +124,7 @@
   }
 
   const menuItems = $derived.by(() => {
+    const isSuperAdmin = appState.user?.role === "super_admin";
     const items = [
       {
         name: "Dashboard",
@@ -130,17 +134,27 @@
       },
       { name: "POS Kasir", path: "#/pos", key: "pos", icon: ShoppingCart },
       { name: "Inventori", path: "#/inventory", key: "inventory", icon: Package },
+      { name: "Member & Harga", path: "#/members", key: "members", icon: UsersIcon },
       { name: "Riwayat Transaksi", path: "#/sales", key: "sales", icon: History },
-      { name: "HPP & Margin", path: "#/hpp", key: "hpp", icon: TrendingUp },
-      {
-        name: "Pengaturan",
-        path: "#/settings",
-        key: "settings",
-        icon: SettingsIcon,
-      },
     ];
 
-    if (appState.user?.role === "super_admin") {
+    if (isSuperAdmin) {
+      items.push({
+        name: "HPP & Margin",
+        path: "#/hpp",
+        key: "hpp",
+        icon: TrendingUp,
+      });
+    }
+
+    items.push({
+      name: "Pengaturan",
+      path: "#/settings",
+      key: "settings",
+      icon: SettingsIcon,
+    });
+
+    if (isSuperAdmin) {
       items.push({
         name: "Manajemen User",
         path: "#/users",
@@ -210,6 +224,8 @@
           <Pos />
         {:else if parsedRoute.name === "inventory"}
           <Inventory />
+        {:else if parsedRoute.name === "members"}
+          <Members />
         {:else if parsedRoute.name === "sales"}
           <Sales />
         {:else if parsedRoute.name === "hpp"}

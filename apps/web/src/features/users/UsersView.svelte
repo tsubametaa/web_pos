@@ -17,11 +17,8 @@
     CheckCircle2,
     Info,
     X,
-    Building2,
     Pencil,
   } from "lucide-svelte";
-
-  import CustomSelect from "../../components/ui/CustomSelect.svelte";
 
   let loading = $state(true);
   let usersList = $state<any[]>([]);
@@ -29,27 +26,15 @@
   let showEditModal = $state(false);
   let isSubmitting = $state(false);
 
-  // Derived store options for CustomSelect
-  const storeOptions = $derived(
-    activeStore.stores.map((s) => ({
-      value: s.id,
-      label: s.name,
-      icon: Building2,
-      subtitle: s.address || 'Brand Unit'
-    }))
-  );
-
   // Add Form State
   let email = $state("");
   let password = $state("");
   let businessName = $state("");
-  let selectedStoreId = $state("");
   let errorMsg = $state("");
 
   // Edit Form State
   let editingUser = $state<any | null>(null);
   let editBusinessName = $state("");
-  let editSelectedStoreId = $state("");
   let editNewPassword = $state("");
 
   async function loadUsers() {
@@ -74,7 +59,6 @@
     email = "";
     password = "";
     businessName = appState.user?.businessName || "";
-    selectedStoreId = activeStore.currentStore?.id || "";
     errorMsg = "";
     showAddModal = true;
   }
@@ -82,7 +66,6 @@
   function openEditModal(u: any) {
     editingUser = u;
     editBusinessName = u.businessName || "";
-    editSelectedStoreId = u.storeId || "";
     editNewPassword = "";
     errorMsg = "";
     showEditModal = true;
@@ -103,7 +86,7 @@
         email,
         password,
         businessName,
-        storeId: selectedStoreId || undefined,
+        storeId: activeStore.currentStore?.id || undefined,
       });
 
       if (res.success) {
@@ -131,7 +114,6 @@
     try {
       const res = await api.put(`/users/${editingUser.id}`, {
         businessName: editBusinessName.trim(),
-        storeId: editSelectedStoreId || null,
         password: editNewPassword.trim() || undefined
       });
 
@@ -229,11 +211,6 @@
                 Nama Staff / Bisnis
               </th>
               <th
-                class="text-left px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
-              >
-                Penugasan Brand
-              </th>
-              <th
                 class="text-center px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
               >
                 Peran (Role)
@@ -261,21 +238,6 @@
                 <!-- Business / Staff Name -->
                 <td class="px-5 py-3.5 font-bold text-slate-700 dark:text-slate-200">
                   {u.businessName || "-"}
-                </td>
-
-                <!-- Brand Assignment -->
-                <td class="px-5 py-3.5 font-bold text-emerald-700 dark:text-emerald-300">
-                  {#if u.role === "super_admin"}
-                    <span class="text-slate-400 font-normal italic">Semua Brand (Utama)</span>
-                  {:else if u.storeId}
-                    {@const matchedStore = activeStore.stores.find(s => s.id === u.storeId)}
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs">
-                      <Building2 class="w-3.5 h-3.5 text-emerald-600" />
-                      {matchedStore?.name || 'Brand #' + u.storeId.slice(0, 5)}
-                    </span>
-                  {:else}
-                    <span class="text-slate-400 font-normal italic">Belum Diatur</span>
-                  {/if}
                 </td>
 
                 <!-- Role Badge -->
@@ -434,23 +396,6 @@
           disabled={isSubmitting}
         />
 
-        {#if activeStore.stores.length > 0}
-          <div>
-            <CustomSelect
-              id="add-store-custom"
-              label="Penugasan Brand (Store) *"
-              bind:value={selectedStoreId}
-              options={storeOptions}
-              disabled={isSubmitting}
-              placeholder="Pilih Brand Toko..."
-              icon={Building2}
-            />
-            <p class="text-[10px] text-slate-400 mt-1">
-              Staff ini hanya dapat mengakses data dan mencetak nota dari Brand yang dipilih.
-            </p>
-          </div>
-        {/if}
-
         <!-- Action Buttons Footer -->
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200/60 dark:border-emerald-950/60">
           <button
@@ -493,10 +438,10 @@
           </div>
           <div>
             <h2 class="text-base font-black text-slate-900 dark:text-white tracking-tight">
-              Edit Pengaturan Staff & Brand
+              Edit Pengaturan Staff
             </h2>
             <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium">
-              Ubah penugasan brand & nama staff ({editingUser.email})
+              Ubah nama staff & password ({editingUser.email})
             </p>
           </div>
         </div>
@@ -540,23 +485,6 @@
           placeholder="Contoh: Kasir Shift Pagi"
           disabled={isSubmitting}
         />
-
-        {#if activeStore.stores.length > 0}
-          <div>
-            <CustomSelect
-              id="edit-store-custom"
-              label="Penugasan Brand (Store) *"
-              bind:value={editSelectedStoreId}
-              options={storeOptions}
-              disabled={isSubmitting}
-              placeholder="Pilih Brand Toko..."
-              icon={Building2}
-            />
-            <p class="text-[10px] text-slate-400 mt-1">
-              Ubah unit brand tempat staff ini ditugaskan melayani transaksi.
-            </p>
-          </div>
-        {/if}
 
         <Input
           type="password"

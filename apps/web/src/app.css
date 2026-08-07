@@ -25,29 +25,6 @@
 	--color-brand: var(--color-accent);
 	--color-brand-hover: var(--color-accent-hover);
 	--color-brand-soft: var(--color-accent-soft);
-
-	/* Map legacy emerald utilities directly to theme variables */
-	--color-emerald-50: var(--color-accent-soft);
-	--color-emerald-100: var(--color-accent-soft);
-	--color-emerald-200: var(--color-accent-soft);
-	--color-emerald-300: var(--color-accent-soft-text);
-	--color-emerald-400: var(--color-accent-soft-text);
-	--color-emerald-500: var(--color-accent);
-	--color-emerald-600: var(--color-accent);
-	--color-emerald-700: var(--color-accent-soft-text);
-	--color-emerald-800: var(--color-accent-soft-text);
-	--color-emerald-900: var(--color-surface);
-	--color-emerald-950: var(--color-surface);
-
-	/* Maintain backward compatibility with old color names */
-	--color-sage-50: var(--color-base);
-	--color-sage-100: var(--color-surface);
-	--color-sage-200: var(--color-accent-soft);
-	--color-sage-300: var(--color-accent-soft-text);
-	--color-sage-500: var(--color-accent);
-	--color-sage-600: var(--color-accent-hover);
-	--color-sage-650: var(--color-ink);
-	--color-sage-700: var(--color-accent-soft-text);
 }
 
 :root {
@@ -59,7 +36,7 @@
 	/* Interactive states */
 	--color-accent-hover: #DC2626;
 	--color-accent-soft: #FFE6E6;
-	--color-accent-soft-text: #B91C1C; /* Dark red text for high contrast on light red background */
+	--color-accent-soft-text: #880808; /* Dark maroon text for maximum contrast on light red background */
 	--color-ink: #000033;       /* 10% — Text & high contrast focal elements */
 	--color-ink-muted: #4D4D7A;
 	--color-border-theme: rgba(0, 0, 51, 0.1);
@@ -77,7 +54,7 @@
 	/* Interactive states */
 	--color-accent-hover: #FF5555;
 	--color-accent-soft: rgba(255, 0, 0, 0.18); /* Semi-transparent overlay for soft containers */
-	--color-accent-soft-text: #FFAAAA; /* High contrast bright pink-red text/icons for dark mode */
+	--color-accent-soft-text: #FFCCCC; /* High contrast bright pink-red text/icons for dark mode */
 	--color-ink: #D1D1D1;       /* 10% — Text & high contrast elements */
 	--color-ink-muted: #9CA3AF;
 	--color-border-theme: rgba(255, 255, 255, 0.08);

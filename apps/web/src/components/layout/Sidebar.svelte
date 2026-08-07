@@ -33,6 +33,36 @@
 
   const menuGroups = $derived.by(() => {
     const isSuperAdmin = appState.user?.role === 'super_admin';
+    const managementItems = [
+      {
+        name: 'Inventori',
+        path: '#/inventory',
+        key: 'inventory',
+        icon: Package,
+      },
+      {
+        name: 'Member & Harga',
+        path: '#/members',
+        key: 'members',
+        icon: Users,
+      },
+      {
+        name: 'Riwayat Transaksi',
+        path: '#/sales',
+        key: 'sales',
+        icon: History,
+      },
+    ];
+
+    if (isSuperAdmin) {
+      managementItems.push({
+        name: 'HPP & Margin',
+        path: '#/hpp',
+        key: 'hpp',
+        icon: TrendingUp,
+      });
+    }
+
     const systemItems = [
       {
         name: 'Pengaturan',
@@ -71,26 +101,7 @@
       },
       {
         title: 'Manajemen',
-        items: [
-          {
-            name: 'Inventori',
-            path: '#/inventory',
-            key: 'inventory',
-            icon: Package,
-          },
-          {
-            name: 'Riwayat Transaksi',
-            path: '#/sales',
-            key: 'sales',
-            icon: History,
-          },
-          {
-            name: 'HPP & Margin',
-            path: '#/hpp',
-            key: 'hpp',
-            icon: TrendingUp,
-          },
-        ],
+        items: managementItems,
       },
       {
         title: 'Sistem',

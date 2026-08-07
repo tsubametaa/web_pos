@@ -74,15 +74,17 @@
         loadError = null;
       } else if (res && !res.success) {
         // Server returned an explicit error — show error but don't wipe data
-        loadError = res.error || 'Gagal memuat data dashboard.';
-        console.warn('[Dashboard] API returned error:', res.error);
+        loadError = res.error || "Gagal memuat data dashboard.";
+        console.warn("[Dashboard] API returned error:", res.error);
       }
     } catch (err: any) {
       // Network error / auth error — keep existing data, show retry banner
       console.error("[Dashboard] Error fetching stats:", err);
       if (!err?.isAuthError) {
         // Non-auth error: keep showing data, just show a banner
-        loadError = err?.message || 'Koneksi ke server bermasalah. Data mungkin belum terkini.';
+        loadError =
+          err?.message ||
+          "Koneksi ke server bermasalah. Data mungkin belum terkini.";
       }
     } finally {
       loading = false;
@@ -147,7 +149,7 @@
         color: "text-amber-600 dark:text-amber-400",
         badgeBg:
           "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
-      }
+      },
     );
 
     return list;
@@ -163,10 +165,11 @@
   </div>
 {:else}
   <div class="flex flex-col gap-6 text-ink w-full pb-8">
-
     {#if loadError}
       <!-- Connection error banner - non-blocking, shows retry button -->
-      <div class="flex items-center justify-between gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-xl text-sm">
+      <div
+        class="flex items-center justify-between gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-xl text-sm"
+      >
         <div class="flex items-center gap-2 text-amber-700 dark:text-amber-300">
           <AlertTriangle class="w-4 h-4 shrink-0" />
           <span class="font-medium">{loadError}</span>
@@ -187,32 +190,24 @@
     >
       <div class="space-y-1">
         <div class="flex items-center gap-2">
-          <h1
-            class="text-lg sm:text-xl font-black text-h-text tracking-tight"
-          >
+          <h1 class="text-lg sm:text-xl font-black text-h-text tracking-tight">
             Selamat Datang Kembali, {userNameDisplay}!
           </h1>
         </div>
         <p class="text-xs text-ink-muted font-medium">
           Ringkasan performa dan aktivitas toko Anda per <span
-            class="font-semibold text-ink"
-            >{currentDateFormatted()}</span
+            class="font-semibold text-ink">{currentDateFormatted()}</span
           >.
         </p>
-      </div>
-
-      <div class="flex items-center gap-2 shrink-0">
-        <span
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-accent bg-accent-soft rounded-xl border border-accent/20"
-        >
-          <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-          Sesi Aktif
-        </span>
       </div>
     </div>
 
     <!-- Stats Cards Grid -->
-    <div class="grid grid-cols-1 {stats.length === 3 ? 'sm:grid-cols-3 lg:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4'} gap-4">
+    <div
+      class="grid grid-cols-1 {stats.length === 3
+        ? 'sm:grid-cols-3 lg:grid-cols-3'
+        : 'sm:grid-cols-2 lg:grid-cols-4'} gap-4"
+    >
       {#each stats as stat}
         {@const Icon = stat.icon}
         <div
@@ -384,9 +379,7 @@
         <div
           class="bg-surface border border-border-theme rounded-2xl p-5 shadow-2xs flex flex-col gap-3.5"
         >
-          <h3
-            class="text-xs font-bold text-ink-muted uppercase tracking-wider"
-          >
+          <h3 class="text-xs font-bold text-ink-muted uppercase tracking-wider">
             Tindakan Utama
           </h3>
           <div class="grid grid-cols-2 gap-3">
@@ -394,7 +387,9 @@
               href="#/pos"
               class="inline-flex items-center justify-center gap-2 px-3.5 py-3 bg-accent hover:bg-accent-hover active:scale-[0.98] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow transition-all duration-150 group text-center"
             >
-              <Plus class="w-4 h-4 group-hover:rotate-90 transition-transform duration-200 shrink-0" />
+              <Plus
+                class="w-4 h-4 group-hover:rotate-90 transition-transform duration-200 shrink-0"
+              />
               <span class="truncate">Transaksi Baru</span>
             </a>
             <a
@@ -411,9 +406,7 @@
         <div
           class="bg-surface border border-border-theme rounded-2xl p-5 shadow-2xs flex flex-col gap-4"
         >
-          <h3
-            class="text-xs font-bold text-ink-muted uppercase tracking-wider"
-          >
+          <h3 class="text-xs font-bold text-ink-muted uppercase tracking-wider">
             Akses Cepat POS
           </h3>
           <div class="grid grid-cols-2 gap-3">

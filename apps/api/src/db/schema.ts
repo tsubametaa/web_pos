@@ -73,6 +73,37 @@ export const products = sqliteTable('products', {
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull()
 });
 
+// Members Table
+export const members = sqliteTable('members', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	name: text('name').notNull(),
+	phone: text('phone').notNull().unique(),
+	email: text('email'),
+	address: text('address'),
+	notes: text('notes'),
+	isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull()
+});
+
+// Member Prices Table (Custom pricing per SKU per member)
+export const memberPrices = sqliteTable('member_prices', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	memberId: text('member_id')
+		.references(() => members.id, { onDelete: 'cascade' })
+		.notNull(),
+	sku: text('sku').notNull(),
+	customPrice: integer('custom_price').notNull(),
+	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull()
+}, (table) => ({
+	memberSkuUniq: index('idx_member_prices_member_sku').on(table.memberId, table.sku)
+}));
+
 // Transactions Table
 export const transactions = sqliteTable('transactions', {
 	id: text('id')
@@ -80,6 +111,8 @@ export const transactions = sqliteTable('transactions', {
 		.$defaultFn(() => crypto.randomUUID()),
 	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 	storeId: text('store_id').references(() => stores.id, { onDelete: 'cascade' }),
+	memberId: text('member_id').references(() => members.id, { onDelete: 'set null' }),
+	isMemberTransaction: integer('is_member_transaction', { mode: 'boolean' }).notNull().default(false),
 	transactionCode: text('transaction_code').notNull().unique(),
 	recipientName: text('recipient_name'),
 	recipientPhone: text('recipient_phone'),
@@ -154,4 +187,9 @@ export type Setting = typeof settings.$inferSelect;
 export type InsertSetting = typeof settings.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+export type Member = typeof members.$inferSelect;
+export type InsertMember = typeof members.$inferInsert;
+export type MemberPrice = typeof memberPrices.$inferSelect;
+export type InsertMemberPrice = typeof memberPrices.$inferInsert;
+
 

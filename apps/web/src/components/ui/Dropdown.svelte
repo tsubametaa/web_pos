@@ -13,10 +13,11 @@
     value?: string;
     placeholder?: string;
     position?: 'auto' | 'up' | 'down';
+    class?: string;
     onchange?: (value: string) => void;
   }
 
-  let { options, value = $bindable(''), placeholder = 'Pilih opsi...', position = 'auto', onchange }: Props = $props();
+  let { options, value = $bindable(''), placeholder = 'Pilih opsi...', position = 'auto', class: className = '', onchange }: Props = $props();
 
   let isOpen = $state(false);
   let direction = $state<'down' | 'up'>('down');
@@ -54,7 +55,7 @@
 
 <svelte:window onclick={handleOutsideClick} />
 
-<div class="relative inline-block text-left select-none" bind:this={dropdownRef}>
+<div class="relative w-full text-left select-none {className}" bind:this={dropdownRef}>
   <!-- Trigger Button -->
   <button
     type="button"

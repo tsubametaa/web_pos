@@ -6,7 +6,7 @@
   import Spinner from '../../components/ui/Spinner.svelte';
   import ProductGrid from './components/ProductGrid.svelte';
   import CartPanel from './components/CartPanel.svelte';
-  import PaymentModal from '../../components/ui/PaymentModal.svelte';
+  import PaymentModal from './components/PaymentModal.svelte';
   import ReceiptView from './components/ReceiptView.svelte';
   import type { UIProduct, UITransaction } from '../../types';
   import confetti from 'canvas-confetti';

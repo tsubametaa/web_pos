@@ -11,6 +11,7 @@ import { etalaseController } from './modules/etalase/etalase.controller';
 import { uploadsController } from './modules/uploads/uploads.controller';
 import { usersController } from './modules/users/users.controller';
 import { storesController } from './modules/stores/stores.controller';
+import { membersController } from './modules/members/members.controller';
 import { getLandingPageHtml } from './views/landing';
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
@@ -31,6 +32,7 @@ const app = new Elysia()
 				{ name: 'Dashboard', description: 'Statistik & Ringkasan Laporan Performa Toko' },
 				{ name: 'Users', description: 'Manajemen Staff Admin Biasa (Khusus Super Admin)' },
 				{ name: 'Stores', description: 'Manajemen Multi-Brand / Unit Perusahaan' },
+				{ name: 'Members', description: 'Manajemen Pelanggan Member & Harga Khusus' },
 				{ name: 'Etalase', description: 'Katalog Publik Toko (Bebas Akses)' },
 				{ name: 'Settings', description: 'Pengaturan Profil Toko' },
 				{ name: 'Uploads', description: 'Unggah Berkas / Gambar Produk' },
@@ -121,6 +123,7 @@ const app = new Elysia()
 			.use(etalaseController)
 			.use(uploadsController)
 			.use(usersController)
+			.use(membersController)
 	)
 	.get('/', () => new Response(getLandingPageHtml(), {
 		headers: { 'Content-Type': 'text/html; charset=utf-8' }

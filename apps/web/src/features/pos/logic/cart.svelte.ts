@@ -1,4 +1,5 @@
 import type { UICartItem, UIProduct } from '../../../types';
+import { memberStore } from './member.svelte';
 
 class CartStore {
 	items = $state<UICartItem[]>([]);
@@ -15,7 +16,8 @@ class CartStore {
 			}
 			existing.qty += 1;
 		} else {
-			this.items.push({ product, qty: 1 });
+			const customPrice = memberStore.getCustomPrice(product.sku);
+			this.items.push({ product, qty: 1, customPrice });
 		}
 	}
 

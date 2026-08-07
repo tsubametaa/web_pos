@@ -48,9 +48,35 @@ export interface UITransactionItem {
 	subtotal: number;
 }
 
+export interface UIMemberPrice {
+	id?: string;
+	memberId?: string;
+	sku: string;
+	customPrice: number;
+	createdAt?: string | Date;
+	updatedAt?: string | Date;
+}
+
+export interface UIMember {
+	id: string;
+	name: string;
+	phone: string;
+	email?: string;
+	address?: string;
+	notes?: string;
+	isActive: boolean;
+	prices?: UIMemberPrice[];
+	createdAt?: string | Date;
+	updatedAt?: string | Date;
+}
+
 export interface UITransaction {
 	id: string;
 	storeId?: string;
+	memberId?: string;
+	memberName?: string;
+	memberPhone?: string;
+	isMemberTransaction?: boolean;
 	transactionCode: string;
 	recipientName?: string;
 	recipientPhone?: string;

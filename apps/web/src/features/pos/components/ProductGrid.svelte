@@ -1,5 +1,6 @@
 <script lang="ts">
   import { cart } from "../logic/cart.svelte";
+  import { memberStore } from "../logic/member.svelte";
   import { formatCurrency } from "../../../lib/utils/currency";
   import {
     createProductFuse,
@@ -14,6 +15,7 @@
     Barcode as BarcodeIcon,
     Camera,
     Filter,
+    Tag,
   } from "lucide-svelte";
   import { toast } from "../../../lib/utils/toast.svelte";
   import Dropdown, {
@@ -145,11 +147,13 @@
 
     <!-- Category Filter Dropdown -->
     {#if categories.length > 0}
-      <Dropdown
-        options={categoryOptions}
-        bind:value={selectedCategory}
-        placeholder="Semua Kategori"
-      />
+      <div class="shrink-0 w-full sm:w-56">
+        <Dropdown
+          options={categoryOptions}
+          bind:value={selectedCategory}
+          placeholder="Semua Kategori"
+        />
+      </div>
     {/if}
   </div>
 
@@ -176,6 +180,8 @@
           {@const displayStock = product.stock - (cartItem?.qty || 0)}
           {@const outOfStock = displayStock <= 0}
           {@const inCartQty = cartItem?.qty || 0}
+          {@const memberPrice = memberStore.getCustomPrice(product.sku)}
+          {@const isMemberDeal = memberPrice !== undefined && memberPrice < product.sellingPrice}
 
           <button
             type="button"
@@ -257,11 +263,23 @@
             <div
               class="flex items-center justify-between mt-2 pt-2 border-t border-border-theme w-full"
             >
-              <span
-                class="font-mono font-black text-xs sm:text-sm text-accent"
-              >
-                {formatCurrency(product.sellingPrice)}
-              </span>
+              {#if isMemberDeal}
+                <div class="flex flex-col min-w-0">
+                  <span class="font-mono text-[10px] text-ink-muted line-through leading-tight">
+                    {formatCurrency(product.sellingPrice)}
+                  </span>
+                  <span class="font-mono font-black text-xs sm:text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 leading-tight">
+                    <Tag class="w-3 h-3 inline shrink-0" />
+                    {formatCurrency(memberPrice)}
+                  </span>
+                </div>
+              {:else}
+                <span
+                  class="font-mono font-black text-xs sm:text-sm text-accent-soft-text"
+                >
+                  {formatCurrency(product.sellingPrice)}
+                </span>
+              {/if}
 
               <div
                 class="p-1.5 rounded-xl bg-accent text-white shadow-2xs group-hover:scale-110 group-hover:bg-accent-hover transition-all flex items-center justify-center shrink-0"

@@ -13,6 +13,7 @@
     X,
     Package,
     Filter,
+    Plus,
   } from 'lucide-svelte';
   import Dropdown, { type DropdownOption } from '../../../components/ui/Dropdown.svelte';
   import type { UIProduct } from '../../../types';
@@ -20,6 +21,7 @@
   interface Props {
     products: UIProduct[];
     categories?: string[];
+    onadd?: () => void;
     onedit: (p: UIProduct) => void;
     onadjust: (p: UIProduct) => void;
     onshare: (p: UIProduct) => void;
@@ -27,7 +29,7 @@
     ontoggle: (p: UIProduct) => void;
   }
 
-  let { products, categories = [], onedit, onadjust, onshare, ondelete, ontoggle }: Props = $props();
+  let { products, categories = [], onadd, onedit, onadjust, onshare, ondelete, ontoggle }: Props = $props();
 
   let searchQuery = $state('');
   let selectedCategory = $state('');
@@ -39,14 +41,21 @@
   ]);
 
   const filteredProducts = $derived(() => {
-    // 1. Filter by active status
-    let visible = showInactive ? products : products.filter((p) => p.isActive);
-    // 2. Filter by category if selected
-    if (selectedCategory) {
-      visible = visible.filter((p) => p.category === selectedCategory);
+    let result = products;
+
+    if (!showInactive) {
+      result = result.filter((p) => p.isActive);
     }
-    // 3. Fuzzy search within subset
-    return fuzzySearchSubset(visible, searchQuery);
+
+    if (selectedCategory) {
+      result = result.filter((p) => p.category === selectedCategory);
+    }
+
+    if (searchQuery.trim()) {
+      result = fuzzySearchSubset(result, searchQuery);
+    }
+
+    return result;
   });
 
   const isSearchActive = $derived(searchQuery.trim().length > 0);
@@ -57,50 +66,65 @@
 </script>
 
 <div class="flex flex-col gap-4 text-ink">
-  <!-- Search, Category Dropdown & Filters Bar -->
-  <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between w-full">
-    <!-- Left: Search & Category Dropdown -->
-    <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center flex-1 min-w-0">
-      <!-- Search Input -->
-      <div class="relative flex-1 max-w-md">
-        <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
-        <input
-          type="text"
-          bind:value={searchQuery}
-          placeholder="Cari produk, SKU, atau kategori..."
-          class="w-full pl-10 pr-9 py-2.5 bg-surface border border-border-theme focus:border-accent rounded-xl text-xs font-medium text-h-text placeholder-ink-muted focus:outline-none transition-all shadow-2xs"
-        />
-        {#if isSearchActive}
-          <button
-            type="button"
-            onclick={clearSearch}
-            class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-ink-muted hover:text-h-text cursor-pointer"
-          >
-            <X class="w-3.5 h-3.5" />
-          </button>
-        {/if}
-      </div>
-
-      {#if categories.length > 0}
-        <Dropdown
-          options={categoryOptions}
-          bind:value={selectedCategory}
-          placeholder="Semua Kategori"
-        />
+  <!-- Search, Category Dropdown, Inactive Checkbox & Add Product Bar -->
+  <div class="flex flex-col xl:flex-row gap-3.5 items-stretch xl:items-center justify-between w-full">
+    <!-- Left: Search Input (Luas / flex-1) -->
+    <div class="relative flex-1 min-w-0">
+      <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
+      <input
+        type="text"
+        bind:value={searchQuery}
+        placeholder="Cari nama produk, SKU, atau kategori..."
+        class="w-full pl-10 pr-9 py-2.5 bg-surface border border-border-theme focus:border-accent rounded-xl text-xs font-medium text-h-text placeholder-ink-muted focus:outline-none transition-all shadow-2xs"
+      />
+      {#if isSearchActive}
+        <button
+          type="button"
+          onclick={clearSearch}
+          class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-ink-muted hover:text-h-text cursor-pointer"
+        >
+          <X class="w-3.5 h-3.5" />
+        </button>
       {/if}
     </div>
 
-    <!-- Right: Show Inactive Checkbox -->
-    <label class="flex items-center gap-2 cursor-pointer select-none shrink-0 px-1 py-1">
-      <input
-        type="checkbox"
-        bind:checked={showInactive}
-        class="w-4 h-4 rounded accent-accent cursor-pointer"
-      />
-      <span class="text-xs font-bold text-ink">
-        Tampilkan Non-aktif
-      </span>
-    </label>
+    <!-- Right: Category Dropdown, Show Inactive Checkbox & Add Product Button -->
+    <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-3.5 shrink-0">
+      <!-- Category Filter Dropdown -->
+      {#if categories.length > 0}
+        <div class="shrink-0 w-full sm:w-52">
+          <Dropdown
+            options={categoryOptions}
+            bind:value={selectedCategory}
+            placeholder="Semua Kategori"
+          />
+        </div>
+      {/if}
+
+      <!-- Show Inactive Checkbox -->
+      <label class="flex items-center gap-2.5 cursor-pointer select-none shrink-0 px-3.5 py-2 bg-surface border border-border-theme rounded-xl h-10 hover:border-accent/30 transition-all shadow-2xs">
+        <input
+          type="checkbox"
+          bind:checked={showInactive}
+          class="w-4 h-4 rounded accent-accent cursor-pointer"
+        />
+        <span class="text-xs font-bold text-ink whitespace-nowrap">
+          Tampilkan Non-aktif
+        </span>
+      </label>
+
+      <!-- Add Product Button -->
+      {#if onadd}
+        <button
+          type="button"
+          onclick={onadd}
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-xs font-extrabold rounded-xl shadow-2xs hover:shadow-xs transition-all duration-150 group shrink-0 cursor-pointer h-10 active:scale-[0.98]"
+        >
+          <Plus class="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" />
+          <span class="whitespace-nowrap">Tambah Produk Baru</span>
+        </button>
+      {/if}
+    </div>
   </div>
 
   <!-- Search Results Counter -->

@@ -1,5 +1,5 @@
 // Formats a Date object or date string into Indonesian readable date
-export function formatDate(date: Date | string | number): string {
+export function formatDate(date?: Date | string | number | null): string {
 	if (!date) return '-';
 	const d = new Date(date);
 	if (isNaN(d.getTime())) return '-';
@@ -11,7 +11,7 @@ export function formatDate(date: Date | string | number): string {
 }
 
 // Formats a Date object or date string into short Indonesian readable date (no time)
-export function formatDateShort(date: Date | string | number): string {
+export function formatDateShort(date?: Date | string | number | null): string {
 	if (!date) return '-';
 	const d = new Date(date);
 	if (isNaN(d.getTime())) return '-';

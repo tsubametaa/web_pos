@@ -14,7 +14,8 @@
     "@libsql/client": "^0.17.4",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
-    "elysia": "latest"
+    "elysia": "latest",
+    "fuse.js": "^7.5.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",

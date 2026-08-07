@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { formatCurrency } from '../../../lib/utils/currency';
 	import { formatDate } from '../../../lib/utils/date';
-	import { Printer, X, CheckCircle, FileText } from 'lucide-svelte';
+	import { Printer, X, CheckCircle, FileText, User } from 'lucide-svelte';
 	import type { UITransaction, UISettings } from '../../../types';
 
 	interface Props {
@@ -49,6 +49,21 @@
 
 			<!-- Receipt Body -->
 			<div class="px-6 py-5 flex flex-col gap-3">
+				{#if transaction.memberName || transaction.isMemberTransaction}
+					<div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs space-y-1">
+						<span class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+							<User class="w-3.5 h-3.5" />
+							TRANSAKSI MEMBER
+						</span>
+						{#if transaction.memberName}
+							<span class="text-slate-700 dark:text-slate-200 block font-semibold">Nama: {transaction.memberName}</span>
+						{/if}
+						{#if transaction.memberPhone}
+							<span class="text-slate-500 dark:text-slate-400 block font-mono">No HP: {transaction.memberPhone}</span>
+						{/if}
+					</div>
+				{/if}
+
 				{#if transaction.recipientName}
 					<div class="p-3 bg-base border rounded-xl text-xs space-y-1">
 						<span class="font-bold text-slate-700 dark:text-slate-200 block">Penerima: {transaction.recipientName}</span>

@@ -38,6 +38,26 @@ export async function ensureDbMigrations() {
 			created_at INTEGER NOT NULL,
 			updated_at INTEGER NOT NULL
 		);`,
+		`CREATE TABLE IF NOT EXISTS members (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			phone TEXT NOT NULL UNIQUE,
+			email TEXT,
+			address TEXT,
+			notes TEXT,
+			is_active INTEGER DEFAULT 1 NOT NULL,
+			created_at INTEGER NOT NULL,
+			updated_at INTEGER NOT NULL
+		);`,
+		`ALTER TABLE members ADD COLUMN address TEXT;`,
+		`CREATE TABLE IF NOT EXISTS member_prices (
+			id TEXT PRIMARY KEY,
+			member_id TEXT NOT NULL,
+			sku TEXT NOT NULL,
+			custom_price INTEGER NOT NULL,
+			created_at INTEGER NOT NULL,
+			updated_at INTEGER NOT NULL
+		);`,
 		'ALTER TABLE products ADD COLUMN barcode TEXT;',
 		'ALTER TABLE products ADD COLUMN notes TEXT;',
 		'ALTER TABLE products ADD COLUMN image_url TEXT;',
@@ -51,6 +71,8 @@ export async function ensureDbMigrations() {
 		'ALTER TABLE transactions ADD COLUMN recipient_name TEXT;',
 		'ALTER TABLE transactions ADD COLUMN recipient_phone TEXT;',
 		'ALTER TABLE transactions ADD COLUMN recipient_address TEXT;',
+		'ALTER TABLE transactions ADD COLUMN member_id TEXT;',
+		'ALTER TABLE transactions ADD COLUMN is_member_transaction INTEGER DEFAULT 0;',
 		'ALTER TABLE settings ADD COLUMN store_id TEXT;',
 		'ALTER TABLE settings ADD COLUMN logo_url TEXT;',
 		'UPDATE users SET role = "super_admin" WHERE role IS NULL OR role = "";'
