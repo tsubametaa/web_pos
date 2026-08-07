@@ -39,10 +39,18 @@ const app = new Elysia()
 	}))
 	.use(cors({
 		credentials: true,
-		origin: (request) => {
+		origin: (request: Request) => {
 			const origin = request.headers.get('origin');
 			if (!origin) return true;
-			if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) return true;
+			if (
+				origin.startsWith('http://localhost:') ||
+				origin.startsWith('http://127.0.0.1:') ||
+				origin.endsWith('.vercel.app') ||
+				origin.includes('karyasejati') ||
+				origin.includes('web-pos-test')
+			) {
+				return true;
+			}
 			const allowedOrigins = [
 				process.env.APP_WEB_URL,
 				process.env.APP_HOME_URL,
@@ -52,7 +60,17 @@ const app = new Elysia()
 				.map((o) => (o as string).trim());
 			return allowedOrigins.includes(origin);
 		},
-		allowedHeaders: ['Content-Type', 'Authorization', 'X-User-Email', 'X-Store-Id'],
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+		allowedHeaders: [
+			'Content-Type',
+			'Authorization',
+			'X-User-Email',
+			'X-Store-Id',
+			'Accept',
+			'Origin',
+			'X-Requested-With',
+		],
+		maxAge: 86400,
 	}))
 
 	.onTransform(({ body, query }) => {
