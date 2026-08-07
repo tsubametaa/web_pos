@@ -16,24 +16,37 @@
     Percent,
     Bell,
     FileText,
+    Upload,
+    Building2,
+    Plus,
+    Trash2
   } from 'lucide-svelte';
-  import { api } from '../../core/api';
+  import { api, API_BASE_URL } from '../../core/api';
   import { appState } from '../../core/state.svelte';
+  import { activeStore } from '../../core/activeStore.svelte';
   import Spinner from '../../components/ui/Spinner.svelte';
 
   let loading = $state(true);
-  let activeTab = $state<'profile' | 'security'>('profile');
+  let activeTab = $state<'profile' | 'security' | 'stores'>('profile');
   let profileSaving = $state(false);
   let securitySaving = $state(false);
+  let uploadingLogo = $state(false);
 
   // Settings Form Fields
   let businessName = $state('');
+  let logoUrl = $state('');
   let businessPhone = $state('');
   let businessAddress = $state('');
   let currencySymbol = $state('Rp');
   let taxRate = $state(0);
   let lowStockThreshold = $state(10);
   let receiptFooter = $state('');
+
+  // Brand Management Fields (Super Admin)
+  let newBrandName = $state('');
+  let newBrandAddress = $state('');
+  let newBrandPhone = $state('');
+  let brandSaving = $state(false);
 
   // Security Form Fields
   let oldPassword = $state('');
@@ -57,6 +70,7 @@
       if (res.success && res.settings) {
         const s = res.settings;
         businessName = s.businessName || '';
+        logoUrl = s.logoUrl || '';
         businessPhone = s.businessPhone || '';
         businessAddress = s.businessAddress || '';
         currencySymbol = s.currencySymbol || 'Rp';
@@ -71,9 +85,52 @@
     }
   }
 
+  function checkHashTab() {
+    if (window.location.hash.includes('tab=stores') || window.location.hash.includes('stores')) {
+      activeTab = 'stores';
+    }
+  }
+
   onMount(() => {
+    checkHashTab();
+    window.addEventListener('hashchange', checkHashTab);
     loadSettings();
+    return () => {
+      window.removeEventListener('hashchange', checkHashTab);
+    };
   });
+
+  async function handleLogoUpload(e: Event) {
+    const input = e.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      uploadingLogo = true;
+      const authEmail = localStorage.getItem('auth_email') || '';
+      const res = await fetch(`${API_BASE_URL}/uploads/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authEmail}`,
+          'X-User-Email': authEmail
+        },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        logoUrl = data.url;
+        toast.success('Logo brand berhasil diunggah!');
+      } else {
+        throw new Error(data.error || 'Gagal mengunggah logo.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal mengunggah logo.');
+    } finally {
+      uploadingLogo = false;
+    }
+  }
 
   async function handleUpdateProfile(e: SubmitEvent) {
     e.preventDefault();
@@ -81,6 +138,7 @@
     try {
       const res = await api.put('/settings', {
         businessName: businessName.trim(),
+        logoUrl: logoUrl || undefined,
         businessAddress: businessAddress.trim() || undefined,
         businessPhone: businessPhone.trim() || undefined,
         currencySymbol: currencySymbol.trim() || undefined,
@@ -91,6 +149,7 @@
       if (res.success) {
         toast.success(res.message || 'Profil bisnis berhasil diperbarui!');
         await appState.refreshSettings();
+        await activeStore.loadStores();
       } else {
         throw new Error(res.error || 'Gagal menyimpan.');
       }
@@ -98,6 +157,32 @@
       toast.error(err.message || 'Gagal memperbarui profil.');
     } finally {
       profileSaving = false;
+    }
+  }
+
+  async function handleCreateBrand(e: SubmitEvent) {
+    e.preventDefault();
+    if (!newBrandName.trim()) return;
+    brandSaving = true;
+    try {
+      const res = await api.post('/stores', {
+        name: newBrandName.trim(),
+        address: newBrandAddress.trim() || undefined,
+        phone: newBrandPhone.trim() || undefined
+      });
+      if (res.success) {
+        toast.success(res.message || 'Brand baru berhasil dibuat!');
+        newBrandName = '';
+        newBrandAddress = '';
+        newBrandPhone = '';
+        await activeStore.loadStores();
+      } else {
+        throw new Error(res.error || 'Gagal membuat brand.');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal membuat brand baru.');
+    } finally {
+      brandSaving = false;
     }
   }
 
@@ -186,6 +271,20 @@
           <ShieldCheck class="w-4 h-4 shrink-0" />
           <span>Keamanan & Sandi</span>
         </button>
+
+        {#if appState.user?.role === 'super_admin'}
+          <button
+            type="button"
+            onclick={() => (activeTab = 'stores')}
+            class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer select-none shrink-0 w-full border-0
+							{activeTab === 'stores'
+              ? 'bg-emerald-600 text-white shadow-xs'
+              : 'text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
+          >
+            <Building2 class="w-4 h-4 shrink-0" />
+            <span>Kelola Daftar Brand</span>
+          </button>
+        {/if}
       </aside>
 
       <!-- Content Area -->
@@ -199,15 +298,41 @@
                 onsubmit={handleUpdateProfile}
                 class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-6 shadow-2xs space-y-6"
               >
-                <!-- Section 1: Informasi Bisnis -->
+                <!-- Section 1: Informasi Bisnis & Logo -->
                 <div class="space-y-4">
                   <div class="border-b border-slate-200/60 dark:border-emerald-950/60 pb-3">
                     <h2 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">
-                      Informasi Profil Bisnis
+                      Informasi Profil Bisnis & Logo
                     </h2>
                     <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium mt-0.5">
-                      Identitas toko yang ditampilkan pada header struk dan laporan invoice.
+                      Identitas brand & logo yang ditampilkan pada cetak Invoice dan Surat Jalan.
                     </p>
+                  </div>
+
+                  <!-- Logo Upload Box -->
+                  <div class="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 dark:bg-base p-4 rounded-xl border border-slate-200/60 dark:border-emerald-950/60">
+                    {#if logoUrl}
+                      <img src={logoUrl} alt="Logo Brand" class="h-16 w-16 object-contain rounded-lg border bg-white p-1" />
+                    {:else}
+                      <div class="h-16 w-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center text-slate-400">
+                        <Building2 class="w-6 h-6" />
+                      </div>
+                    {/if}
+                    <div class="flex-1 space-y-1 text-center sm:text-left">
+                      <label class="block text-xs font-bold text-slate-700 dark:text-slate-200" for="logo-upload-input">
+                        Logo Brand (Gambar Surat Jalan & Invoice)
+                      </label>
+                      <p class="text-[11px] text-slate-400">
+                        Format: JPG, PNG, WEBP. Maksimal 5 MB.
+                      </p>
+                      <div class="pt-1">
+                        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg cursor-pointer transition-colors shadow-2xs" for="logo-upload-input">
+                          <Upload class="w-3.5 h-3.5" />
+                          <span>{uploadingLogo ? 'Mengunggah...' : 'Pilih Gambar Logo'}</span>
+                        </label>
+                        <input id="logo-upload-input" type="file" accept="image/*" onchange={handleLogoUpload} disabled={uploadingLogo} class="hidden" />
+                      </div>
+                    </div>
                   </div>
 
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -677,6 +802,145 @@
                     </span>
                   </li>
                 </ul>
+              </div>
+            </div>
+          </div>
+        {/if}
+
+        <!-- TAB 3: KELOLA DAFTAR BRAND (Super Admin Only) -->
+        {#if activeTab === 'stores' && appState.user?.role === 'super_admin'}
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            <!-- Left: Add New Brand Form -->
+            <div class="md:col-span-1">
+              <form
+                onsubmit={handleCreateBrand}
+                class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-6 shadow-2xs space-y-4"
+              >
+                <div class="border-b border-slate-200/60 dark:border-emerald-950/60 pb-3 flex items-center gap-2.5">
+                  <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                    <Plus class="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">
+                      Tambah Brand Baru
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium">
+                      Buat unit brand / anak perusahaan baru.
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5" for="brand-new-name">
+                    Nama Brand / Perusahaan *
+                  </label>
+                  <input
+                    id="brand-new-name"
+                    type="text"
+                    bind:value={newBrandName}
+                    placeholder="Contoh: PT Perusahaan Kedua"
+                    required
+                    disabled={brandSaving}
+                    class="w-full px-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5" for="brand-new-phone">
+                    No Telepon Kontak
+                  </label>
+                  <input
+                    id="brand-new-phone"
+                    type="text"
+                    bind:value={newBrandPhone}
+                    placeholder="Contoh: 081299998888"
+                    disabled={brandSaving}
+                    class="w-full px-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5" for="brand-new-addr">
+                    Alamat Lengkap Perusahaan
+                  </label>
+                  <textarea
+                    id="brand-new-addr"
+                    bind:value={newBrandAddress}
+                    rows="2"
+                    placeholder="Alamat kantor / gudang brand..."
+                    disabled={brandSaving}
+                    class="w-full px-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+                  ></textarea>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={brandSaving || !newBrandName.trim()}
+                  class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs"
+                >
+                  {#if brandSaving}
+                    <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>Menyimpan...</span>
+                  {:else}
+                    <Plus class="w-4 h-4" />
+                    <span>Tambah Brand</span>
+                  {/if}
+                </button>
+              </form>
+            </div>
+
+            <!-- Right: List of Registered Brands -->
+            <div class="md:col-span-2 space-y-4">
+              <div class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-6 shadow-2xs">
+                <div class="border-b border-slate-200/60 dark:border-emerald-950/60 pb-3 flex items-center justify-between">
+                  <div>
+                    <h2 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">
+                      Daftar Brand Terdaftar ({activeStore.stores.length})
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium">
+                      Pilih brand untuk beralih konteks aktif.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="divide-y divide-slate-200/60 dark:divide-emerald-950/60 mt-2">
+                  {#each activeStore.stores as store}
+                    <div class="py-3.5 flex items-center justify-between gap-3">
+                      <div class="flex items-center gap-3">
+                        {#if store.logoUrl}
+                          <img src={store.logoUrl} alt={store.name} class="w-10 h-10 object-contain rounded-lg border bg-white p-1" />
+                        {:else}
+                          <div class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold flex items-center justify-center border border-emerald-500/20">
+                            <Building2 class="w-5 h-5" />
+                          </div>
+                        {/if}
+                        <div>
+                          <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            {store.name}
+                            {#if store.id === activeStore.currentStore?.id}
+                              <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-500 text-white rounded-full">Aktif</span>
+                            {/if}
+                          </h4>
+                          <p class="text-[11px] text-slate-400 truncate max-w-xs">
+                            {store.address || 'Alamat belum diatur'} {store.phone ? `• Telp: ${store.phone}` : ''}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-2">
+                        {#if store.id !== activeStore.currentStore?.id}
+                          <button
+                            type="button"
+                            onclick={() => activeStore.selectStore(store.id)}
+                            class="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-lg border border-emerald-500/30 cursor-pointer transition-all"
+                          >
+                            Pilih Brand
+                          </button>
+                        {/if}
+                      </div>
+                    </div>
+                  {/each}
+                </div>
               </div>
             </div>
           </div>

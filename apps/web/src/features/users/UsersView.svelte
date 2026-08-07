@@ -7,6 +7,7 @@
   import Button from "../../components/ui/Button.svelte";
   import Input from "../../components/ui/Input.svelte";
   import Spinner from "../../components/ui/Spinner.svelte";
+  import { activeStore } from "../../core/activeStore.svelte";
   import {
     Users as UsersIcon,
     UserPlus,
@@ -16,21 +17,44 @@
     CheckCircle2,
     Info,
     X,
+    Building2,
+    Pencil,
   } from "lucide-svelte";
+
+  import CustomSelect from "../../components/ui/CustomSelect.svelte";
 
   let loading = $state(true);
   let usersList = $state<any[]>([]);
   let showAddModal = $state(false);
+  let showEditModal = $state(false);
   let isSubmitting = $state(false);
 
-  // Form State
+  // Derived store options for CustomSelect
+  const storeOptions = $derived(
+    activeStore.stores.map((s) => ({
+      value: s.id,
+      label: s.name,
+      icon: Building2,
+      subtitle: s.address || 'Brand Unit'
+    }))
+  );
+
+  // Add Form State
   let email = $state("");
   let password = $state("");
   let businessName = $state("");
+  let selectedStoreId = $state("");
   let errorMsg = $state("");
+
+  // Edit Form State
+  let editingUser = $state<any | null>(null);
+  let editBusinessName = $state("");
+  let editSelectedStoreId = $state("");
+  let editNewPassword = $state("");
 
   async function loadUsers() {
     try {
+      await activeStore.loadStores();
       const res = await api.get("/users");
       if (res.success) {
         usersList = res.users;
@@ -50,8 +74,18 @@
     email = "";
     password = "";
     businessName = appState.user?.businessName || "";
+    selectedStoreId = activeStore.currentStore?.id || "";
     errorMsg = "";
     showAddModal = true;
+  }
+
+  function openEditModal(u: any) {
+    editingUser = u;
+    editBusinessName = u.businessName || "";
+    editSelectedStoreId = u.storeId || "";
+    editNewPassword = "";
+    errorMsg = "";
+    showEditModal = true;
   }
 
   async function handleAddUser(e: SubmitEvent) {
@@ -69,6 +103,7 @@
         email,
         password,
         businessName,
+        storeId: selectedStoreId || undefined,
       });
 
       if (res.success) {
@@ -77,6 +112,36 @@
         await loadUsers();
       } else {
         throw new Error(res.error || "Gagal menambah user.");
+      }
+    } catch (err: any) {
+      errorMsg = err.message || "Terjadi kesalahan.";
+      toast.error(errorMsg);
+    } finally {
+      isSubmitting = false;
+    }
+  }
+
+  async function handleEditUser(e: SubmitEvent) {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    isSubmitting = true;
+    errorMsg = "";
+
+    try {
+      const res = await api.put(`/users/${editingUser.id}`, {
+        businessName: editBusinessName.trim(),
+        storeId: editSelectedStoreId || null,
+        password: editNewPassword.trim() || undefined
+      });
+
+      if (res.success) {
+        toast.success("Pengaturan akun staff berhasil diperbarui!");
+        showEditModal = false;
+        editingUser = null;
+        await loadUsers();
+      } else {
+        throw new Error(res.error || "Gagal mengubah user.");
       }
     } catch (err: any) {
       errorMsg = err.message || "Terjadi kesalahan.";
@@ -164,6 +229,11 @@
                 Nama Staff / Bisnis
               </th>
               <th
+                class="text-left px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
+              >
+                Penugasan Brand
+              </th>
+              <th
                 class="text-center px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
               >
                 Peran (Role)
@@ -193,6 +263,21 @@
                   {u.businessName || "-"}
                 </td>
 
+                <!-- Brand Assignment -->
+                <td class="px-5 py-3.5 font-bold text-emerald-700 dark:text-emerald-300">
+                  {#if u.role === "super_admin"}
+                    <span class="text-slate-400 font-normal italic">Semua Brand (Utama)</span>
+                  {:else if u.storeId}
+                    {@const matchedStore = activeStore.stores.find(s => s.id === u.storeId)}
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs">
+                      <Building2 class="w-3.5 h-3.5 text-emerald-600" />
+                      {matchedStore?.name || 'Brand #' + u.storeId.slice(0, 5)}
+                    </span>
+                  {:else}
+                    <span class="text-slate-400 font-normal italic">Belum Diatur</span>
+                  {/if}
+                </td>
+
                 <!-- Role Badge -->
                 <td class="px-5 py-3.5 text-center">
                   {#if u.role === "super_admin"}
@@ -220,14 +305,24 @@
                 <!-- Action -->
                 <td class="px-5 py-3.5 text-center">
                   {#if u.id !== appState.user?.id && u.role !== "super_admin"}
-                    <button
-                      type="button"
-                      onclick={() => handleDeleteUser(u.id, u.email)}
-                      class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                      title="Hapus User"
-                    >
-                      <Trash2 class="w-4 h-4" />
-                    </button>
+                    <div class="flex items-center justify-center gap-1">
+                      <button
+                        type="button"
+                        onclick={() => openEditModal(u)}
+                        class="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-500/10 transition-colors cursor-pointer"
+                        title="Edit Pengaturan Staff & Brand"
+                      >
+                        <Pencil class="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onclick={() => handleDeleteUser(u.id, u.email)}
+                        class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                        title="Hapus User"
+                      >
+                        <Trash2 class="w-4 h-4" />
+                      </button>
+                    </div>
                   {:else}
                     <span class="text-[10px] font-semibold text-slate-400 italic">Utama</span>
                   {/if}
@@ -235,7 +330,7 @@
               </tr>
             {:else}
               <tr>
-                <td colspan="5" class="py-12 text-center text-slate-400 font-semibold">
+                <td colspan="6" class="py-12 text-center text-slate-400 font-semibold">
                   Belum ada pengguna tambahan.
                 </td>
               </tr>
@@ -339,6 +434,23 @@
           disabled={isSubmitting}
         />
 
+        {#if activeStore.stores.length > 0}
+          <div>
+            <CustomSelect
+              id="add-store-custom"
+              label="Penugasan Brand (Store) *"
+              bind:value={selectedStoreId}
+              options={storeOptions}
+              disabled={isSubmitting}
+              placeholder="Pilih Brand Toko..."
+              icon={Building2}
+            />
+            <p class="text-[10px] text-slate-400 mt-1">
+              Staff ini hanya dapat mengakses data dan mencetak nota dari Brand yang dipilih.
+            </p>
+          </div>
+        {/if}
+
         <!-- Action Buttons Footer -->
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200/60 dark:border-emerald-950/60">
           <button
@@ -351,6 +463,122 @@
 
           <Button type="submit" loading={isSubmitting} class="px-5 py-2.5 font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs">
             Simpan Akun
+          </Button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
+<!-- Edit User Modal -->
+{#if showEditModal && editingUser}
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4"
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+  >
+    <div
+      class="relative w-full max-w-md bg-base dark:bg-surface border border-slate-200/80 dark:border-emerald-950/80 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col text-ink select-none"
+      onclick={(e) => e.stopPropagation()}
+      role="presentation"
+    >
+      <!-- Modal Header -->
+      <div
+        class="flex items-center justify-between px-6 py-4.5 border-b border-slate-200/60 dark:border-emerald-950/60 bg-base/80 dark:bg-surface/80"
+      >
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 shrink-0">
+            <Pencil class="w-5 h-5" />
+          </div>
+          <div>
+            <h2 class="text-base font-black text-slate-900 dark:text-white tracking-tight">
+              Edit Pengaturan Staff & Brand
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium">
+              Ubah penugasan brand & nama staff ({editingUser.email})
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onclick={() => { showEditModal = false; editingUser = null; }}
+          class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+          aria-label="Tutup modal"
+        >
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+
+      <!-- Modal Body Form -->
+      <form onsubmit={handleEditUser} class="flex-1 overflow-y-auto px-6 py-5 space-y-4 scrollbar-none">
+        {#if errorMsg}
+          <div
+            class="flex items-start gap-2.5 p-3.5 bg-rose-500/10 border border-rose-500/25 rounded-xl text-xs text-rose-600 dark:text-rose-400 font-bold"
+          >
+            <ShieldAlert class="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
+          </div>
+        {/if}
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1" for="edit-email-readonly">Email Akun (Tetap)</label>
+          <input
+            id="edit-email-readonly"
+            type="text"
+            value={editingUser.email}
+            disabled
+            class="w-full px-3.5 py-2.5 bg-slate-100 dark:bg-base/50 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-mono font-bold text-slate-500 cursor-not-allowed"
+          />
+        </div>
+
+        <Input
+          label="Nama Staff / Label Toko"
+          id="edit-businessName"
+          bind:value={editBusinessName}
+          placeholder="Contoh: Kasir Shift Pagi"
+          disabled={isSubmitting}
+        />
+
+        {#if activeStore.stores.length > 0}
+          <div>
+            <CustomSelect
+              id="edit-store-custom"
+              label="Penugasan Brand (Store) *"
+              bind:value={editSelectedStoreId}
+              options={storeOptions}
+              disabled={isSubmitting}
+              placeholder="Pilih Brand Toko..."
+              icon={Building2}
+            />
+            <p class="text-[10px] text-slate-400 mt-1">
+              Ubah unit brand tempat staff ini ditugaskan melayani transaksi.
+            </p>
+          </div>
+        {/if}
+
+        <Input
+          type="password"
+          label="Password Baru (Opsional)"
+          id="edit-password"
+          bind:value={editNewPassword}
+          placeholder="Biarkan kosong jika tidak ingin mengubah password"
+          disabled={isSubmitting}
+        />
+
+        <!-- Action Buttons Footer -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200/60 dark:border-emerald-950/60">
+          <button
+            type="button"
+            onclick={() => { showEditModal = false; editingUser = null; }}
+            class="px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-200/80 dark:border-emerald-950/80 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            Batal
+          </button>
+
+          <Button type="submit" loading={isSubmitting} class="px-5 py-2.5 font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs">
+            Simpan Perubahan
           </Button>
         </div>
       </form>

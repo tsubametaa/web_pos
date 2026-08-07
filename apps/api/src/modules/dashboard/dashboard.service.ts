@@ -2,8 +2,14 @@ import { eq, and, desc, isNull, or } from 'drizzle-orm';
 import { db, products, transactions } from '../../db';
 
 export class DashboardService {
-	private getUserCondition(userId: string, field: any) {
-		return or(eq(field, userId), isNull(field));
+	private getTxCondition(userId: string, storeId?: string | null) {
+		if (storeId) return or(eq(transactions.storeId, storeId), and(eq(transactions.userId, userId), isNull(transactions.storeId)));
+		return or(eq(transactions.userId, userId), isNull(transactions.userId));
+	}
+
+	private getProdCondition(userId: string, storeId?: string | null) {
+		if (storeId) return or(eq(products.storeId, storeId), and(eq(products.userId, userId), isNull(products.storeId)));
+		return or(eq(products.userId, userId), isNull(products.userId));
 	}
 
 	private parseDate(val: any): Date {
@@ -26,9 +32,9 @@ export class DashboardService {
 		return new Date(0);
 	}
 
-	async getDashboardStats(userId: string) {
-		const txUserCondition = this.getUserCondition(userId, transactions.userId);
-		const prodUserCondition = this.getUserCondition(userId, products.userId);
+	async getDashboardStats(userId: string, storeId?: string | null) {
+		const txUserCondition = this.getTxCondition(userId, storeId);
+		const prodUserCondition = this.getProdCondition(userId, storeId);
 
 		// 1. Fetch completed transactions for user
 		const completedTransactions = await db.select()

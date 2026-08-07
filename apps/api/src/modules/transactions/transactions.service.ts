@@ -1,37 +1,96 @@
-import { eq, and, desc, isNull, or } from 'drizzle-orm';
-import { db, products, transactions, transactionItems, settings } from '../../db';
-
-export interface CartItemInput {
-	productId: string;
-	qty: number;
-}
-
-export interface CheckoutInput {
-	items: CartItemInput[];
-	paymentMethod: string;
-	amountPaid: number;
-	notes?: string;
-}
+import { eq, and, desc, isNull, or, gte, lte, inArray } from 'drizzle-orm';
+import { db, products, transactions, transactionItems, settings, stores } from '../../db';
+import type { CartItemInput, CheckoutInput } from '../../types';
 
 export class TransactionsService {
-	private getUserCondition(userId: string, field: any) {
+	private getUserCondition(userId: string, storeId?: string | null, field: any = transactions.userId) {
+		if (storeId) {
+			return or(eq(transactions.storeId, storeId), and(eq(field, userId), isNull(transactions.storeId)));
+		}
 		return or(eq(field, userId), isNull(field));
 	}
 
-	async getTransactions(userId: string) {
-		const condition = this.getUserCondition(userId, transactions.userId);
-		const transactionsList = await db.select().from(transactions).where(condition).orderBy(desc(transactions.createdAt));
-		const allItems = await db.select().from(transactionItems);
+	async getTransactions(
+		userId: string,
+		storeId?: string | null,
+		options: {
+			startDate?: Date | null;
+			endDate?: Date | null;
+			paymentMethod?: string | null;
+			limit?: number;
+			offset?: number;
+		} = {}
+	) {
+		const conditions: any[] = [this.getUserCondition(userId, storeId, transactions.userId)];
 
-		// Map relational transactionItems back into nested array
+		if (options.startDate) {
+			conditions.push(gte(transactions.createdAt, options.startDate));
+		}
+		if (options.endDate) {
+			conditions.push(lte(transactions.createdAt, options.endDate));
+		}
+		if (options.paymentMethod && options.paymentMethod !== 'all') {
+			conditions.push(eq(transactions.paymentMethod, options.paymentMethod));
+		}
+
+		const fetchLimit = Math.min(options.limit || 1000, 2000);
+		const fetchOffset = Math.max(options.offset || 0, 0);
+
+		// Optimized Drizzle Selection (selective columns + indexed lookup)
+		const transactionsList = await db
+			.select({
+				id: transactions.id,
+				userId: transactions.userId,
+				storeId: transactions.storeId,
+				transactionCode: transactions.transactionCode,
+				recipientName: transactions.recipientName,
+				recipientPhone: transactions.recipientPhone,
+				recipientAddress: transactions.recipientAddress,
+				totalAmount: transactions.totalAmount,
+				totalCost: transactions.totalCost,
+				profit: transactions.profit,
+				paymentMethod: transactions.paymentMethod,
+				amountPaid: transactions.amountPaid,
+				change: transactions.change,
+				notes: transactions.notes,
+				status: transactions.status,
+				createdAt: transactions.createdAt,
+				updatedAt: transactions.updatedAt
+			})
+			.from(transactions)
+			.where(and(...conditions))
+			.orderBy(desc(transactions.createdAt))
+			.limit(fetchLimit)
+			.offset(fetchOffset);
+
+		if (transactionsList.length === 0) {
+			return [];
+		}
+
+		// Batch fetch items ONLY for the returned transaction IDs (zero memory bloat)
+		const txIds = transactionsList.map((tx) => tx.id);
+		const relevantItems = await db
+			.select()
+			.from(transactionItems)
+			.where(inArray(transactionItems.transactionId, txIds));
+
+		// Efficient Map grouping
+		const itemsByTxId = new Map<string, typeof relevantItems>();
+		for (const item of relevantItems) {
+			if (!itemsByTxId.has(item.transactionId)) {
+				itemsByTxId.set(item.transactionId, []);
+			}
+			itemsByTxId.get(item.transactionId)!.push(item);
+		}
+
 		return transactionsList.map((tx) => ({
 			...tx,
-			items: allItems.filter((item) => item.transactionId === tx.id)
+			items: itemsByTxId.get(tx.id) || []
 		}));
 	}
 
-	async getTransactionById(userId: string, id: string) {
-		const condition = this.getUserCondition(userId, transactions.userId);
+	async getTransactionById(userId: string, storeId: string | null | undefined, id: string) {
+		const condition = this.getUserCondition(userId, storeId, transactions.userId);
 		const txResult = await db.select().from(transactions).where(and(eq(transactions.id, id), condition)).limit(1);
 		const transaction = txResult[0];
 		if (!transaction) {
@@ -39,9 +98,39 @@ export class TransactionsService {
 		}
 
 		const items = await db.select().from(transactionItems).where(eq(transactionItems.transactionId, id));
-		const settingsCondition = this.getUserCondition(userId, settings.userId);
-		const settingsResult = await db.select().from(settings).where(settingsCondition).limit(1);
-		const shopSettings = settingsResult[0] || null;
+
+		// Retrieve store/brand settings
+		let shopSettings: any = null;
+		if (transaction.storeId) {
+			const storeList = await db.select().from(stores).where(eq(stores.id, transaction.storeId)).limit(1);
+			if (storeList.length > 0) {
+				const s = storeList[0];
+				shopSettings = {
+					businessName: s.name,
+					logoUrl: s.logoUrl || null,
+					businessAddress: s.address || '',
+					businessPhone: s.phone || '',
+					currencySymbol: s.currencySymbol || 'Rp',
+					receiptFooter: s.receiptFooter || ''
+				};
+			}
+		}
+
+		if (!shopSettings) {
+			const settingsCondition = or(eq(settings.userId, userId), isNull(settings.userId));
+			const settingsResult = await db.select().from(settings).where(settingsCondition).limit(1);
+			const s = settingsResult[0];
+			if (s) {
+				shopSettings = {
+					businessName: s.businessName,
+					logoUrl: s.logoUrl || null,
+					businessAddress: s.businessAddress || '',
+					businessPhone: s.businessPhone || '',
+					currencySymbol: s.currencySymbol,
+					receiptFooter: s.receiptFooter || ''
+				};
+			}
+		}
 
 		return {
 			transaction: {
@@ -49,19 +138,11 @@ export class TransactionsService {
 				items
 			},
 			settings: shopSettings
-				? {
-						businessName: shopSettings.businessName,
-						businessAddress: shopSettings.businessAddress || '',
-						businessPhone: shopSettings.businessPhone || '',
-						currencySymbol: shopSettings.currencySymbol,
-						receiptFooter: shopSettings.receiptFooter || ''
-					}
-				: null
 		};
 	}
 
-	async createTransaction(userId: string, data: CheckoutInput) {
-		const { items, paymentMethod, amountPaid, notes } = data;
+	async createTransaction(userId: string, storeId: string | null | undefined, data: CheckoutInput) {
+		const { items, paymentMethod, amountPaid, notes, recipientName, recipientPhone, recipientAddress } = data;
 
 		if (!items || items.length === 0) {
 			throw new Error('Keranjang belanja kosong.');
@@ -72,11 +153,13 @@ export class TransactionsService {
 			let totalCost = 0;
 			const resolvedItems = [];
 
-			const prodUserCondition = this.getUserCondition(userId, products.userId);
+			const prodCondition = storeId
+				? eq(products.storeId, storeId)
+				: or(eq(products.userId, userId), isNull(products.userId));
 
 			// 1. Verify stock levels and gather snapshots
 			for (const cartItem of items) {
-				const prodList = await tx.select().from(products).where(and(eq(products.id, cartItem.productId), prodUserCondition)).limit(1);
+				const prodList = await tx.select().from(products).where(and(eq(products.id, cartItem.productId), prodCondition)).limit(1);
 				const product = prodList[0];
 
 				if (!product) {
@@ -119,7 +202,7 @@ export class TransactionsService {
 
 			// 3. Deduct stock levels atomically
 			for (const item of resolvedItems) {
-				const prodList = await tx.select().from(products).where(and(eq(products.id, item.productId), prodUserCondition)).limit(1);
+				const prodList = await tx.select().from(products).where(and(eq(products.id, item.productId), prodCondition)).limit(1);
 				const product = prodList[0];
 				if (!product) throw new Error('Produk tidak ditemukan');
 
@@ -147,7 +230,11 @@ export class TransactionsService {
 			// 4. Create Transaction log
 			const txResult = await tx.insert(transactions).values({
 				userId,
+				storeId: storeId || null,
 				transactionCode,
+				recipientName: recipientName || null,
+				recipientPhone: recipientPhone || null,
+				recipientAddress: recipientAddress || null,
 				totalAmount,
 				totalCost,
 				profit,
@@ -181,8 +268,8 @@ export class TransactionsService {
 		});
 	}
 
-	async voidTransaction(userId: string, id: string) {
-		const condition = this.getUserCondition(userId, transactions.userId);
+	async voidTransaction(userId: string, storeId: string | null | undefined, id: string) {
+		const condition = this.getUserCondition(userId, storeId, transactions.userId);
 		return await db.transaction(async (tx) => {
 			const txList = await tx.select().from(transactions).where(and(eq(transactions.id, id), condition)).limit(1);
 			const transaction = txList[0];

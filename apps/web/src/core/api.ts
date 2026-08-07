@@ -17,6 +17,11 @@ class ApiClient {
 			headers['X-User-Email'] = savedEmail;
 		}
 
+		const activeStoreId = typeof localStorage !== 'undefined' ? localStorage.getItem('active_store_id') : null;
+		if (activeStoreId) {
+			headers['X-Store-Id'] = activeStoreId;
+		}
+
 		const options: RequestInit = {
 			method,
 			headers,

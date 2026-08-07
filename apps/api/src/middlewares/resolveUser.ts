@@ -1,13 +1,6 @@
 import { db, users, ensureDbMigrations } from '../db';
 import { eq } from 'drizzle-orm';
-
-export type AuthUser = {
-	id: string;
-	email: string;
-	businessName: string;
-	role: string;
-	createdById?: string | null;
-};
+import type { AuthUser } from '../types';
 
 let migrationTriggered = false;
 
@@ -61,12 +54,18 @@ export async function resolveUser(request: Request): Promise<AuthUser | null> {
 	}
 
 	const user = userList[0];
+
+	// Active store can be requested via X-Store-Id header (for Super Admin switching store)
+	const requestedStoreId = request.headers.get('x-store-id')?.trim() || null;
+	const activeStoreId = requestedStoreId || user.storeId || null;
+
 	return {
 		id: user.id,
 		email: user.email,
 		businessName: user.businessName,
 		role: user.role || 'super_admin',
-		createdById: user.createdById || null
+		createdById: user.createdById || null,
+		storeId: activeStoreId
 	};
 }
 

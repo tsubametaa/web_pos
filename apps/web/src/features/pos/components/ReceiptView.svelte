@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { formatCurrency } from '../../../lib/utils/currency';
 	import { formatDate } from '../../../lib/utils/date';
-	import { Printer, X, CheckCircle } from 'lucide-svelte';
+	import { Printer, X, CheckCircle, FileText } from 'lucide-svelte';
 	import type { UITransaction, UISettings } from '../../../types';
 
 	interface Props {
@@ -18,6 +18,12 @@
 			window.open(`#/invoice/${transaction.id}`, '_blank');
 		}
 	}
+
+	function handlePrintSuratJalan() {
+		if (transaction?.id) {
+			window.open(`#/surat-jalan/${transaction.id}`, '_blank');
+		}
+	}
 </script>
 
 {#if show && transaction}
@@ -28,7 +34,7 @@
 		aria-label="Struk Transaksi"
 	>
 		<div
-			class="relative w-full max-w-sm bg-surface rounded-3xl shadow-2xl border border-sage-200/50 overflow-hidden text-ink"
+			class="relative w-full max-w-md bg-surface rounded-3xl shadow-2xl border border-sage-200/50 overflow-hidden text-ink"
 			onclick={(e) => e.stopPropagation()}
 			role="presentation"
 		>
@@ -43,6 +49,18 @@
 
 			<!-- Receipt Body -->
 			<div class="px-6 py-5 flex flex-col gap-3">
+				{#if transaction.recipientName}
+					<div class="p-3 bg-base border rounded-xl text-xs space-y-1">
+						<span class="font-bold text-slate-700 dark:text-slate-200 block">Penerima: {transaction.recipientName}</span>
+						{#if transaction.recipientPhone}
+							<span class="text-slate-500 block">Telp: {transaction.recipientPhone}</span>
+						{/if}
+						{#if transaction.recipientAddress}
+							<span class="text-slate-500 block truncate">Alamat: {transaction.recipientAddress}</span>
+						{/if}
+					</div>
+				{/if}
+
 				<!-- Items -->
 				<div class="flex flex-col gap-1.5">
 					{#each transaction.items as item}
@@ -89,22 +107,32 @@
 			</div>
 
 			<!-- Actions -->
-			<div class="px-6 pb-6 flex gap-3">
+			<div class="px-6 pb-6 flex flex-col gap-2">
+				<div class="flex gap-2">
+					<button
+						type="button"
+						onclick={handlePrintInvoice}
+						class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs"
+					>
+						<Printer class="w-3.5 h-3.5 inline mr-1" />
+						Cetak Invoice
+					</button>
+					<button
+						type="button"
+						onclick={handlePrintSuratJalan}
+						class="flex-1 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs"
+					>
+						<FileText class="w-3.5 h-3.5 inline mr-1" />
+						Cetak Surat Jalan
+					</button>
+				</div>
 				<button
 					type="button"
 					onclick={onclose}
-					class="flex-1 py-3 border border-sage-200 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl hover:bg-base cursor-pointer transition-all"
+					class="w-full py-2 border border-sage-200 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-base cursor-pointer transition-all"
 				>
 					<X class="w-3.5 h-3.5 inline mr-1" />
 					Tutup
-				</button>
-				<button
-					type="button"
-					onclick={handlePrintInvoice}
-					class="flex-1 py-3 bg-sage-500 hover:bg-sage-600 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-md shadow-sage-500/20 active:scale-[0.97]"
-				>
-					<Printer class="w-3.5 h-3.5 inline mr-1" />
-					Cetak Invoice
 				</button>
 			</div>
 		</div>

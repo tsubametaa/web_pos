@@ -17,6 +17,7 @@
   import Users from "./pages/Users.svelte";
   import Etalase from "./pages/Etalase.svelte";
   import Invoice from "./pages/Invoice.svelte";
+  import SuratJalan from "./pages/SuratJalan.svelte";
 
   // Icons
   import {
@@ -47,6 +48,10 @@
     if (hash.startsWith("#/invoice/")) {
       const id = hash.replace("#/invoice/", "");
       return { name: "invoice", params: { id } };
+    }
+    if (hash.startsWith("#/surat-jalan/")) {
+      const id = hash.replace("#/surat-jalan/", "");
+      return { name: "surat-jalan", params: { id } };
     }
     if (hash.startsWith("#/etalase/")) {
       const id = hash.replace("#/etalase/", "");
@@ -94,7 +99,7 @@
   );
 
   const isShellHidden = $derived(
-    parsedRoute.name === "etalase" || parsedRoute.name === "invoice",
+    parsedRoute.name === "etalase" || parsedRoute.name === "invoice" || parsedRoute.name === "surat-jalan",
   );
 
   // Handle routing auth guard
@@ -164,9 +169,11 @@
     >
   </div>
 {:else if isShellHidden}
-  <!-- Render public or fullscreen layouts (Etalase, Invoice) directly -->
+  <!-- Render public or fullscreen layouts (Etalase, Invoice, Surat Jalan) directly -->
   {#if parsedRoute.name === "invoice"}
     <Invoice transactionId={parsedRoute.params.id ?? ""} />
+  {:else if parsedRoute.name === "surat-jalan"}
+    <SuratJalan transactionId={parsedRoute.params.id ?? ""} />
   {:else}
     <Etalase productId={parsedRoute.params.id} />
   {/if}

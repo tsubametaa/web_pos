@@ -7,7 +7,10 @@
   import Spinner from '../../components/ui/Spinner.svelte';
   import TransactionTable from './components/TransactionTable.svelte';
   import TransactionDetailModal from './components/TransactionDetailModal.svelte';
-  import { History, DollarSign, TrendingUp, ShoppingBag, Calculator } from 'lucide-svelte';
+  import { generateSalesPDF } from '../../lib/utils/pdfGenerator';
+  import { generateSalesExcel } from '../../lib/utils/excelGenerator';
+  import { activeStore } from '../../core/activeStore.svelte';
+  import { History, DollarSign, TrendingUp, ShoppingBag, Calculator, Download } from 'lucide-svelte';
   import type { UITransaction } from '../../types';
 
   let loading = $state(true);
@@ -16,12 +19,46 @@
 
   let selectedTransaction = $state<UITransaction | null>(null);
   let showDetailModal = $state(false);
+  let selectedMonth = $state('all');
 
   const isSuperAdmin = $derived(appState.user?.role === 'super_admin');
 
+  async function handleDownloadPDF() {
+    try {
+      await generateSalesPDF({
+        transactions,
+        brandName: activeStore.currentStore?.name || settings?.businessName || 'Brand Utama',
+        brandLogo: activeStore.currentStore?.logoUrl || settings?.logoUrl || '',
+        brandAddress: activeStore.currentStore?.address || settings?.businessAddress || '',
+        brandPhone: activeStore.currentStore?.phone || settings?.businessPhone || '',
+        userRole: appState.user?.role || 'admin',
+        printedBy: appState.user?.businessName || appState.user?.email || 'Staff Kasir'
+      });
+      toast.success('Laporan PDF Rekapitulasi Penjualan berhasil diunduh!');
+    } catch (err: any) {
+      console.error('Error generating PDF:', err);
+      toast.error('Gagal mengunduh file PDF.');
+    }
+  }
+
+  function handleDownloadExcel() {
+    try {
+      generateSalesExcel({
+        transactions,
+        brandName: activeStore.currentStore?.name || settings?.businessName || 'Brand Utama',
+        userRole: appState.user?.role || 'admin'
+      });
+      toast.success('Laporan Excel Rekapitulasi Penjualan berhasil diunduh!');
+    } catch (err: any) {
+      console.error('Error generating Excel:', err);
+      toast.error('Gagal mengunduh file Excel.');
+    }
+  }
+
   async function loadSalesData() {
     try {
-      const res = await api.get('/transactions');
+      const monthQuery = selectedMonth !== 'all' ? `?month=${selectedMonth}` : '';
+      const res = await api.get(`/transactions${monthQuery}`);
       if (res.success) {
         transactions = res.transactions;
       }
@@ -34,6 +71,11 @@
     } finally {
       loading = false;
     }
+  }
+
+  function handleMonthChange(newMonth: string) {
+    selectedMonth = newMonth;
+    loadSalesData();
   }
 
   onMount(() => {
@@ -102,7 +144,7 @@
       </div>
 
       <div
-        class="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 rounded-xl font-extrabold text-xs shrink-0 self-start sm:self-auto"
+        class="inline-flex items-center gap-2 px-3.5 py-2.5 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 rounded-xl font-extrabold text-xs shrink-0 self-start sm:self-auto"
       >
         <ShoppingBag class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
         <span>{transactions.length} Total Transaksi</span>
@@ -183,7 +225,14 @@
     </div>
 
     <!-- Transaction Table Section -->
-    <TransactionTable {transactions} onview={handleViewTransaction} />
+    <TransactionTable
+      {transactions}
+      onview={handleViewTransaction}
+      {selectedMonth}
+      onmonthchange={handleMonthChange}
+      ondownloadpdf={handleDownloadPDF}
+      ondownloadexcel={handleDownloadExcel}
+    />
   </div>
 
   <!-- Detail Modal -->

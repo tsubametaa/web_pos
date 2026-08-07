@@ -10,6 +10,7 @@ import { dashboardController } from './modules/dashboard/dashboard.controller';
 import { etalaseController } from './modules/etalase/etalase.controller';
 import { uploadsController } from './modules/uploads/uploads.controller';
 import { usersController } from './modules/users/users.controller';
+import { storesController } from './modules/stores/stores.controller';
 import { getLandingPageHtml } from './views/landing';
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
@@ -29,6 +30,7 @@ const app = new Elysia()
 				{ name: 'Transactions', description: 'Transaksi Kasir POS & Void' },
 				{ name: 'Dashboard', description: 'Statistik & Ringkasan Laporan Performa Toko' },
 				{ name: 'Users', description: 'Manajemen Staff Admin Biasa (Khusus Super Admin)' },
+				{ name: 'Stores', description: 'Manajemen Multi-Brand / Unit Perusahaan' },
 				{ name: 'Etalase', description: 'Katalog Publik Toko (Bebas Akses)' },
 				{ name: 'Settings', description: 'Pengaturan Profil Toko' },
 				{ name: 'Uploads', description: 'Unggah Berkas / Gambar Produk' },
@@ -45,7 +47,7 @@ const app = new Elysia()
 			if (!origin) return true;
 			return allowedOrigins.includes(origin);
 		},
-		allowedHeaders: ['Content-Type', 'Authorization', 'X-User-Email'],
+		allowedHeaders: ['Content-Type', 'Authorization', 'X-User-Email', 'X-Store-Id'],
 	}))
 	.onTransform(({ body, query }) => {
 		if (body && typeof body === 'object') {
@@ -87,6 +89,7 @@ const app = new Elysia()
 				timestamp: new Date().toISOString()
 			}))
 			.use(authController)
+			.use(storesController)
 			.use(productsController)
 			.use(transactionsController)
 			.use(settingsController)

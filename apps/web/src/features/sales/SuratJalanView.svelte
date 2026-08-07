@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { formatCurrency } from '../../lib/utils/currency';
 	import { Printer, ArrowLeft } from 'lucide-svelte';
 	import { api } from '../../core/api';
 	import Spinner from '../../components/ui/Spinner.svelte';
@@ -15,7 +14,7 @@
 	let transaction = $state<UITransaction | null>(null);
 	let settings = $state<UISettings | null>(null);
 
-	async function loadInvoiceData() {
+	async function loadData() {
 		try {
 			const res = await api.get(`/transactions/${transactionId}`);
 			if (res.success) {
@@ -23,14 +22,14 @@
 				settings = res.settings;
 			}
 		} catch (err) {
-			console.error('Error fetching invoice details:', err);
+			console.error('Error fetching surat jalan details:', err);
 		} finally {
 			loading = false;
 		}
 	}
 
 	onMount(() => {
-		loadInvoiceData();
+		loadData();
 	});
 
 	function triggerPrint() {
@@ -62,14 +61,14 @@
 					class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-xl shadow-sm cursor-pointer transition-all"
 				>
 					<Printer class="w-3.5 h-3.5" />
-					Cetak Invoice
+					Cetak Surat Jalan
 				</button>
 			</div>
 		</div>
 
 		<!-- Printable Container (Continuous Form 9.5 in x 5.5 in) -->
 		<div class="mt-6 flex justify-center w-full px-2">
-			<div class="invoice-page bg-white border border-slate-300 p-6 text-black font-sans select-none shadow-md flex flex-col justify-between">
+			<div class="surat-jalan-page bg-white border border-slate-300 p-6 text-black font-sans select-none shadow-md flex flex-col justify-between">
 				<div>
 					<!-- Modular Header with Logo & Brand Info -->
 					<BrandPrintHeader
@@ -77,66 +76,44 @@
 						businessName={settings?.businessName}
 						businessAddress={settings?.businessAddress}
 						businessPhone={settings?.businessPhone}
-						docType="INVOICE"
-						docCode={transaction.transactionCode}
+						docType="SURAT JALAN"
+						docCode={transaction.transactionCode.replace('TRX-', 'DO/')}
 						docDate={transaction.createdAt}
 					/>
 
-					<!-- Modular Recipient & Payment Details -->
+					<!-- Modular Recipient & Document Info -->
 					<PrintRecipientCard
 						recipientName={transaction.recipientName}
 						recipientPhone={transaction.recipientPhone}
 						recipientAddress={transaction.recipientAddress}
-						paymentMethod={transaction.paymentMethod}
-						status={transaction.status}
-						docType="INVOICE"
+						docType="SURAT JALAN"
 					/>
 
-					<!-- Table of items -->
+					<!-- Items Table -->
 					<table class="w-full border-collapse text-xs mb-3 border border-slate-900 text-left">
 						<thead>
 							<tr class="border-b-2 border-slate-900 bg-slate-100 font-bold text-[11px]">
 								<th class="border-r border-slate-900 p-1.5 w-8 text-center">No</th>
-								<th class="border-r border-slate-900 p-1.5 w-24">Kode SKU</th>
 								<th class="border-r border-slate-900 p-1.5">Nama Produk</th>
+								<th class="border-r border-slate-900 p-1.5">Deskripsi Produk</th>
+								<th class="border-r border-slate-900 p-1.5 w-24">Kode SKU</th>
 								<th class="border-r border-slate-900 p-1.5 w-16 text-center">Kuantitas</th>
-								<th class="border-r border-slate-900 p-1.5 text-right w-24">Harga Satuan</th>
-								<th class="p-1.5 text-right w-28">Subtotal</th>
+								<th class="p-1.5 w-16 text-center">Unit</th>
 							</tr>
 						</thead>
 						<tbody>
 							{#each transaction.items as item, index}
 								<tr class="border-b border-slate-300">
 									<td class="border-r border-slate-900 p-1.5 text-center font-medium">{index + 1}</td>
-									<td class="border-r border-slate-900 p-1.5 font-mono text-[11px] font-semibold">{item.sku}</td>
 									<td class="border-r border-slate-900 p-1.5 font-bold text-slate-900">{item.productName}</td>
+									<td class="border-r border-slate-900 p-1.5 text-[11px] text-slate-700">{transaction.notes || '-'}</td>
+									<td class="border-r border-slate-900 p-1.5 font-mono text-[11px] font-semibold">{item.sku}</td>
 									<td class="border-r border-slate-900 p-1.5 text-center font-black">{item.qty}</td>
-									<td class="border-r border-slate-900 p-1.5 text-right font-mono">{formatCurrency(item.sellingPrice)}</td>
-									<td class="p-1.5 text-right font-mono font-bold">{formatCurrency(item.subtotal)}</td>
+									<td class="p-1.5 text-center text-[11px] font-medium">Piece</td>
 								</tr>
 							{/each}
 						</tbody>
 					</table>
-
-					<!-- Totals Summary -->
-					<div class="flex justify-end text-xs mb-2">
-						<div class="w-60 border border-slate-900 p-2 bg-slate-50 space-y-1">
-							<div class="flex justify-between font-bold text-slate-900 border-b border-slate-300 pb-1">
-								<span>Total Bayar:</span>
-								<span class="font-mono text-sm">{formatCurrency(transaction.totalAmount)}</span>
-							</div>
-							{#if transaction.paymentMethod === 'cash'}
-								<div class="flex justify-between text-slate-700 text-[11px]">
-									<span>Tunai Diterima:</span>
-									<span class="font-mono">{formatCurrency(transaction.amountPaid)}</span>
-								</div>
-								<div class="flex justify-between text-slate-700 font-semibold text-[11px]">
-									<span>Kembalian:</span>
-									<span class="font-mono">{formatCurrency(transaction.change)}</span>
-								</div>
-							{/if}
-						</div>
-					</div>
 				</div>
 
 				<!-- Modular Signatures & Footer -->
@@ -144,7 +121,7 @@
 					receiptFooter={settings?.receiptFooter}
 					businessName={settings?.businessName}
 					recipientName={transaction.recipientName}
-					docType="INVOICE"
+					docType="SURAT JALAN"
 				/>
 			</div>
 		</div>
@@ -152,8 +129,8 @@
 {/if}
 
 <style>
-	/* Continuous form 9.5in x 5.5in layout */
-	.invoice-page {
+	/* Standard Continuous Form 9.5in x 5.5in layout */
+	.surat-jalan-page {
 		width: 9.5in;
 		min-height: 5.5in;
 		box-sizing: border-box;
@@ -174,7 +151,7 @@
 			display: none !important;
 		}
 
-		.invoice-page {
+		.surat-jalan-page {
 			border: none !important;
 			box-shadow: none !important;
 			width: 100% !important;

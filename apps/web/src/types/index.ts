@@ -1,5 +1,21 @@
+export interface UIStore {
+	id: string;
+	name: string;
+	logoUrl?: string;
+	address?: string;
+	phone?: string;
+	receiptFooter?: string;
+	taxRate?: number;
+	currency?: string;
+	currencySymbol?: string;
+	createdById?: string;
+	createdAt?: string | Date;
+	updatedAt?: string | Date;
+}
+
 export interface UIProduct {
 	id: string;
+	storeId?: string;
 	name: string;
 	sku: string;
 	category: string;
@@ -34,7 +50,11 @@ export interface UITransactionItem {
 
 export interface UITransaction {
 	id: string;
+	storeId?: string;
 	transactionCode: string;
+	recipientName?: string;
+	recipientPhone?: string;
+	recipientAddress?: string;
 	items: UITransactionItem[];
 	totalAmount: number;
 	totalCost: number;
@@ -49,7 +69,10 @@ export interface UITransaction {
 }
 
 export interface UISettings {
+	id?: string;
+	storeId?: string;
 	businessName: string;
+	logoUrl?: string;
 	businessAddress?: string;
 	businessPhone?: string;
 	currency: string;

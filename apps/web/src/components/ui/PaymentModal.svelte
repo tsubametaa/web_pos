@@ -23,6 +23,9 @@
 	let paymentMethod = $state<'cash' | 'transfer' | 'qris' | 'other'>('cash');
 	let amountPaid = $state(0);
 	let notes = $state('');
+	let recipientName = $state('');
+	let recipientPhone = $state('');
+	let recipientAddress = $state('');
 	let isLoading = $state(false);
 
 	const change = $derived(paymentMethod === 'cash' ? Math.max(0, amountPaid - totalAmount) : 0);
@@ -55,7 +58,10 @@
 				})),
 				paymentMethod,
 				amountPaid: paymentMethod === 'cash' ? amountPaid : totalAmount,
-				notes: notes || undefined
+				notes: notes || undefined,
+				recipientName: recipientName.trim() || undefined,
+				recipientPhone: recipientPhone.trim() || undefined,
+				recipientAddress: recipientAddress.trim() || undefined
 			};
 			const res = await api.post('/transactions', payload);
 			if (res.success) {
@@ -190,6 +196,45 @@
 						{/if}
 					</div>
 				{/if}
+
+				<!-- Recipient Information (Surat Jalan & Invoice) -->
+				<div class="space-y-3 border-t border-dashed border-sage-200/50 pt-3">
+					<span class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block">
+						Informasi Penerima (Surat Jalan & Invoice)
+					</span>
+					<div class="grid grid-cols-2 gap-2">
+						<div>
+							<label class="text-[11px] font-bold text-slate-500 block mb-1" for="recipient-name">Nama Penerima</label>
+							<input
+								id="recipient-name"
+								type="text"
+								bind:value={recipientName}
+								placeholder="Nama Pembeli / Penerima"
+								class="w-full px-3 py-2 bg-white dark:bg-base border border-sage-200 rounded-xl text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sage-500/20"
+							/>
+						</div>
+						<div>
+							<label class="text-[11px] font-bold text-slate-500 block mb-1" for="recipient-phone">No. HP Penerima</label>
+							<input
+								id="recipient-phone"
+								type="text"
+								bind:value={recipientPhone}
+								placeholder="08123456789"
+								class="w-full px-3 py-2 bg-white dark:bg-base border border-sage-200 rounded-xl text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sage-500/20"
+							/>
+						</div>
+					</div>
+					<div>
+						<label class="text-[11px] font-bold text-slate-500 block mb-1" for="recipient-address">Alamat Pengiriman / Penerima</label>
+						<textarea
+							id="recipient-address"
+							bind:value={recipientAddress}
+							rows="2"
+							placeholder="Alamat lengkap penerima..."
+							class="w-full px-3 py-2 bg-white dark:bg-base border border-sage-200 rounded-xl text-xs text-slate-800 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-sage-500/20"
+						></textarea>
+					</div>
+				</div>
 
 				<!-- Notes -->
 				<div>

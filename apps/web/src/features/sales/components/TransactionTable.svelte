@@ -14,19 +14,39 @@
     X,
     ExternalLink,
     ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Calendar,
+    Download,
+    FileText,
+    FileSpreadsheet
   } from "lucide-svelte";
   import Dropdown from "../../../components/ui/Dropdown.svelte";
+  import CustomSelect from "../../../components/ui/CustomSelect.svelte";
   import type { UITransaction } from "../../../types";
 
   interface Props {
     transactions: UITransaction[];
     onview: (t: UITransaction) => void;
+    selectedMonth?: string;
+    onmonthchange?: (month: string) => void;
+    ondownloadpdf?: () => void;
+    ondownloadexcel?: () => void;
   }
 
-  let { transactions, onview }: Props = $props();
+  let {
+    transactions,
+    onview,
+    selectedMonth = "all",
+    onmonthchange,
+    ondownloadpdf,
+    ondownloadexcel
+  }: Props = $props();
 
   let searchQuery = $state("");
   let filterMethod = $state("");
+  let itemsPerPage = $state<number>(50);
+  let currentPage = $state<number>(1);
 
   const isSuperAdmin = $derived(appState.user?.role === 'super_admin');
 
@@ -37,6 +57,25 @@
     { value: "qris", label: "QRIS", icon: QrCode },
     { value: "other", label: "Lainnya", icon: Package },
   ];
+
+  const monthNames = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+
+  const monthOptions = $derived.by(() => {
+    const options = [{ value: "all", label: "Semua Bulan", icon: Calendar }];
+    const date = new Date();
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(date.getFullYear(), date.getMonth() - i, 1);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const val = `${year}-${month}`;
+      const label = `${monthNames[d.getMonth()]} ${year}`;
+      options.push({ value: val, label, icon: Calendar });
+    }
+    return options;
+  });
 
   const filteredTransactions = $derived(
     transactions.filter((t) => {
@@ -50,6 +89,24 @@
       return matchesSearch && matchesMethod;
     }),
   );
+
+  const pageSize = $derived(itemsPerPage === 0 ? (filteredTransactions.length || 1) : itemsPerPage);
+  const totalPages = $derived(itemsPerPage === 0 ? 1 : Math.max(1, Math.ceil(filteredTransactions.length / itemsPerPage)));
+
+  const paginatedTransactions = $derived.by(() => {
+    if (itemsPerPage === 0) return filteredTransactions;
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredTransactions.slice(start, start + itemsPerPage);
+  });
+
+  $effect(() => {
+    // Reset page to 1 when filters or search change
+    searchQuery;
+    filterMethod;
+    selectedMonth;
+    itemsPerPage;
+    currentPage = 1;
+  });
 
   const isSearchActive = $derived(searchQuery.trim().length > 0);
 
@@ -77,23 +134,23 @@
 </script>
 
 <div class="flex flex-col gap-4 text-ink">
-  <!-- Search & Method Filter Pills Bar -->
+  <!-- Search & Method & Month Filter Bar -->
   <div
-    class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between w-full"
+    class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between w-full"
   >
-    <!-- Left: Search Bar & Method Pills -->
+    <!-- Left: Search Bar, Payment Method & Month Dropdowns -->
     <div
-      class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center flex-1 min-w-0"
+      class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center flex-1 min-w-0 flex-wrap"
     >
       <!-- Search Input -->
-      <div class="relative flex-1 max-w-md">
+      <div class="relative flex-1 min-w-[200px] max-w-xs">
         <Search
           class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
         />
         <input
           type="text"
           bind:value={searchQuery}
-          placeholder="Cari kode transaksi atau catatan..."
+          placeholder="Cari kode transaksi..."
           class="w-full pl-10 pr-9 py-2.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none transition-all shadow-2xs"
         />
         {#if isSearchActive}
@@ -108,11 +165,50 @@
       </div>
 
       <!-- Custom Filter Dropdown for Payment Methods -->
-      <Dropdown
-        options={dropdownOptions}
-        bind:value={filterMethod}
-        placeholder="Semua Metode Pembayaran"
-      />
+      <div class="min-w-[210px]">
+        <Dropdown
+          options={dropdownOptions}
+          bind:value={filterMethod}
+          placeholder="Semua Metode Pembayaran"
+        />
+      </div>
+
+      <!-- Custom Filter Dropdown for Months (CustomSelect UI) -->
+      <div class="min-w-[180px]">
+        <CustomSelect
+          options={monthOptions}
+          value={selectedMonth}
+          onchange={(val) => onmonthchange && onmonthchange(val)}
+          placeholder="Pilih Bulan..."
+        />
+      </div>
+    </div>
+
+    <!-- Right: Unduh PDF & Excel Buttons -->
+    <div class="flex items-center gap-2 shrink-0 self-start lg:self-auto">
+      {#if ondownloadpdf}
+        <button
+          type="button"
+          onclick={ondownloadpdf}
+          class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs hover:shadow transition-all cursor-pointer"
+          title="Unduh Laporan Rekapan PDF"
+        >
+          <FileText class="w-4 h-4" />
+          <span>Unduh PDF</span>
+        </button>
+      {/if}
+
+      {#if ondownloadexcel}
+        <button
+          type="button"
+          onclick={ondownloadexcel}
+          class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs hover:shadow transition-all cursor-pointer"
+          title="Unduh Laporan Rekapan Excel (.csv)"
+        >
+          <FileSpreadsheet class="w-4 h-4" />
+          <span>Unduh Excel</span>
+        </button>
+      {/if}
     </div>
   </div>
 
@@ -129,67 +225,40 @@
   <div
     class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl overflow-hidden shadow-2xs"
   >
-    <div class="overflow-x-auto">
-      <table class="w-full text-xs">
+    <div class="overflow-x-auto scrollbar-none">
+      <table class="w-full text-left border-collapse">
         <thead>
           <tr
-            class="border-b border-slate-200/60 dark:border-emerald-950/60 bg-base/50 dark:bg-surface/30"
+            class="border-b border-slate-200/80 dark:border-emerald-950/80 bg-base/80 dark:bg-surface/80 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none"
           >
-            <th
-              class="text-left px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
-            >
-              Kode Transaksi
-            </th>
-            <th
-              class="text-left px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider hidden md:table-cell"
-            >
-              Waktu & Tanggal
-            </th>
-            <th
-              class="text-left px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider hidden sm:table-cell"
-            >
-              Metode Pembayaran
-            </th>
-            <th
-              class="text-right px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
-            >
-              Total Belanja
-            </th>
+            <th class="px-5 py-3.5">Kode Transaksi</th>
+            <th class="px-5 py-3.5 hidden md:table-cell">Waktu & Tanggal</th>
+            <th class="px-5 py-3.5 hidden sm:table-cell">Metode Pembayaran</th>
+            <th class="px-5 py-3.5 text-right">Total Belanja</th>
             {#if isSuperAdmin}
-              <th
-                class="text-right px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider hidden lg:table-cell"
-              >
-                Profit
-              </th>
+              <th class="px-5 py-3.5 text-right hidden lg:table-cell">Profit</th>
             {/if}
-            <th
-              class="text-center px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider hidden sm:table-cell"
-            >
-              Status
-            </th>
-            <th
-              class="px-5 py-3.5 text-center font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
-            >
-              Aksi
-            </th>
+            <th class="px-5 py-3.5 text-center hidden sm:table-cell">Status</th>
+            <th class="px-5 py-3.5 text-center">Aksi</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-200/40 dark:divide-emerald-950/40">
-          {#each filteredTransactions as trx (trx.id)}
+        <tbody
+          class="divide-y divide-slate-200/60 dark:divide-emerald-950/60 text-xs font-medium"
+        >
+          {#each paginatedTransactions as trx, i (trx.id)}
             {@const IconComp = getMethodIcon(trx.paymentMethod)}
             <tr
-              class="hover:bg-emerald-500/5 transition-colors {trx.status !==
-              'completed'
-                ? 'opacity-50'
-                : ''}"
+              class="hover:bg-emerald-500/5 transition-colors group text-slate-800 dark:text-slate-200"
             >
-              <!-- Kode Transaksi -->
-              <td class="px-5 py-3.5 font-mono">
-                <div class="flex items-center gap-2">
-                  <Receipt
-                    class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0"
-                  />
-                  <span class="font-black text-slate-800 dark:text-slate-100">
+              <!-- Kode Transaksi & Icon -->
+              <td class="px-5 py-3.5 font-bold font-mono">
+                <div class="flex items-center gap-2.5">
+                  <div
+                    class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 shrink-0"
+                  >
+                    <Receipt class="w-4 h-4" />
+                  </div>
+                  <span class="truncate max-w-[180px] sm:max-w-none">
                     {trx.transactionCode}
                   </span>
                 </div>
@@ -284,6 +353,60 @@
           {/each}
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Pagination Control Bar -->
+  <div
+    class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-base/80 dark:bg-surface/60 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl shadow-2xs text-xs font-semibold text-slate-600 dark:text-slate-300"
+  >
+    <!-- Left: Rows per page selector & Total Items Counter -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5">
+        <span class="text-slate-400 font-medium">Tampilkan:</span>
+        <div class="w-28">
+          <CustomSelect
+            options={[
+              { value: '50', label: '50 Item' },
+              { value: '100', label: '100 Item' },
+              { value: '0', label: 'Semua' }
+            ]}
+            value={String(itemsPerPage)}
+            onchange={(val) => (itemsPerPage = Number(val))}
+          />
+        </div>
+      </div>
+
+      <span class="hidden sm:inline-block text-slate-400 font-medium">
+        Menampilkan <strong class="text-emerald-600 dark:text-emerald-400">{filteredTransactions.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</strong> - <strong class="text-emerald-600 dark:text-emerald-400">{Math.min(currentPage * pageSize, filteredTransactions.length)}</strong> dari <strong class="text-slate-800 dark:text-white">{filteredTransactions.length}</strong> Transaksi
+      </span>
+    </div>
+
+    <!-- Right: Previous / Next Navigation Buttons -->
+    <div class="flex items-center gap-2 self-end sm:self-auto">
+      <span class="text-[11px] text-slate-400 font-medium mr-1">
+        Halaman <strong class="text-slate-800 dark:text-white">{currentPage}</strong> dari <strong class="text-slate-800 dark:text-white">{totalPages}</strong>
+      </span>
+
+      <button
+        type="button"
+        disabled={currentPage <= 1}
+        onclick={() => (currentPage = Math.max(1, currentPage - 1))}
+        class="inline-flex items-center gap-1 px-3 py-1.5 bg-base dark:bg-base border border-slate-200 dark:border-emerald-950 rounded-xl hover:bg-emerald-500/10 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all text-xs font-bold text-slate-700 dark:text-slate-200"
+      >
+        <ChevronLeft class="w-4 h-4" />
+        <span>Sebelumnya</span>
+      </button>
+
+      <button
+        type="button"
+        disabled={currentPage >= totalPages}
+        onclick={() => (currentPage = Math.min(totalPages, currentPage + 1))}
+        class="inline-flex items-center gap-1 px-3 py-1.5 bg-base dark:bg-base border border-slate-200 dark:border-emerald-950 rounded-xl hover:bg-emerald-500/10 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all text-xs font-bold text-slate-700 dark:text-slate-200"
+      >
+        <span>Selanjutnya</span>
+        <ChevronRight class="w-4 h-4" />
+      </button>
     </div>
   </div>
 </div>

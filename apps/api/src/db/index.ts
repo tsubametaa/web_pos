@@ -24,22 +24,44 @@ export * from './schema';
  */
 export async function ensureDbMigrations() {
 	const safeMigrations = [
+		`CREATE TABLE IF NOT EXISTS stores (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL,
+			logo_url TEXT,
+			address TEXT,
+			phone TEXT,
+			receipt_footer TEXT,
+			tax_rate REAL DEFAULT 0,
+			currency TEXT DEFAULT 'IDR',
+			currency_symbol TEXT DEFAULT 'Rp',
+			created_by_id TEXT,
+			created_at INTEGER NOT NULL,
+			updated_at INTEGER NOT NULL
+		);`,
 		'ALTER TABLE products ADD COLUMN barcode TEXT;',
 		'ALTER TABLE products ADD COLUMN notes TEXT;',
 		'ALTER TABLE products ADD COLUMN image_url TEXT;',
 		'ALTER TABLE products ADD COLUMN min_stock INTEGER DEFAULT 10;',
 		'ALTER TABLE products ADD COLUMN is_active INTEGER DEFAULT 1;',
+		'ALTER TABLE products ADD COLUMN store_id TEXT;',
 		'ALTER TABLE users ADD COLUMN role TEXT DEFAULT "super_admin";',
 		'ALTER TABLE users ADD COLUMN created_by_id TEXT;',
+		'ALTER TABLE users ADD COLUMN store_id TEXT;',
+		'ALTER TABLE transactions ADD COLUMN store_id TEXT;',
+		'ALTER TABLE transactions ADD COLUMN recipient_name TEXT;',
+		'ALTER TABLE transactions ADD COLUMN recipient_phone TEXT;',
+		'ALTER TABLE transactions ADD COLUMN recipient_address TEXT;',
+		'ALTER TABLE settings ADD COLUMN store_id TEXT;',
+		'ALTER TABLE settings ADD COLUMN logo_url TEXT;',
 		'UPDATE users SET role = "super_admin" WHERE role IS NULL OR role = "";'
 	];
 
 	for (const sql of safeMigrations) {
 		try {
 			await client.execute(sql);
-			console.log(`[DB Migration] Executed: ${sql}`);
+			console.log(`[DB Migration] Executed successfully`);
 		} catch (err: any) {
-			// Silently ignore if column already exists
+			// Silently ignore if column/table already exists
 		}
 	}
 }

@@ -42,7 +42,8 @@ export const usersController = new Elysia({ prefix: '/users' })
 		body: t.Object({
 			email: t.String({ format: 'email', error: 'Email tidak valid.' }),
 			password: t.String({ minLength: 6, error: 'Password minimal 6 karakter.' }),
-			businessName: t.Optional(t.String())
+			businessName: t.Optional(t.String()),
+			storeId: t.Optional(t.String())
 		})
 	})
 	.delete('/:id', async ({ params, set, request }: any) => {
@@ -56,4 +57,22 @@ export const usersController = new Elysia({ prefix: '/users' })
 			set.status = 400;
 			return { success: false, error: err.message };
 		}
+	})
+	.put('/:id', async ({ params, body, set, request }: any) => {
+		const user = await getUser(request, set);
+		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
+		if (!user) return unauthorized(set);
+		try {
+			const updatedUser = await usersService.updateUser(user, params.id, body);
+			return { success: true, message: 'Data pengguna berhasil diperbarui!', user: updatedUser };
+		} catch (err: any) {
+			set.status = 400;
+			return { success: false, error: err.message };
+		}
+	}, {
+		body: t.Object({
+			businessName: t.Optional(t.String()),
+			storeId: t.Optional(t.Nullable(t.String())),
+			password: t.Optional(t.String({ minLength: 6 }))
+		})
 	});

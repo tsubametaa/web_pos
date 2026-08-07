@@ -21,7 +21,7 @@ export const productsController = new Elysia({ prefix: '/products' })
 		if (!user) return unauthorized(set);
 		const ownerId = user.createdById || user.id;
 		const activeOnly = query.active === 'true';
-		const list = await productsService.getProducts(ownerId, query.category, activeOnly);
+		const list = await productsService.getProducts(ownerId, user.storeId, query.category, activeOnly);
 		return { success: true, products: list };
 	}, {
 		query: t.Object({
@@ -35,7 +35,7 @@ export const productsController = new Elysia({ prefix: '/products' })
 		if (!user) return unauthorized(set);
 		try {
 			const ownerId = user.createdById || user.id;
-			const product = await productsService.createProduct(ownerId, body);
+			const product = await productsService.createProduct(ownerId, user.storeId, body);
 			return { success: true, product };
 		} catch (err: any) {
 			set.status = 400;

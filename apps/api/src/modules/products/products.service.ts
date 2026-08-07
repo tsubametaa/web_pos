@@ -1,26 +1,17 @@
 import { eq, and, desc, isNull, or, gte } from 'drizzle-orm';
 import { db, products } from '../../db';
-
-export interface ProductInput {
-	name: string;
-	category: string;
-	unit: string;
-	costPrice: number;
-	sellingPrice: number;
-	stock?: number;
-	minStock?: number;
-	imageUrl?: string;
-	barcode?: string;
-	notes?: string;
-}
+import type { ProductInput } from '../../types';
 
 export class ProductsService {
-	private userCondition(userId: string) {
+	private userCondition(userId: string, storeId?: string | null) {
+		if (storeId) {
+			return or(eq(products.storeId, storeId), and(eq(products.userId, userId), isNull(products.storeId)));
+		}
 		return or(eq(products.userId, userId), isNull(products.userId));
 	}
 
-	async getProducts(userId: string, category?: string, activeOnly?: boolean) {
-		const conditions: any[] = [this.userCondition(userId)];
+	async getProducts(userId: string, storeId?: string | null, category?: string, activeOnly?: boolean) {
+		const conditions: any[] = [this.userCondition(userId, storeId)];
 		if (category) conditions.push(eq(products.category, category));
 		if (activeOnly) conditions.push(eq(products.isActive, true));
 
@@ -30,23 +21,43 @@ export class ProductsService {
 			.orderBy(desc(products.createdAt));
 	}
 
-	async createProduct(userId: string, data: ProductInput) {
+	private generateRandomBarcode(length: number = 9): string {
+		const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		let result = '';
+		for (let i = 0; i < length; i++) {
+			result += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+		return result;
+	}
+
+	async createProduct(userId: string, storeId: string | null | undefined, data: ProductInput) {
 		// Generate unique SKU
 		let sku = '';
 		for (let attempts = 0; attempts < 20; attempts++) {
 			const rand = Math.floor(1000 + Math.random() * 9000);
 			const tempSku = `PRD-${rand}`;
 			const existing = await db.select().from(products)
-				.where(and(eq(products.sku, tempSku), eq(products.userId, userId)))
+				.where(and(eq(products.sku, tempSku), this.userCondition(userId, storeId)))
 				.limit(1);
 			if (existing.length === 0) { sku = tempSku; break; }
 		}
 		if (!sku) sku = `PRD-${Date.now().toString().slice(-4)}`;
 
-		const barcode = data.barcode?.trim() || sku;
+		let barcode = data.barcode?.trim();
+		if (!barcode) {
+			for (let attempts = 0; attempts < 20; attempts++) {
+				const tempBarcode = this.generateRandomBarcode(9);
+				const existing = await db.select().from(products)
+					.where(and(eq(products.barcode, tempBarcode), this.userCondition(userId, storeId)))
+					.limit(1);
+				if (existing.length === 0) { barcode = tempBarcode; break; }
+			}
+			if (!barcode) barcode = sku;
+		}
 
 		const result = await db.insert(products).values({
 			userId,
+			storeId: storeId || null,
 			name: data.name,
 			category: data.category,
 			unit: data.unit,

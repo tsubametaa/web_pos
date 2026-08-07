@@ -2,7 +2,9 @@ import {
 	sqliteTable,
 	text,
 	integer,
-	real
+	real,
+	index,
+	AnySQLiteColumn
 } from 'drizzle-orm/sqlite-core';
 
 export function generateRandomId(length = 7): string {
@@ -15,7 +17,25 @@ export function generateRandomId(length = 7): string {
 	return result;
 }
 
-// Users Table (defined first so references work seamlessly)
+// Stores Table (Brand / Business Unit)
+export const stores = sqliteTable('stores', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	name: text('name').notNull(),
+	logoUrl: text('logo_url'),
+	address: text('address'),
+	phone: text('phone'),
+	receiptFooter: text('receipt_footer'),
+	taxRate: real('tax_rate').notNull().default(0),
+	currency: text('currency').notNull().default('IDR'),
+	currencySymbol: text('currency_symbol').notNull().default('Rp'),
+	createdById: text('created_by_id').references((): AnySQLiteColumn => users.id, { onDelete: 'cascade' }),
+	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),
+	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull()
+});
+
+// Users Table
 export const users = sqliteTable('users', {
 	id: text('id')
 		.primaryKey()
@@ -25,6 +45,7 @@ export const users = sqliteTable('users', {
 	businessName: text('business_name').notNull(),
 	role: text('role').notNull().default('super_admin'),
 	createdById: text('created_by_id'),
+	storeId: text('store_id').references((): AnySQLiteColumn => stores.id, { onDelete: 'set null' }),
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull()
 });
@@ -35,6 +56,7 @@ export const products = sqliteTable('products', {
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
 	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+	storeId: text('store_id').references(() => stores.id, { onDelete: 'cascade' }),
 	name: text('name').notNull(),
 	sku: text('sku').notNull(),
 	category: text('category').notNull(),
@@ -57,7 +79,11 @@ export const transactions = sqliteTable('transactions', {
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
 	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+	storeId: text('store_id').references(() => stores.id, { onDelete: 'cascade' }),
 	transactionCode: text('transaction_code').notNull().unique(),
+	recipientName: text('recipient_name'),
+	recipientPhone: text('recipient_phone'),
+	recipientAddress: text('recipient_address'),
 	totalAmount: integer('total_amount').notNull(),
 	totalCost: integer('total_cost').notNull(),
 	profit: integer('profit').notNull(),
@@ -68,7 +94,11 @@ export const transactions = sqliteTable('transactions', {
 	status: text('status').notNull().default('completed'), // 'completed' | 'voided'
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull(),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull()
-});
+}, (table) => ({
+	storeUserIdx: index('idx_transactions_store_user').on(table.storeId, table.userId),
+	createdAtIdx: index('idx_transactions_created_at').on(table.createdAt),
+	statusMethodIdx: index('idx_transactions_status_method').on(table.status, table.paymentMethod)
+}));
 
 // Transaction Items Table
 export const transactionItems = sqliteTable('transaction_items', {
@@ -87,7 +117,9 @@ export const transactionItems = sqliteTable('transaction_items', {
 	costPrice: integer('cost_price').notNull(),
 	sellingPrice: integer('selling_price').notNull(),
 	subtotal: integer('subtotal').notNull()
-});
+}, (table) => ({
+	trxIdIdx: index('idx_trx_items_trx_id').on(table.transactionId)
+}));
 
 // Settings Table
 export const settings = sqliteTable('settings', {
@@ -95,7 +127,9 @@ export const settings = sqliteTable('settings', {
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
 	userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+	storeId: text('store_id').references(() => stores.id, { onDelete: 'cascade' }),
 	businessName: text('business_name').notNull(),
+	logoUrl: text('logo_url'),
 	businessAddress: text('business_address'),
 	businessPhone: text('business_phone'),
 	currency: text('currency').notNull().default('IDR'),
@@ -108,6 +142,8 @@ export const settings = sqliteTable('settings', {
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date()).notNull()
 });
 
+export type Store = typeof stores.$inferSelect;
+export type InsertStore = typeof stores.$inferInsert;
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
 export type TransactionType = typeof transactions.$inferSelect;
@@ -118,3 +154,4 @@ export type Setting = typeof settings.$inferSelect;
 export type InsertSetting = typeof settings.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+

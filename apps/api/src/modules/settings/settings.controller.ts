@@ -20,7 +20,7 @@ export const settingsController = new Elysia({ prefix: '/settings' })
 		if (user === undefined) return { success: false, error: 'Server sedang bermasalah.' };
 		if (!user) return unauthorized(set);
 		const ownerId = user.createdById || user.id;
-		const data = await settingsService.getSettings(ownerId);
+		const data = await settingsService.getSettings(ownerId, user.storeId);
 		return { success: true, settings: data };
 	})
 	.put('/', async ({ body, set, request }: any) => {
@@ -29,7 +29,7 @@ export const settingsController = new Elysia({ prefix: '/settings' })
 		if (!user) return unauthorized(set);
 		try {
 			const ownerId = user.createdById || user.id;
-			const data = await settingsService.updateSettings(ownerId, body, user.email);
+			const data = await settingsService.updateSettings(ownerId, user.storeId, body, user.email);
 			return { success: true, settings: data, message: 'Profil bisnis berhasil diperbarui!' };
 		} catch (err: any) {
 			set.status = 400;
@@ -38,6 +38,7 @@ export const settingsController = new Elysia({ prefix: '/settings' })
 	}, {
 		body: t.Object({
 			businessName: t.String({ minLength: 1, error: 'Nama bisnis wajib diisi.' }),
+			logoUrl: t.Optional(t.String()),
 			businessAddress: t.Optional(t.String()),
 			businessPhone: t.Optional(t.String()),
 			currencySymbol: t.Optional(t.String()),
