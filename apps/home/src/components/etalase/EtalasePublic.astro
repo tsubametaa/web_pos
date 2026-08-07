@@ -1,0 +1,526 @@
+---
+import ProductModal from "./layout/modals/ProductModal.astro";
+import Dropdown from "./layout/Dropdown.astro";
+import SearchBar from "./layout/SearchBar.astro";
+import { PhoneCall, Search, ArrowRight, RotateCcw } from "lucide-astro";
+
+const initialBrandOptions = [{ value: "", label: "Semua Brand" }];
+const initialCategoryOptions = [{ value: "", label: "Semua Kategori" }];
+const sortOptions = [
+  { value: "newest", label: "Terbaru" },
+  { value: "price-asc", label: "Harga: Termurah" },
+  { value: "price-desc", label: "Harga: Tertinggi" },
+];
+---
+
+<section id="etalase" class="py-20 bg-theme-main relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div
+      class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12"
+    >
+      <div class="space-y-3 max-w-2xl">
+        <h2
+          class="text-3xl sm:text-4xl font-extrabold text-theme-main tracking-tight"
+        >
+          Etalase <span class="text-brand">Produk</span>
+        </h2>
+        <p class="text-theme-muted text-base">
+          Temukan ragam contoh produk buatan workshop Karya Sejati. Dapatkan
+          estimasi harga transparan dan spesifikasi lengkap.
+        </p>
+      </div>
+      <div
+        class="hidden sm:flex items-center space-x-3 p-4 rounded-md bg-theme-card border border-theme"
+      >
+        <div
+          class="w-10 h-10 rounded-md bg-brand-light border border-theme-brand text-brand flex items-center justify-center font-bold shrink-0"
+        >
+          <PhoneCall class="w-5 h-5 text-brand" />
+        </div>
+        <div>
+          <p
+            class="text-[10px] font-mono uppercase font-bold text-theme-subtle"
+          >
+            Kebutuhan Ukuran Custom?
+          </p>
+          <p class="text-sm font-bold text-theme-main">Hubungi Kami</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search & Cascading Dropdown Filter Controls Bar -->
+    <div
+      class="p-4 rounded-md bg-theme-card border border-theme shadow-theme mb-8 space-y-3 lg:space-y-0 lg:grid lg:grid-cols-12 gap-3 items-center"
+    >
+      <!-- Search Bar -->
+      <SearchBar class="lg:col-span-4" id="etalase-search" />
+
+      <!-- Cascading Filter Dropdowns Grid -->
+      <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <!-- Brand Dropdown -->
+        <div class="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+          <label
+            class="text-[11px] sm:text-xs font-mono font-bold text-theme-subtle uppercase shrink-0"
+            >Brand:</label
+          >
+          <Dropdown
+            id="etalase-brand"
+            placeholder="Semua Brand"
+            options={initialBrandOptions}
+          />
+        </div>
+
+        <!-- Category Dropdown -->
+        <div class="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+          <label
+            class="text-[11px] sm:text-xs font-mono font-bold text-theme-subtle uppercase shrink-0"
+            >Kategori:</label
+          >
+          <Dropdown
+            id="etalase-category"
+            placeholder="Semua Kategori"
+            options={initialCategoryOptions}
+          />
+        </div>
+
+        <!-- Sort Dropdown -->
+        <div class="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+          <label
+            class="text-[11px] sm:text-xs font-mono font-bold text-theme-subtle uppercase shrink-0"
+            >Urutkan:</label
+          >
+          <Dropdown
+            id="etalase-sort"
+            placeholder="Terbaru"
+            value="newest"
+            options={sortOptions}
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Grid Container -->
+    <div
+      id="etalase-grid"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
+      <div class="col-span-full py-16 text-center text-theme-subtle">
+        <div
+          class="w-8 h-8 border-3 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-3"
+        >
+        </div>
+        <p class="text-xs font-mono uppercase tracking-wider">
+          Memuat katalog etalase produk...
+        </p>
+      </div>
+    </div>
+
+    <!-- Empty State Container -->
+    <div
+      id="etalase-empty"
+      class="hidden py-16 text-center bg-theme-card rounded-md border border-theme space-y-4"
+    >
+      <div
+        class="w-12 h-12 rounded-md bg-brand-light text-brand flex items-center justify-center mx-auto border border-theme-brand"
+      >
+        <Search class="w-6 h-6 text-brand" />
+      </div>
+      <h3 class="text-lg font-bold text-theme-main">Produk Tidak Ditemukan</h3>
+      <p class="text-sm text-theme-subtle max-w-md mx-auto">
+        Tidak ada produk yang sesuai dengan Brand, Kategori, atau Kata Kunci
+        yang Anda pilih.
+      </p>
+      <button
+        id="reset-filter-btn"
+        class="px-4 py-2 rounded-md bg-brand text-white font-bold text-xs hover:bg-brand-hover transition-colors inline-flex items-center space-x-1.5 cursor-pointer"
+      >
+        <RotateCcw class="w-3.5 h-3.5" />
+        <span>Reset Filter</span>
+      </button>
+    </div>
+  </div>
+
+  <ProductModal />
+</section>
+
+<script>
+  import {
+    fetchEtalaseCatalog,
+    formatRupiah,
+    getProductImageUrl,
+  } from "../../lib/api";
+  import { FALLBACK_PRODUCTS, COMPANY_INFO } from "../../data/companyData";
+  import type { Product, ShopSettings, Store } from "../../lib/types";
+  import { animate, inView } from "motion";
+
+  inView("#etalase", () => {
+    const header = document.querySelector("#etalase .max-w-2xl");
+    const filterBar = document.querySelector("#etalase .shadow-theme");
+    if (header)
+      animate(
+        header as any,
+        { opacity: [0, 1], y: [20, 0] },
+        { duration: 0.55, ease: "easeOut" },
+      );
+    if (filterBar)
+      animate(
+        filterBar as any,
+        { opacity: [0, 1], y: [20, 0] },
+        { duration: 0.55, delay: 0.1, ease: "easeOut" },
+      );
+  });
+
+  let allProducts: Product[] = [];
+  let allStores: Store[] = [];
+  let shopSettings: ShopSettings | null = null;
+
+  let selectedBrandId = "";
+  let selectedCategory = "";
+  let searchQuery = "";
+  let sortBy = "newest";
+
+  const gridEl = document.getElementById("etalase-grid");
+  const emptyEl = document.getElementById("etalase-empty");
+  const searchInput = document.getElementById(
+    "etalase-search",
+  ) as HTMLInputElement | null;
+  const brandSelect = document.getElementById(
+    "etalase-brand",
+  ) as HTMLSelectElement | null;
+  const categorySelect = document.getElementById(
+    "etalase-category",
+  ) as HTMLSelectElement | null;
+  const sortSelect = document.getElementById(
+    "etalase-sort",
+  ) as HTMLSelectElement | null;
+  const resetBtn = document.getElementById("reset-filter-btn");
+
+  // Modal elements
+  const modalEl = document.getElementById("product-modal");
+  const modalContainer = modalEl?.querySelector(".modal-container");
+  const closeModalBtn = document.getElementById("close-modal-btn");
+  const cancelModalBtn = document.getElementById("modal-cancel-btn");
+  const modalTitle = document.getElementById("modal-title");
+  const modalCategory = document.getElementById("modal-category");
+  const modalSku = document.getElementById("modal-sku");
+  const modalPrice = document.getElementById("modal-price");
+  const modalUnit = document.getElementById("modal-unit");
+  const modalImage = document.getElementById(
+    "modal-image",
+  ) as HTMLImageElement | null;
+  const modalDescription = document.getElementById("modal-description");
+  const modalWaBtn = document.getElementById(
+    "modal-wa-btn",
+  ) as HTMLAnchorElement | null;
+
+  function updateCustomDropdownMenu(id: string, optionsList: { value: string; label: string }[], currentValue: string) {
+    const wrapper = document.getElementById(`${id}-wrapper`);
+    const menu = document.getElementById(`${id}-menu`);
+    const selectedLabel = document.getElementById(`${id}-selected-label`);
+    if (!menu || !wrapper) return;
+
+    const currentOpt = optionsList.find((o) => String(o.value) === String(currentValue)) || optionsList[0];
+    if (selectedLabel && currentOpt) {
+      selectedLabel.textContent = currentOpt.label;
+    }
+
+    const container = menu.querySelector(".custom-scrollbar");
+    if (!container) return;
+
+    container.innerHTML = optionsList
+      .map((opt) => {
+        const isSelected = String(opt.value) === String(currentValue);
+        return `
+        <button
+          type="button"
+          role="option"
+          aria-selected="${isSelected}"
+          data-value="${opt.value}"
+          data-label="${opt.label}"
+          class="w-full text-left px-3 py-2 rounded-sm text-xs font-semibold font-mono transition-colors flex items-center justify-between cursor-pointer ${
+            isSelected
+              ? 'bg-brand-light text-brand font-bold'
+              : 'text-theme-main hover:bg-theme-main hover:text-brand'
+          }"
+        >
+          <span class="truncate">${opt.label}</span>
+          ${isSelected ? '<span class="w-1.5 h-1.5 rounded-full bg-brand shrink-0 active-dot"></span>' : ''}
+        </button>
+      `;
+      })
+      .join("");
+
+    container.querySelectorAll('button[data-value]').forEach((btn) => {
+      btn.addEventListener('click', (evt) => {
+        evt.stopPropagation();
+        const val = btn.getAttribute('data-value') || '';
+        const lbl = btn.getAttribute('data-label') || '';
+        if (selectedLabel) selectedLabel.textContent = lbl;
+
+        container.querySelectorAll('button[data-value]').forEach((b) => {
+          b.setAttribute('aria-selected', 'false');
+          b.classList.remove('bg-brand-light', 'text-brand', 'font-bold');
+          b.classList.add('text-theme-main');
+          const dot = b.querySelector('.active-dot');
+          if (dot) dot.remove();
+        });
+
+        btn.setAttribute('aria-selected', 'true');
+        btn.classList.remove('text-theme-main');
+        btn.classList.add('bg-brand-light', 'text-brand', 'font-bold');
+        if (!btn.querySelector('.active-dot')) {
+          const dot = document.createElement('span');
+          dot.className = 'w-1.5 h-1.5 rounded-full bg-brand shrink-0 active-dot';
+          btn.appendChild(dot);
+        }
+
+        const event = new CustomEvent('dropdown:change', {
+          bubbles: true,
+          detail: { value: val, label: lbl, id: id },
+        });
+        wrapper.dispatchEvent(event);
+
+        menu.classList.remove('opacity-100', 'scale-100');
+        menu.classList.add('opacity-0', 'scale-95');
+        const trigger = document.getElementById(`${id}-trigger`);
+        const chevron = wrapper.querySelector('.dropdown-chevron');
+        if (chevron) chevron.classList.remove('rotate-180');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        setTimeout(() => menu.classList.add('hidden'), 150);
+      });
+    });
+  }
+
+  async function initEtalase() {
+    try {
+      const data = await fetchEtalaseCatalog();
+      if (data.products && data.products.length > 0) {
+        allProducts = data.products;
+        allStores = data.stores || [];
+        shopSettings = data.settings;
+      } else {
+        allProducts = FALLBACK_PRODUCTS;
+      }
+    } catch {
+      allProducts = FALLBACK_PRODUCTS;
+    }
+
+    renderBrandDropdown();
+    renderCategoryDropdown();
+    renderProducts();
+  }
+
+  function renderBrandDropdown() {
+    const storeMap = new Map<string, string>();
+    allStores.forEach((s) => storeMap.set(s.id, s.name));
+    const productStoreIds = Array.from(
+      new Set(allProducts.map((p) => p.storeId).filter(Boolean)),
+    );
+    const brandsList: { value: string; label: string }[] = [{ value: "", label: "Semua Brand" }];
+
+    if (allStores.length > 0) {
+      allStores.forEach((s) => brandsList.push({ value: s.id, label: s.name }));
+    } else {
+      productStoreIds.forEach((id) => {
+        brandsList.push({
+          value: id as string,
+          label: storeMap.get(id as string) || `Brand ${id}`,
+        });
+      });
+    }
+
+    updateCustomDropdownMenu("etalase-brand", brandsList, selectedBrandId);
+  }
+
+  function renderCategoryDropdown() {
+    const brandProducts = selectedBrandId
+      ? allProducts.filter((p) => p.storeId === selectedBrandId)
+      : allProducts;
+
+    const availableCategories = Array.from(
+      new Set(brandProducts.map((p) => p.category).filter(Boolean)),
+    );
+
+    const categoryList: { value: string; label: string }[] = [{ value: "", label: "Semua Kategori" }];
+    availableCategories.forEach((cat) => {
+      categoryList.push({ value: cat as string, label: cat as string });
+    });
+
+    updateCustomDropdownMenu("etalase-category", categoryList, selectedCategory);
+  }
+
+  function renderProducts() {
+    if (!gridEl || !emptyEl) return;
+
+    let filtered = allProducts.filter((p) => {
+      const matchesBrand = !selectedBrandId || p.storeId === selectedBrandId;
+      const matchesCategory =
+        !selectedCategory || p.category === selectedCategory;
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        (p.sku && p.sku.toLowerCase().includes(q)) ||
+        (p.description && p.description.toLowerCase().includes(q));
+      return (
+        matchesBrand && matchesCategory && matchesSearch && p.isActive !== false
+      );
+    });
+
+    filtered.sort((a, b) => {
+      if (sortBy === "price-asc") return a.sellingPrice - b.sellingPrice;
+      if (sortBy === "price-desc") return b.sellingPrice - a.sellingPrice;
+      return 0;
+    });
+
+    if (filtered.length === 0) {
+      gridEl.classList.add("hidden");
+      emptyEl.classList.remove("hidden");
+      return;
+    }
+
+    gridEl.classList.remove("hidden");
+    emptyEl.classList.add("hidden");
+
+    gridEl.innerHTML = filtered
+      .map(
+        (product) => `
+      <div data-product-id="${product.id}" class="product-card group architectural-card overflow-hidden transition-all duration-200 flex flex-col justify-between cursor-pointer">
+        <div>
+          <div class="relative w-full h-56 bg-slate-950 overflow-hidden border-b border-theme">
+            <img src="${getProductImageUrl(product.imageUrl || product.image)}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+            <div class="absolute top-3 left-3">
+              <span class="px-2.5 py-1 rounded-sm bg-slate-900/90 border border-slate-700 text-white font-mono font-bold text-[10px] uppercase tracking-wider">${product.category || "Umum"}</span>
+            </div>
+          </div>
+          <div class="p-5 space-y-3">
+            <h3 class="font-extrabold text-theme-main text-base group-hover:text-brand transition-colors line-clamp-2">${product.name}</h3>
+            <p class="text-theme-subtle text-xs leading-relaxed line-clamp-2">${product.description || "Produk buatan workshop Karya Sejati dengan spesifikasi dan ketahanan tinggi."}</p>
+          </div>
+        </div>
+        <div class="p-5 pt-0 space-y-4">
+          <div class="flex items-baseline justify-between border-t border-theme pt-4">
+            <div>
+              <span class="text-[10px] text-theme-subtle font-mono uppercase block">Estimasi Harga</span>
+              <span class="text-xl font-extrabold text-brand">${formatRupiah(product.sellingPrice)}</span>
+              ${product.unit ? `<span class="text-xs text-theme-subtle font-normal">/${product.unit}</span>` : ""}
+            </div>
+          </div>
+          <button type="button" class="w-full py-2.5 rounded-md bg-theme-main border border-theme group-hover:border-brand group-hover:bg-brand group-hover:text-white text-theme-main font-bold text-xs transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer">
+            <span>Lihat Detail & Pesan</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </button>
+        </div>
+      </div>
+    `,
+      )
+      .join("");
+
+    const cards = gridEl.querySelectorAll(".product-card");
+    if (cards.length > 0) {
+      animate(cards as any, { opacity: [0, 1], y: [15, 0] }, { duration: 0.4 });
+    }
+
+    gridEl.querySelectorAll(".product-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const id = card.getAttribute("data-product-id");
+        const prod = allProducts.find((p) => p.id === id);
+        if (prod) openModal(prod);
+      });
+    });
+  }
+
+  function openModal(prod: Product) {
+    if (!modalEl || !modalContainer) return;
+    if (modalTitle) modalTitle.textContent = prod.name;
+    if (modalCategory) modalCategory.textContent = prod.category || "Umum";
+    if (modalSku) modalSku.textContent = `SKU: ${prod.sku || "-"}`;
+    if (modalPrice) modalPrice.textContent = formatRupiah(prod.sellingPrice);
+    if (modalUnit) modalUnit.textContent = prod.unit ? `/${prod.unit}` : "";
+    if (modalImage)
+      modalImage.src = getProductImageUrl(prod.imageUrl || prod.image);
+    if (modalDescription)
+      modalDescription.textContent =
+        prod.description ||
+        "Produk kualitas tinggi karya workshop Karya Sejati.";
+
+    const waPhone = shopSettings?.businessPhone || COMPANY_INFO.whatsapp;
+    const msg = encodeURIComponent(
+      `Halo Karya Sejati, saya berminat dengan produk:\n\n*${prod.name}*\nHarga: ${formatRupiah(prod.sellingPrice)}${prod.unit ? "/" + prod.unit : ""}\n\nApakah bisa survei / diskusi estimasi ukuran?`,
+    );
+    if (modalWaBtn)
+      modalWaBtn.href = `https://wa.me/${waPhone.replace(/[^0-9]/g, "")}?text=${msg}`;
+
+    modalEl.classList.remove("hidden");
+    modalEl.classList.add("flex");
+    animate(
+      modalContainer as any,
+      { scale: [0.96, 1], opacity: [0, 1] },
+      { duration: 0.2 },
+    );
+  }
+
+  function closeModal() {
+    if (!modalEl || !modalContainer) return;
+    animate(
+      modalContainer as any,
+      { scale: [1, 0.96], opacity: [1, 0] },
+      { duration: 0.15 },
+    ).then(() => {
+      modalEl.classList.add("hidden");
+      modalEl.classList.remove("flex");
+    });
+  }
+
+  document.addEventListener("dropdown:change", (e: any) => {
+    const { id, value } = e.detail || {};
+    if (id === "etalase-brand") {
+      selectedBrandId = value;
+      selectedCategory = "";
+      renderCategoryDropdown();
+      renderProducts();
+    } else if (id === "etalase-category") {
+      selectedCategory = value;
+      renderProducts();
+    } else if (id === "etalase-sort") {
+      sortBy = value;
+      renderProducts();
+    }
+  });
+
+  function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    return (...args: Parameters<T>) => {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  }
+
+  const handleSearchDebounced = debounce((val: string) => {
+    searchQuery = val;
+    renderProducts();
+  }, 300);
+
+  searchInput?.addEventListener("input", (e) => {
+    handleSearchDebounced((e.target as HTMLInputElement).value);
+  });
+
+  resetBtn?.addEventListener("click", () => {
+    searchQuery = "";
+    selectedBrandId = "";
+    selectedCategory = "";
+    if (searchInput) searchInput.value = "";
+    renderBrandDropdown();
+    renderCategoryDropdown();
+    renderProducts();
+  });
+
+  closeModalBtn?.addEventListener("click", closeModal);
+  cancelModalBtn?.addEventListener("click", closeModal);
+  modalEl?.addEventListener("click", (e) => {
+    if (e.target === modalEl) closeModal();
+  });
+
+  initEtalase();
+</script>

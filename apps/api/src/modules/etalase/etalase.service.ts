@@ -1,5 +1,5 @@
 import { eq, and, gte, asc, isNull, or } from 'drizzle-orm';
-import { db, products, settings } from '../../db';
+import { db, products, settings, stores } from '../../db';
 
 export class EtalaseService {
 	private getUserCondition(userId: string | undefined, field: any) {
@@ -27,8 +27,11 @@ export class EtalaseService {
 			.where(and(...prodConditions))
 			.orderBy(asc(products.name));
 
+		const storesList = await db.select().from(stores);
+
 		return {
 			products: productsList,
+			stores: storesList,
 			settings: shopSettings
 				? {
 						businessName: shopSettings.businessName,
@@ -39,6 +42,7 @@ export class EtalaseService {
 				: null
 		};
 	}
+
 
 	async getCatalogProductById(id: string, userId?: string) {
 		const prodCondition = this.getUserCondition(userId, products.userId);

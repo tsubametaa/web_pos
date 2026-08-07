@@ -1,0 +1,106 @@
+---
+import { ShieldCheck, X, MessageSquare } from 'lucide-astro';
+---
+
+<div
+  id="product-modal"
+  class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm transition-opacity duration-200"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-title"
+>
+  <div class="relative w-full max-w-2xl bg-theme-card rounded-md border border-theme shadow-theme overflow-hidden flex flex-col max-h-[90vh] transition-transform duration-200 scale-95 opacity-0 modal-container">
+    
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-theme bg-theme-main">
+      <div class="flex items-center space-x-3">
+        <span id="modal-category" class="px-2.5 py-1 rounded-sm bg-brand-light border border-theme-brand text-brand font-mono font-bold text-xs uppercase tracking-wider">
+          Kategori
+        </span>
+        <span id="modal-sku" class="text-xs font-mono text-theme-subtle uppercase">
+          SKU: -
+        </span>
+      </div>
+
+      <button
+        id="close-modal-btn"
+        type="button"
+        class="p-2 rounded-md text-theme-muted hover:text-brand hover:bg-brand-light transition-colors cursor-pointer"
+        aria-label="Tutup Modal"
+      >
+        <X class="w-5 h-5" />
+      </button>
+    </div>
+
+    <!-- Modal Content Body -->
+    <div class="p-4 sm:p-6 overflow-y-auto space-y-5 sm:space-y-6">
+      <!-- Product Image -->
+      <div class="relative w-full h-64 sm:h-80 rounded-md overflow-hidden bg-slate-950 border border-theme">
+        <img
+          id="modal-image"
+          src=""
+          alt="Product detail"
+          class="w-full h-full object-cover"
+        />
+      </div>
+
+      <!-- Title & Price -->
+      <div class="space-y-2">
+        <h3 id="modal-title" class="text-2xl font-extrabold text-theme-main leading-snug">
+          Nama Produk
+        </h3>
+        
+        <div class="flex items-baseline space-x-2">
+          <span id="modal-price" class="text-3xl font-extrabold text-brand">
+            Rp 0
+          </span>
+          <span id="modal-unit" class="text-sm font-semibold text-theme-subtle">
+            / unit
+          </span>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="space-y-2 pt-2 border-t border-theme">
+        <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-theme-subtle">Deskripsi & Spesifikasi</h4>
+        <p id="modal-description" class="text-theme-muted text-sm leading-relaxed whitespace-pre-line">
+          Tidak ada deskripsi produk.
+        </p>
+      </div>
+
+      <!-- Workshop Assurance -->
+      <div class="p-4 rounded-md bg-theme-main border border-theme flex items-center space-x-3 text-xs text-theme-muted">
+        <div class="w-8 h-8 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center font-bold shrink-0">
+          <ShieldCheck class="w-5 h-5 text-emerald-500" />
+        </div>
+        <div>
+          <p class="font-bold text-theme-main">Pengerjaan Langsung Workshop Karya Sejati</p>
+          <p>Harga dapat disesuaikan dengan ukuran custom dan volume proyek bangunan Anda.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div class="px-6 py-4 border-t border-theme bg-theme-main flex flex-col sm:flex-row items-center justify-between gap-3">
+      <button
+        id="modal-cancel-btn"
+        type="button"
+        class="w-full sm:w-auto px-5 py-2.5 rounded-md border border-theme text-theme-main font-semibold text-xs hover:bg-theme-card transition-colors cursor-pointer"
+      >
+        Tutup
+      </button>
+
+      <a
+        id="modal-wa-btn"
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="w-full sm:w-auto flex-1 inline-flex items-center justify-center space-x-2 px-6 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-theme transition-all duration-200"
+      >
+        <MessageSquare class="w-4 h-4" />
+        <span>Tanyakan / Pesan via WhatsApp</span>
+      </a>
+    </div>
+
+  </div>
+</div>

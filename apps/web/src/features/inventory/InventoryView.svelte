@@ -72,6 +72,21 @@
     }
   }
 
+  async function handleDeleteProduct(product: UIProduct) {
+    if (!confirm(`Apakah Anda yakin ingin menghapus produk "${product.name}" secara permanen?`)) {
+      return;
+    }
+    try {
+      const res = await api.delete(`/products?id=${product.id}&permanent=true`);
+      if (res.success) {
+        products = products.filter((p) => p.id !== product.id);
+        toast.success(`Produk "${product.name}" berhasil dihapus.`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal menghapus produk.');
+    }
+  }
+
   async function handleFormSave(formData: any) {
     isSaving = true;
     try {
@@ -129,18 +144,18 @@
   <div class="flex flex-col gap-6 text-ink w-full pb-8 select-none">
     <!-- Top Bar & Title -->
     <div
-      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-base/90 dark:bg-surface/60 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl shadow-2xs"
+      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-surface border border-border-theme rounded-2xl shadow-2xs"
     >
       <div class="space-y-1">
         <div class="flex items-center gap-2.5">
-          <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+          <div class="p-2 rounded-xl bg-accent-soft text-accent">
             <Package class="w-5 h-5" />
           </div>
-          <h1 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 class="text-lg sm:text-xl font-black text-h-text tracking-tight">
             Manajemen Inventori
           </h1>
         </div>
-        <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium">
+        <p class="text-xs text-ink-muted font-medium">
           Kelola katalog produk, pantau persediaan stok, dan atur harga jual serta HPP toko Anda.
         </p>
       </div>
@@ -148,7 +163,7 @@
       <button
         type="button"
         onclick={handleAdd}
-        class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl shadow-xs hover:shadow transition-all duration-150 group shrink-0 cursor-pointer"
+        class="inline-flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-xs font-extrabold rounded-xl shadow-xs hover:shadow transition-all duration-150 group shrink-0 cursor-pointer"
       >
         <Plus class="w-4 h-4 group-hover:rotate-90 transition-transform" />
         <span>Tambah Produk Baru</span>
@@ -158,45 +173,45 @@
     <!-- Summary KPI Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <div
-        class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
+        class="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
       >
         <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <span class="text-xs font-bold text-ink-muted uppercase tracking-wider">
             Total Produk
           </span>
-          <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+          <div class="p-1.5 rounded-lg bg-accent-soft text-accent">
             <Package class="w-4 h-4" />
           </div>
         </div>
-        <span class="text-xl sm:text-2xl font-black text-slate-800 dark:text-white font-mono">
-          {totalProducts} <span class="text-xs font-semibold text-slate-400">Item</span>
+        <span class="text-xl sm:text-2xl font-black text-h-text font-mono">
+          {totalProducts} <span class="text-xs font-semibold text-ink-muted">Item</span>
         </span>
       </div>
 
       <div
-        class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
+        class="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
       >
         <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <span class="text-xs font-bold text-ink-muted uppercase tracking-wider">
             Produk Aktif
           </span>
-          <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+          <div class="p-1.5 rounded-lg bg-accent-soft text-accent">
             <CheckCircle2 class="w-4 h-4" />
           </div>
         </div>
-        <span class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
-          {activeProducts} <span class="text-xs font-semibold text-slate-400">Aktif</span>
+        <span class="text-xl sm:text-2xl font-black text-accent font-mono">
+          {activeProducts} <span class="text-xs font-semibold text-ink-muted">Aktif</span>
         </span>
       </div>
 
       <div
-        class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
+        class="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
       >
         <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <span class="text-xs font-bold text-ink-muted uppercase tracking-wider">
             Stok Menipis
           </span>
-          <div class="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+          <div class="p-1.5 rounded-lg bg-amber-500/10 text-amber-600">
             <AlertTriangle class="w-4 h-4" />
           </div>
         </div>
@@ -206,17 +221,17 @@
       </div>
 
       <div
-        class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
+        class="bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
       >
         <div class="flex items-center justify-between gap-2">
-          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          <span class="text-xs font-bold text-ink-muted uppercase tracking-wider">
             Nilai Estimasi Stok
           </span>
-          <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+          <div class="p-1.5 rounded-lg bg-accent-soft text-accent">
             <Coins class="w-4 h-4" />
           </div>
         </div>
-        <span class="text-xl sm:text-2xl font-black text-slate-800 dark:text-white font-mono truncate">
+        <span class="text-xl sm:text-2xl font-black text-h-text font-mono truncate">
           {formatCurrency(totalInventoryValuation)}
         </span>
       </div>
@@ -229,6 +244,7 @@
       onedit={handleEdit}
       onadjust={handleAdjustStock}
       onshare={handleShare}
+      ondelete={handleDeleteProduct}
       ontoggle={handleToggleStatus}
     />
   </div>

@@ -12,54 +12,78 @@
 	--color-accent: var(--color-accent);
 	--color-accent-hover: var(--color-accent-hover);
 	--color-accent-soft: var(--color-accent-soft);
+	--color-accent-soft-text: var(--color-accent-soft-text);
 	--color-ink: var(--color-ink);
 	--color-ink-muted: var(--color-ink-muted);
+	--color-border-theme: var(--color-border-theme);
 	
 	/* Typography colors */
 	--color-h-text: var(--color-h-text);
 	--color-p-text: var(--color-p-text);
 
+	/* Aliases for quick access & compatibility */
+	--color-brand: var(--color-accent);
+	--color-brand-hover: var(--color-accent-hover);
+	--color-brand-soft: var(--color-accent-soft);
+
+	/* Map legacy emerald utilities directly to theme variables */
+	--color-emerald-50: var(--color-accent-soft);
+	--color-emerald-100: var(--color-accent-soft);
+	--color-emerald-200: var(--color-accent-soft);
+	--color-emerald-300: var(--color-accent-soft-text);
+	--color-emerald-400: var(--color-accent-soft-text);
+	--color-emerald-500: var(--color-accent);
+	--color-emerald-600: var(--color-accent);
+	--color-emerald-700: var(--color-accent-soft-text);
+	--color-emerald-800: var(--color-accent-soft-text);
+	--color-emerald-900: var(--color-surface);
+	--color-emerald-950: var(--color-surface);
+
 	/* Maintain backward compatibility with old color names */
 	--color-sage-50: var(--color-base);
 	--color-sage-100: var(--color-surface);
 	--color-sage-200: var(--color-accent-soft);
-	--color-sage-300: var(--color-accent-soft);
+	--color-sage-300: var(--color-accent-soft-text);
 	--color-sage-500: var(--color-accent);
-	--color-sage-650: var(--color-ink);
 	--color-sage-600: var(--color-accent-hover);
-	--color-sage-700: var(--color-ink);
+	--color-sage-650: var(--color-ink);
+	--color-sage-700: var(--color-accent-soft-text);
 }
 
 :root {
-	/* Light Theme Colors (Green palette) */
-	--color-base: #F0FDF4;      /* 60% — background dominan */
-	--color-surface: #D1FAE5;   /* 30% — card, sidebar, panel */
-	--color-accent: #34D399;    /* 10% — CTA, active state, highlight */
+	/* Light Theme Colors (60-30-10 Palette) */
+	--color-base: #F0F9F9;      /* 60% — Dominant background */
+	--color-surface: #FFFFFF;   /* Card, sidebar, & panel surface */
+	--color-accent: #FF0000;    /* 30% — Secondary & brand accent */
 	
 	/* Interactive states */
-	--color-accent-hover: #10B981;
-	--color-accent-soft: #A7F3D0;
-	--color-ink: #064E3B;       /* Text color over green */
-	--color-ink-muted: #636E72;
+	--color-accent-hover: #DC2626;
+	--color-accent-soft: #FFE6E6;
+	--color-accent-soft-text: #B91C1C; /* Dark red text for high contrast on light red background */
+	--color-ink: #000033;       /* 10% — Text & high contrast focal elements */
+	--color-ink-muted: #4D4D7A;
+	--color-border-theme: rgba(0, 0, 51, 0.1);
 	
-	--color-h-text: #2D3436;
-	--color-p-text: #636E72;
+	--color-h-text: #000033;
+	--color-p-text: #101046;
 }
 
 :root[data-theme="dark"] {
-	/* Dark Theme Colors */
-	--color-base: #022C22;      /* 60% — background dominan */
-	--color-surface: #064E3B;   /* 30% — card, sidebar, panel */
-	--color-accent: #34D399;    /* 10% — CTA, active state */
+	/* Dark Theme Colors (60-30-10 Palette) */
+	--color-base: #1A1A1A;      /* 60% — Dominant background */
+	--color-surface: #242424;   /* Card, sidebar, & panel surface */
+	--color-accent: #FF3333;    /* 30% — Bright vibrant red for dark mode contrast */
 	
 	/* Interactive states */
-	--color-accent-hover: #6EE7B7;
-	--color-accent-soft: #065F46;
-	--color-ink: #F0FDF4;
+	--color-accent-hover: #FF5555;
+	--color-accent-soft: rgba(255, 0, 0, 0.18); /* Semi-transparent overlay for soft containers */
+	--color-accent-soft-text: #FFAAAA; /* High contrast bright pink-red text/icons for dark mode */
+	--color-ink: #D1D1D1;       /* 10% — Text & high contrast elements */
 	--color-ink-muted: #9CA3AF;
+	--color-border-theme: rgba(255, 255, 255, 0.08);
 	
-	--color-h-text: #F0FDF4;
-	--color-p-text: #9CA3AF;
+	--color-h-text: #FFFFFF;
+	--color-p-text: #D1D1D1;
 }
 
 body {
@@ -70,22 +94,23 @@ body {
 	transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Scrollbar Styles */
+/* Scrollbar Styles — Neutral default colors, hidden by default and only visible on hover */
 ::-webkit-scrollbar {
 	width: 6px;
 	height: 6px;
 }
 ::-webkit-scrollbar-track {
-	background: rgba(191, 200, 189, 0.2);
+	background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-	background: var(--color-accent-hover);
-	opacity: 0.3;
+	background: transparent;
 	border-radius: 9999px;
 }
+*:hover::-webkit-scrollbar-thumb {
+	background: rgba(156, 163, 175, 0.35);
+}
 ::-webkit-scrollbar-thumb:hover {
-	background: var(--color-accent-hover);
-	opacity: 0.6;
+	background: rgba(100, 116, 139, 0.65);
 }
 
 .scrollbar-none::-webkit-scrollbar {
@@ -99,17 +124,17 @@ body {
 /* Glassmorphic Panel Styles adjusted for color variables */
 .glass-panel {
 	background: var(--color-surface);
-	border: 1px solid rgba(52, 211, 153, 0.15);
-	box-shadow: 0 4px 12px 0 rgba(2, 44, 34, 0.03);
+	border: 1px solid rgba(255, 0, 0, 0.15);
+	box-shadow: 0 4px 12px 0 rgba(0, 0, 51, 0.04);
 }
 
 .glass-panel-glow {
 	background: var(--color-surface);
-	border: 1px solid rgba(52, 211, 153, 0.25);
-	box-shadow: 0 12px 40px 0 rgba(2, 44, 34, 0.08), inset 0 0 0 1px rgba(240, 253, 244, 0.2);
+	border: 1px solid rgba(255, 0, 0, 0.25);
+	box-shadow: 0 12px 40px 0 rgba(0, 0, 51, 0.08), inset 0 0 0 1px rgba(255, 230, 230, 0.2);
 }
 
 .glass-card {
 	background: var(--color-accent-soft);
-	border: 1px solid rgba(52, 211, 153, 0.1);
+	border: 1px solid rgba(255, 0, 0, 0.12);
 }

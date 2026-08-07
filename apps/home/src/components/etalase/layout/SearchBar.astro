@@ -1,0 +1,29 @@
+---
+import { Search } from 'lucide-astro';
+
+interface Props {
+  id?: string;
+  placeholder?: string;
+  class?: string;
+}
+
+const {
+  id = 'etalase-search',
+  placeholder = 'Cari produk (contoh: kusen, kitchen set, jendela)...',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class={`relative ${className}`}>
+  <div
+    class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-theme-subtle"
+  >
+    <Search class="w-4 h-4 text-theme-subtle" />
+  </div>
+  <input
+    id={id}
+    type="text"
+    placeholder={placeholder}
+    class="w-full pl-10 pr-4 py-2.5 rounded-md bg-theme-main border border-theme text-theme-main placeholder-theme-subtle focus:outline-none focus:border-brand transition-colors text-xs font-medium"
+  />
+</div>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { appState } from '../../core/state.svelte';
-  import logoUrl from '../../assets/img/arthapos.svg';
+  import logoUrl from '../../assets/img/kslogo.svg';
   import {
     LayoutDashboard,
     ShoppingCart,
@@ -121,7 +121,7 @@
 
 <!-- Sticky Desktop Sidebar Container -->
 <aside
-  class="fixed inset-y-0 left-0 z-50 bg-base/95 dark:bg-base/90 backdrop-blur-md border-r border-slate-200/80 dark:border-emerald-950/80 flex flex-col justify-between transition-all duration-200 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 shadow-2xs select-none
+  class="fixed inset-y-0 left-0 z-50 bg-base/95 backdrop-blur-md border-r border-border-theme flex flex-col justify-between transition-all duration-200 ease-in-out lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 shadow-2xs select-none
 		{sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
 		{isCollapsed ? 'w-64 lg:w-19' : 'w-64 lg:w-64'}"
 >
@@ -129,7 +129,7 @@
   <button
     type="button"
     onclick={onToggleCollapse}
-    class="hidden lg:flex absolute -right-3.5 top-7 z-50 items-center justify-center w-7 h-7 rounded-full border border-slate-200 dark:border-emerald-900/60 bg-base text-slate-500 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 shadow-md hover:scale-105 cursor-pointer transition-all duration-150"
+    class="hidden lg:flex absolute -right-3.5 top-7 z-50 items-center justify-center w-7 h-7 rounded-full border border-border-theme bg-base text-ink-muted hover:text-accent shadow-md hover:scale-105 cursor-pointer transition-all duration-150"
     aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
     title={isCollapsed ? 'Buka Sidebar' : 'Tutup Sidebar'}
   >
@@ -147,7 +147,7 @@
       : 'overflow-y-auto'} scrollbar-none"
   >
     <div
-      class="h-16 px-5 flex items-center border-b border-slate-200/60 dark:border-emerald-950/60 transition-all duration-200
+      class="h-16 px-5 flex items-center border-b border-border-theme transition-all duration-200
 			{isCollapsed ? 'lg:justify-center' : 'justify-start'}"
     >
       <a href="#/dashboard" class="flex items-center group overflow-hidden">
@@ -165,7 +165,7 @@
         <div class="space-y-1">
           <!-- Section Title (Hidden when collapsed on desktop) -->
           <div
-            class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-emerald-500/70 transition-all duration-200
+            class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-ink-muted transition-all duration-200
 						{isCollapsed ? 'lg:hidden' : 'block'}"
           >
             {group.title}
@@ -179,19 +179,19 @@
               class="relative group flex items-center rounded-xl text-[13px] font-medium transition-all duration-150 cursor-pointer
 								{isCollapsed ? 'lg:justify-center lg:px-0 lg:py-2.5 px-3 py-2.5 gap-3' : 'gap-3 px-3.5 py-2.5'}
 								{isActive
-                ? 'bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-semibold shadow-2xs'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-emerald-500/10 dark:hover:bg-emerald-500/10'}"
+                ? 'bg-accent-soft text-accent-soft-text font-extrabold shadow-2xs border border-accent/20'
+                : 'text-p-text hover:text-h-text hover:bg-accent-soft/60'}"
             >
               <!-- Active Highlight Pill -->
               {#if isActive}
                 <div
-                  class="absolute left-0 top-2 bottom-2 w-1 bg-emerald-500 rounded-r-full shadow-xs"
+                  class="absolute left-0 top-2 bottom-2 w-1 bg-accent rounded-r-full shadow-xs"
                 ></div>
               {/if}
 
               <item.icon
                 class="w-5 h-5 shrink-0 transition-transform duration-150 group-hover:scale-110
-								{isActive ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-400 dark:text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-300'}"
+								{isActive ? 'text-accent-soft-text' : 'text-ink-muted group-hover:text-accent-soft-text'}"
               />
 
               <span
@@ -220,7 +220,7 @@
   </div>
 
   <!-- User Profile Footer Area -->
-  <div class="p-3 border-t border-slate-200/60 dark:border-emerald-950/60 bg-base/60 dark:bg-base/40">
+  <div class="p-3 border-t border-slate-200/60 dark:border-slate-800/60 bg-base/60 dark:bg-base/40">
     {#if isCollapsed}
       <!-- Collapsed Desktop Mode: ONLY Clean Centered Logout Button -->
       <div class="hidden lg:flex items-center justify-center">
@@ -230,7 +230,7 @@
           class="w-10 h-10 rounded-xl text-slate-400 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 bg-emerald-500/5 dark:bg-emerald-950/30 hover:bg-rose-500/15 dark:hover:bg-rose-950/40 border border-slate-200/60 dark:border-emerald-950/60 hover:border-rose-500/30 cursor-pointer transition-all duration-150 relative group flex items-center justify-center shadow-2xs"
           aria-label="Keluar Akun"
         >
-          <LogOut class="w-4.5 h-4.5 stroke-[2]" />
+          <LogOut class="w-4.5 h-4.5 stroke-2" />
           <!-- Floating Tooltip -->
           <div
             class="absolute left-full ml-3 px-3 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-150 whitespace-nowrap z-50 flex flex-col gap-0.5"

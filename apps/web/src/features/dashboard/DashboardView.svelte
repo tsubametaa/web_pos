@@ -114,9 +114,9 @@
         label: "Penjualan Hari Ini",
         value: formatCurrency(data?.stats?.todaySales ?? 0),
         icon: TrendingUp,
-        color: "text-emerald-600 dark:text-emerald-400",
+        color: "text-red-600 dark:text-red-400",
         badgeBg:
-          "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+          "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20",
       },
     ];
 
@@ -125,9 +125,9 @@
         label: "Profit Hari Ini",
         value: formatCurrency(data?.stats?.todayProfit ?? 0),
         icon: Coins,
-        color: "text-emerald-600 dark:text-emerald-400",
+        color: "text-red-600 dark:text-red-400",
         badgeBg:
-          "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+          "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20",
       });
     }
 
@@ -183,40 +183,31 @@
     <!-- Welcome Header Banner displaying user / business name from DB -->
 
     <div
-      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-base/90 dark:bg-surface/60 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl shadow-2xs"
+      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-surface/90 border border-border-theme rounded-2xl shadow-2xs"
     >
       <div class="space-y-1">
         <div class="flex items-center gap-2">
           <h1
-            class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight"
+            class="text-lg sm:text-xl font-black text-h-text tracking-tight"
           >
             Selamat Datang Kembali, {userNameDisplay}!
           </h1>
         </div>
-        <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium">
+        <p class="text-xs text-ink-muted font-medium">
           Ringkasan performa dan aktivitas toko Anda per <span
-            class="font-semibold text-slate-700 dark:text-slate-300"
+            class="font-semibold text-ink"
             >{currentDateFormatted()}</span
           >.
         </p>
       </div>
 
-      <!-- Quick Action Buttons -->
-      <div class="flex items-center gap-2.5 shrink-0">
-        <a
-          href="#/pos"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs hover:shadow transition-all duration-150 group"
+      <div class="flex items-center gap-2 shrink-0">
+        <span
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-accent bg-accent-soft rounded-xl border border-accent/20"
         >
-          <Plus class="w-4 h-4 group-hover:rotate-90 transition-transform" />
-          <span>Transaksi Baru</span>
-        </a>
-        <a
-          href="#/inventory"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-base hover:bg-emerald-500/10 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-emerald-200 border border-slate-200/80 dark:border-emerald-900/40 rounded-xl font-bold text-xs shadow-2xs transition-all duration-150"
-        >
-          <Package class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <span>Kelola Stok</span>
-        </a>
+          <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+          Sesi Aktif
+        </span>
       </div>
     </div>
 
@@ -259,37 +250,37 @@
 
         <!-- Recent Transactions Panel -->
         <div
-          class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl shadow-2xs overflow-hidden flex flex-col"
+          class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-2xs overflow-hidden flex flex-col"
         >
           <div
-            class="flex items-center justify-between px-5 py-4 border-b border-slate-200/60 dark:border-emerald-950/60"
+            class="flex items-center justify-between px-5 py-4 border-b border-slate-200/60 dark:border-slate-800/60"
           >
             <div class="flex items-center gap-2.5">
               <div
-                class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                class="p-1.5 rounded-lg bg-red-500/10 text-red-700 dark:text-red-400"
               >
                 <Clock class="w-4 h-4" />
               </div>
               <h3
-                class="text-xs font-bold text-slate-800 dark:text-emerald-100 uppercase tracking-wider"
+                class="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider"
               >
                 Transaksi Terbaru
               </h3>
             </div>
             <a
               href="#/sales"
-              class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 flex items-center gap-1 transition-colors"
+              class="text-xs font-bold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 flex items-center gap-1 transition-colors"
             >
               <span>Lihat Semua</span>
               <ArrowUpRight class="w-3.5 h-3.5" />
             </a>
           </div>
 
-          <div class="divide-y divide-slate-200/40 dark:divide-emerald-950/40">
+          <div class="divide-y divide-slate-200/40 dark:divide-slate-800/40">
             {#if data.recentTransactions?.length > 0}
               {#each data.recentTransactions as trx (trx.id)}
                 <div
-                  class="px-5 py-3 flex items-center justify-between gap-4 hover:bg-emerald-500/5 transition-colors"
+                  class="px-5 py-3 flex items-center justify-between gap-4 hover:bg-red-500/5 transition-colors"
                 >
                   <div class="flex-1 min-w-0">
                     <p
@@ -303,12 +294,12 @@
                   </div>
                   <div class="text-right flex flex-col items-end shrink-0">
                     <p
-                      class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400"
+                      class="text-xs font-mono font-black text-red-600 dark:text-red-400"
                     >
                       {formatCurrency(trx.totalAmount)}
                     </p>
                     <span
-                      class="inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 mt-1"
+                      class="inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/20 mt-1"
                     >
                       {trx.paymentMethod}
                     </span>
@@ -330,10 +321,10 @@
       <div class="flex flex-col gap-6">
         <!-- Low Stock Alert Box -->
         <div
-          class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl shadow-2xs overflow-hidden flex flex-col"
+          class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-2xs overflow-hidden flex flex-col"
         >
           <div
-            class="flex items-center justify-between px-5 py-4 border-b border-slate-200/60 dark:border-emerald-950/60"
+            class="flex items-center justify-between px-5 py-4 border-b border-slate-200/60 dark:border-slate-800/60"
           >
             <div class="flex items-center gap-2.5">
               <div
@@ -342,20 +333,20 @@
                 <AlertTriangle class="w-4 h-4" />
               </div>
               <h3
-                class="text-xs font-bold text-slate-800 dark:text-emerald-100 uppercase tracking-wider"
+                class="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider"
               >
                 Stok Menipis
               </h3>
             </div>
             <a
               href="#/inventory"
-              class="text-[11px] font-bold text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors"
+              class="text-[11px] font-bold text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition-colors"
             >
               Kelola Stok &rarr;
             </a>
           </div>
 
-          <div class="divide-y divide-slate-200/40 dark:divide-emerald-950/40">
+          <div class="divide-y divide-slate-200/40 dark:divide-slate-800/40">
             {#if data.lowStockProducts?.length > 0}
               {#each data.lowStockProducts as product (product.id)}
                 <div
@@ -389,22 +380,49 @@
           </div>
         </div>
 
-        <!-- Quick Access Shortcuts Grid -->
+        <!-- Main Quick Action Buttons Box (Transaksi Baru & Kelola Stok) -->
         <div
-          class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-5 shadow-2xs flex flex-col gap-4"
+          class="bg-surface border border-border-theme rounded-2xl p-5 shadow-2xs flex flex-col gap-3.5"
         >
           <h3
-            class="text-xs font-bold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
+            class="text-xs font-bold text-ink-muted uppercase tracking-wider"
+          >
+            Tindakan Utama
+          </h3>
+          <div class="grid grid-cols-2 gap-3">
+            <a
+              href="#/pos"
+              class="inline-flex items-center justify-center gap-2 px-3.5 py-3 bg-accent hover:bg-accent-hover active:scale-[0.98] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow transition-all duration-150 group text-center"
+            >
+              <Plus class="w-4 h-4 group-hover:rotate-90 transition-transform duration-200 shrink-0" />
+              <span class="truncate">Transaksi Baru</span>
+            </a>
+            <a
+              href="#/inventory"
+              class="inline-flex items-center justify-center gap-2 px-3.5 py-3 bg-base hover:bg-accent-soft active:scale-[0.98] text-ink border border-border-theme rounded-xl font-bold text-xs shadow-2xs transition-all duration-150 text-center"
+            >
+              <Package class="w-4 h-4 text-accent shrink-0" />
+              <span class="truncate">Kelola Stok</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Access Shortcuts Grid -->
+        <div
+          class="bg-surface border border-border-theme rounded-2xl p-5 shadow-2xs flex flex-col gap-4"
+        >
+          <h3
+            class="text-xs font-bold text-ink-muted uppercase tracking-wider"
           >
             Akses Cepat POS
           </h3>
           <div class="grid grid-cols-2 gap-3">
             <a
               href="#/pos"
-              class="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl border border-slate-200/80 dark:border-emerald-950/80 bg-base/50 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/15 text-slate-700 dark:text-slate-200 transition-all duration-150 group text-center"
+              class="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl border border-border-theme bg-base/50 hover:bg-accent-soft text-ink transition-all duration-150 group text-center"
             >
               <div
-                class="p-2.5 bg-emerald-600 text-white rounded-xl shadow-2xs group-hover:scale-110 transition-transform"
+                class="p-2.5 bg-accent text-white rounded-xl shadow-2xs group-hover:scale-110 transition-transform"
               >
                 <ShoppingCart class="w-4 h-4" />
               </div>
@@ -413,7 +431,7 @@
 
             <a
               href="#/inventory"
-              class="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl border border-slate-200/80 dark:border-emerald-950/80 bg-base/50 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/15 text-slate-700 dark:text-slate-200 transition-all duration-150 group text-center"
+              class="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl border border-border-theme bg-base/50 hover:bg-accent-soft text-ink transition-all duration-150 group text-center"
             >
               <div
                 class="p-2.5 bg-amber-500 text-white rounded-xl shadow-2xs group-hover:scale-110 transition-transform"
@@ -425,7 +443,7 @@
 
             <a
               href="#/sales"
-              class="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl border border-slate-200/80 dark:border-emerald-950/80 bg-base/50 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/15 text-slate-700 dark:text-slate-200 transition-all duration-150 group text-center"
+              class="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl border border-border-theme bg-base/50 hover:bg-accent-soft text-ink transition-all duration-150 group text-center"
             >
               <div
                 class="p-2.5 bg-blue-600 text-white rounded-xl shadow-2xs group-hover:scale-110 transition-transform"
@@ -437,7 +455,7 @@
 
             <a
               href="#/settings"
-              class="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl border border-slate-200/80 dark:border-emerald-950/80 bg-base/50 hover:bg-emerald-500/10 dark:hover:bg-emerald-500/15 text-slate-700 dark:text-slate-200 transition-all duration-150 group text-center"
+              class="flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl border border-border-theme bg-base/50 hover:bg-accent-soft text-ink transition-all duration-150 group text-center"
             >
               <div
                 class="p-2.5 bg-slate-700 text-white rounded-xl shadow-2xs group-hover:scale-110 transition-transform"

@@ -143,7 +143,7 @@
       class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center flex-1 min-w-0 flex-wrap"
     >
       <!-- Search Input -->
-      <div class="relative flex-1 min-w-[200px] max-w-xs">
+      <div class="relative flex-1 min-w-50 max-w-xs">
         <Search
           class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
         />
@@ -165,7 +165,7 @@
       </div>
 
       <!-- Custom Filter Dropdown for Payment Methods -->
-      <div class="min-w-[210px]">
+      <div class="min-w-52.5">
         <Dropdown
           options={dropdownOptions}
           bind:value={filterMethod}
@@ -174,7 +174,7 @@
       </div>
 
       <!-- Custom Filter Dropdown for Months (CustomSelect UI) -->
-      <div class="min-w-[180px]">
+      <div class="min-w-45">
         <CustomSelect
           options={monthOptions}
           value={selectedMonth}
@@ -190,7 +190,7 @@
         <button
           type="button"
           onclick={ondownloadpdf}
-          class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs hover:shadow transition-all cursor-pointer"
+          class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-accent hover:bg-accent-hover text-white font-bold text-xs rounded-xl shadow-xs hover:shadow transition-all cursor-pointer"
           title="Unduh Laporan Rekapan PDF"
         >
           <FileText class="w-4 h-4" />
@@ -202,7 +202,7 @@
         <button
           type="button"
           onclick={ondownloadexcel}
-          class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs hover:shadow transition-all cursor-pointer"
+          class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-accent hover:bg-accent-hover text-white font-bold text-xs rounded-xl shadow-xs hover:shadow transition-all cursor-pointer"
           title="Unduh Laporan Rekapan Excel (.csv)"
         >
           <FileSpreadsheet class="w-4 h-4" />
@@ -258,7 +258,7 @@
                   >
                     <Receipt class="w-4 h-4" />
                   </div>
-                  <span class="truncate max-w-[180px] sm:max-w-none">
+                  <span class="truncate max-w-45 sm:max-w-none">
                     {trx.transactionCode}
                   </span>
                 </div>
@@ -372,6 +372,7 @@
               { value: '0', label: 'Semua' }
             ]}
             value={String(itemsPerPage)}
+            position="up"
             onchange={(val) => (itemsPerPage = Number(val))}
           />
         </div>

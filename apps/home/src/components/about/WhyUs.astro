@@ -1,0 +1,91 @@
+---
+import { Ruler, Gem, Factory, ShieldCheck } from "lucide-astro";
+---
+
+<section id="why-us-section" class="py-20 bg-theme-main">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto space-y-4 mb-16">
+      <div class="inline-block"></div>
+      <h2
+        class="text-3xl sm:text-4xl font-extrabold text-theme-main tracking-tight"
+      >
+        Alasan Memilih <span class="text-brand">Karya Sejati</span>
+      </h2>
+      <p class="text-theme-muted text-base">
+        Pengalaman belasan tahun mengabdi dalam presisi pertukangan aluminium
+        dan keindahan seni kayu kustom.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="architectural-card p-6 space-y-4 shadow-theme">
+        <div
+          class="w-12 h-12 rounded-md bg-brand-light border border-theme-brand flex items-center justify-center"
+        >
+          <Ruler class="w-6 h-6 text-brand" />
+        </div>
+        <h3 class="text-lg font-bold text-theme-main">
+          Presisi hingga Milimeter
+        </h3>
+        <p class="text-xs text-theme-subtle leading-relaxed">
+          Pengukuran akurat di lokasi proyek sebelum pemotongan bahan aluminium
+          maupun papan multiplek.
+        </p>
+      </div>
+
+      <div class="architectural-card p-6 space-y-4 shadow-theme">
+        <div
+          class="w-12 h-12 rounded-md bg-brand-light border border-theme-brand flex items-center justify-center"
+        >
+          <Gem class="w-6 h-6 text-brand" />
+        </div>
+        <h3 class="text-lg font-bold text-theme-main">Material Kelas A</h3>
+        <p class="text-xs text-theme-subtle leading-relaxed">
+          Aluminium Alexindo/YKK anti-karat & kayu lapis tahan air lapis HPL
+          tebal anti-gores.
+        </p>
+      </div>
+
+      <div class="architectural-card p-6 space-y-4 shadow-theme">
+        <div
+          class="w-12 h-12 rounded-md bg-brand-light border border-theme-brand flex items-center justify-center"
+        >
+          <Factory class="w-6 h-6 text-brand" />
+        </div>
+        <h3 class="text-lg font-bold text-theme-main">Direct Workshop Price</h3>
+        <p class="text-xs text-theme-subtle leading-relaxed">
+          Pengerjaan langsung dari bengkel kerja sendiri tanpa perantara
+          percaloan distributor.
+        </p>
+      </div>
+
+      <div class="architectural-card p-6 space-y-4 shadow-theme">
+        <div
+          class="w-12 h-12 rounded-md bg-brand-light border border-theme-brand flex items-center justify-center"
+        >
+          <ShieldCheck class="w-6 h-6 text-brand" />
+        </div>
+        <h3 class="text-lg font-bold text-theme-main">Garansi Pasca Pasang</h3>
+        <p class="text-xs text-theme-subtle leading-relaxed">
+          Jaminan garansi perbaikan apabila terjadi kendala fungsi atau
+          penyetelan pintu/kusen.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { inView, animate } from 'motion';
+
+  inView('#why-us-section', () => {
+    const cards = document.querySelectorAll('#why-us-section .architectural-card');
+    if (cards.length) {
+      animate(
+        cards as any,
+        { opacity: [0, 1], y: [25, 0], scale: [0.96, 1] },
+        { duration: 0.55, delay: 0.1, ease: 'easeOut' }
+      );
+    }
+  });
+</script>

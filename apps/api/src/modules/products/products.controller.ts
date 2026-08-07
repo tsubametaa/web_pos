@@ -115,6 +115,15 @@ export const productsController = new Elysia({ prefix: '/products' })
 				return { success: false, error: 'ID produk wajib disertakan.' };
 			}
 
+			if (query.permanent === 'true') {
+				const product = await productsService.deleteProduct(ownerId, id);
+				return {
+					success: true,
+					message: `Produk "${product.name}" berhasil dihapus secara permanen.`,
+					product
+				};
+			}
+
 			const product = await productsService.toggleStatus(ownerId, id);
 			return {
 				success: true,
@@ -127,6 +136,7 @@ export const productsController = new Elysia({ prefix: '/products' })
 		}
 	}, {
 		query: t.Object({
-			id: t.String({ minLength: 1, error: 'ID produk wajib disertakan.' })
+			id: t.String({ minLength: 1, error: 'ID produk wajib disertakan.' }),
+			permanent: t.Optional(t.String())
 		})
 	});

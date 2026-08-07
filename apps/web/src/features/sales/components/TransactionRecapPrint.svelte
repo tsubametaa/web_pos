@@ -192,9 +192,9 @@
       <div class="flex items-center justify-between border-b-2 border-emerald-700 pb-4 mb-5">
         <div class="flex items-center gap-3.5">
           {#if brandLogo}
-            <img src={brandLogo} alt={brandName} class="h-12 max-w-[160px] object-contain" />
+            <img src={brandLogo} alt={brandName} class="h-12 max-w-40 object-contain" />
           {:else}
-            <div class="px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-black text-base tracking-tight">
+            <div class="px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-black tracking-tight">
               {brandName}
             </div>
           {/if}

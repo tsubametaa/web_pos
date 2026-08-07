@@ -12,17 +12,30 @@
     options: DropdownOption[];
     value?: string;
     placeholder?: string;
+    position?: 'auto' | 'up' | 'down';
     onchange?: (value: string) => void;
   }
 
-  let { options, value = $bindable(''), placeholder = 'Pilih opsi...', onchange }: Props = $props();
+  let { options, value = $bindable(''), placeholder = 'Pilih opsi...', position = 'auto', onchange }: Props = $props();
 
   let isOpen = $state(false);
+  let direction = $state<'down' | 'up'>('down');
   let dropdownRef = $state<HTMLDivElement | null>(null);
+  let buttonRef = $state<HTMLButtonElement | null>(null);
 
   const selectedOption = $derived(options.find((o) => o.value === value));
 
   function toggleOpen() {
+    if (!isOpen) {
+      if (position === 'up') {
+        direction = 'up';
+      } else if (position === 'down') {
+        direction = 'down';
+      } else if (buttonRef) {
+        const rect = buttonRef.getBoundingClientRect();
+        direction = rect.bottom > window.innerHeight * 0.65 ? 'up' : 'down';
+      }
+    }
     isOpen = !isOpen;
   }
 
@@ -45,18 +58,19 @@
   <!-- Trigger Button -->
   <button
     type="button"
+    bind:this={buttonRef}
     onclick={toggleOpen}
-    class="w-full inline-flex items-center justify-between gap-2.5 px-3.5 py-2.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 hover:border-emerald-500 rounded-xl text-xs font-bold text-slate-800 dark:text-white transition-all shadow-2xs cursor-pointer min-w-52.5"
+    class="w-full inline-flex items-center justify-between gap-2.5 px-3.5 py-2.5 bg-surface border border-border-theme hover:border-accent/40 rounded-xl text-xs font-bold text-h-text transition-all shadow-2xs cursor-pointer min-w-52.5"
   >
     <div class="flex items-center gap-2 truncate">
       {#if selectedOption?.icon}
         {@const Icon = selectedOption.icon}
-        <Icon class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+        <Icon class="w-4 h-4 text-accent shrink-0" />
       {/if}
       <span class="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
     </div>
     <ChevronDown
-      class="w-4 h-4 text-slate-400 shrink-0 transition-transform duration-150 {isOpen
+      class="w-4 h-4 text-ink-muted shrink-0 transition-transform duration-150 {isOpen
         ? 'rotate-180'
         : ''}"
     />
@@ -65,7 +79,7 @@
   <!-- Dropdown Menu Popup -->
   {#if isOpen}
     <div
-      class="absolute left-0 right-0 z-30 mt-1.5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xl py-1.5 overflow-hidden min-w-52.5"
+      class="absolute left-0 right-0 z-30 max-h-56 overflow-y-auto scrollbar-none bg-surface border border-border-theme rounded-2xl shadow-xl py-1.5 min-w-52.5 transition-all animate-in fade-in duration-150 {direction === 'up' ? 'bottom-full mb-1.5 slide-in-from-bottom-2' : 'top-full mt-1.5 slide-in-from-top-2'}"
     >
       {#each options as option}
         {@const OptionIcon = option.icon}
@@ -74,18 +88,18 @@
           onclick={() => selectOption(option.value)}
           class="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-bold transition-colors cursor-pointer text-left
 						{value === option.value
-            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-            : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60'}"
+            ? 'bg-accent-soft text-accent-soft-text font-extrabold border-l-2 border-accent'
+            : 'text-ink hover:bg-accent-soft/60'}"
         >
           <div class="flex items-center gap-2.5 truncate">
             {#if OptionIcon}
-              <OptionIcon class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <OptionIcon class="w-4 h-4 text-accent shrink-0" />
             {/if}
             <span class="truncate">{option.label}</span>
           </div>
 
           {#if value === option.value}
-            <Check class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <Check class="w-4 h-4 text-accent-soft-text shrink-0" />
           {/if}
         </button>
       {/each}

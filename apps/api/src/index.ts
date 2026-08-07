@@ -41,14 +41,20 @@ const app = new Elysia()
 		credentials: true,
 		origin: (request) => {
 			const origin = request.headers.get('origin');
-			const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
-				.split(',')
-				.map(o => o.trim());
 			if (!origin) return true;
+			if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) return true;
+			const allowedOrigins = [
+				process.env.APP_WEB_URL,
+				process.env.APP_HOME_URL,
+				...(process.env.CORS_ORIGIN || '').split(','),
+			]
+				.filter(Boolean)
+				.map((o) => (o as string).trim());
 			return allowedOrigins.includes(origin);
 		},
 		allowedHeaders: ['Content-Type', 'Authorization', 'X-User-Email', 'X-Store-Id'],
 	}))
+
 	.onTransform(({ body, query }) => {
 		if (body && typeof body === 'object') {
 			const sanitizedBody = sanitizeInput(body);

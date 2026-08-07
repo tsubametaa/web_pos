@@ -1,0 +1,179 @@
+---
+import { ChevronDown } from 'lucide-astro';
+
+export interface DropdownOption {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  id: string;
+  name?: string;
+  label?: string;
+  placeholder?: string;
+  value?: string;
+  options: DropdownOption[];
+  class?: string;
+}
+
+const {
+  id,
+  name,
+  label,
+  placeholder = 'Pilih Opsi',
+  value = '',
+  options = [],
+  class: className = '',
+} = Astro.props;
+
+const selectedOption = options.find((opt) => opt.value === value);
+const initialLabel = selectedOption ? selectedOption.label : (label || placeholder);
+---
+
+<div
+  id={`${id}-wrapper`}
+  class={`relative inline-block text-left w-full dropdown-component ${className}`}
+  data-dropdown-id={id}
+>
+  <!-- Hidden form input -->
+  {name && <input type="hidden" name={name} id={`${id}-input`} value={value} />}
+
+  <!-- Dropdown Trigger Button -->
+  <button
+    id={`${id}-trigger`}
+    type="button"
+    aria-expanded="false"
+    aria-haspopup="listbox"
+    class="w-full py-2.5 px-3.5 rounded-md bg-theme-main border border-theme hover:border-brand text-theme-main text-xs font-semibold flex items-center justify-between transition-all duration-200 cursor-pointer shadow-xs focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand group"
+  >
+    <span id={`${id}-selected-label`} class="truncate font-mono font-medium">
+      {initialLabel}
+    </span>
+    <ChevronDown
+      class="w-4 h-4 ml-2 text-theme-subtle group-hover:text-brand transition-transform duration-200 dropdown-chevron"
+    />
+  </button>
+
+  <!-- Dropdown Menu Options Panel -->
+  <div
+    id={`${id}-menu`}
+    role="listbox"
+    class="absolute left-0 right-0 z-50 mt-1.5 hidden w-full rounded-md bg-theme-card border border-theme shadow-xl py-1 focus:outline-none transform opacity-0 scale-95 transition-all duration-150 origin-top"
+  >
+    <div class="max-h-60 overflow-y-auto custom-scrollbar p-1 space-y-0.5">
+      {
+        options.map((opt) => {
+          const isSelected = opt.value === value;
+          return (
+            <button
+              type="button"
+              role="option"
+              aria-selected={isSelected}
+              data-value={opt.value}
+              data-label={opt.label}
+              class={`w-full text-left px-3 py-2 rounded-sm text-xs font-semibold font-mono transition-colors flex items-center justify-between cursor-pointer ${
+                isSelected
+                  ? 'bg-brand-light text-brand font-bold'
+                  : 'text-theme-main hover:bg-theme-main hover:text-brand'
+              }`}
+            >
+              <span class="truncate">{opt.label}</span>
+              {isSelected && <span class="w-1.5 h-1.5 rounded-full bg-brand shrink-0"></span>}
+            </button>
+          );
+        })
+      }
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    const dropdowns = document.querySelectorAll('.dropdown-component');
+
+    dropdowns.forEach((wrapper) => {
+      const id = wrapper.getAttribute('data-dropdown-id');
+      if (!id) return;
+
+      const trigger = document.getElementById(`${id}-trigger`);
+      const menu = document.getElementById(`${id}-menu`);
+      const selectedLabel = document.getElementById(`${id}-selected-label`);
+      const hiddenInput = document.getElementById(`${id}-input`);
+      const chevron = wrapper.querySelector('.dropdown-chevron');
+      const optionButtons = menu ? menu.querySelectorAll('button[data-value]') : [];
+
+      if (!trigger || !menu) return;
+
+      function openMenu() {
+        menu.classList.remove('hidden');
+        trigger.setAttribute('aria-expanded', 'true');
+        setTimeout(() => {
+          menu.classList.remove('opacity-0', 'scale-95');
+          menu.classList.add('opacity-100', 'scale-100');
+          if (chevron) chevron.classList.add('rotate-180');
+        }, 10);
+      }
+
+      function closeMenu() {
+        menu.classList.remove('opacity-100', 'scale-100');
+        menu.classList.add('opacity-0', 'scale-95');
+        if (chevron) chevron.classList.remove('rotate-180');
+        trigger.setAttribute('aria-expanded', 'false');
+        setTimeout(() => {
+          menu.classList.add('hidden');
+        }, 150);
+      }
+
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+        if (isOpen) closeMenu();
+        else openMenu();
+      });
+
+      optionButtons.forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const val = btn.getAttribute('data-value') || '';
+          const lbl = btn.getAttribute('data-label') || '';
+
+          if (selectedLabel) selectedLabel.textContent = lbl;
+          if (hiddenInput) hiddenInput.value = val;
+
+          // Update active state styling
+          optionButtons.forEach((b) => {
+            b.setAttribute('aria-selected', 'false');
+            b.classList.remove('bg-brand-light', 'text-brand', 'font-bold');
+            b.classList.add('text-theme-main');
+          });
+
+          btn.setAttribute('aria-selected', 'true');
+          btn.classList.add('bg-brand-light', 'text-brand', 'font-bold');
+
+          closeMenu();
+
+          // Dispatch custom change event
+          const event = new CustomEvent('dropdown:change', {
+            bubbles: true,
+            detail: { value: val, label: lbl, id: id },
+          });
+          wrapper.dispatchEvent(event);
+        });
+      });
+
+      // Outside click close
+      document.addEventListener('click', (e) => {
+        if (!wrapper.contains(e.target)) {
+          closeMenu();
+        }
+      });
+
+      // Escape key close
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeMenu();
+        }
+      });
+    });
+  })();
+</script>

@@ -28,17 +28,17 @@
 </script>
 
 <div
-  class="flex flex-col h-full bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs relative overflow-hidden text-ink select-none"
+  class="flex flex-col h-full bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-2xs relative overflow-hidden text-ink select-none"
 >
   <!-- Panel Header -->
   <div
-    class="flex items-center justify-between pb-3.5 border-b border-slate-200/60 dark:border-emerald-950/60 mb-3"
+    class="flex items-center justify-between pb-3.5 border-b border-border-theme mb-3"
   >
     <div class="flex items-center gap-2">
-      <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+      <div class="p-1.5 rounded-lg bg-accent-soft text-accent">
         <ShoppingCart class="w-4 h-4" />
       </div>
-      <h3 class="text-xs font-bold text-slate-800 dark:text-emerald-100 uppercase tracking-wider">
+      <h3 class="text-xs font-bold text-h-text uppercase tracking-wider">
         Keranjang ({cart.totalItems})
       </h3>
     </div>
@@ -59,39 +59,39 @@
   <div class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2.5 min-h-65 scrollbar-none">
     {#each cart.items as item (item.product.id)}
       <div
-        class="p-3 bg-base dark:bg-slate-900/60 border border-slate-200/60 dark:border-emerald-950/60 rounded-xl flex justify-between gap-3 items-center hover:border-emerald-500/30 transition-all duration-150 shadow-2xs"
+        class="p-3 bg-base border border-border-theme rounded-xl flex justify-between gap-3 items-center hover:border-accent/30 transition-all duration-150 shadow-2xs"
       >
         <div class="flex-1 min-w-0">
-          <h5 class="font-bold text-slate-800 dark:text-slate-100 text-xs truncate">
+          <h5 class="font-bold text-h-text text-xs truncate">
             {item.product.name}
           </h5>
-          <span class="font-mono text-[10px] text-slate-400 block mt-0.5 uppercase">
+          <span class="font-mono text-[10px] text-ink-muted block mt-0.5 uppercase">
             SKU: {item.product.sku || '-'}
           </span>
-          <span class="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-bold block mt-1">
+          <span class="font-mono text-xs text-accent font-bold block mt-1">
             {formatCurrency(item.product.sellingPrice)}
           </span>
         </div>
 
         <!-- Quantity Stepper Controls -->
         <div
-          class="flex items-center bg-base dark:bg-surface border border-slate-200/80 dark:border-slate-800 rounded-lg p-0.5 shrink-0"
+          class="flex items-center bg-surface border border-border-theme rounded-lg p-0.5 shrink-0"
         >
           <button
             type="button"
             onclick={() => handleQtyChange(item.product.id, item.qty, -1)}
-            class="p-1 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-md text-slate-500 dark:text-slate-300 cursor-pointer transition-colors"
+            class="p-1 hover:bg-accent-soft rounded-md text-ink cursor-pointer transition-colors"
             title="Kurangi Quantity"
           >
             <Minus class="w-3 h-3" />
           </button>
-          <span class="text-xs font-mono font-bold text-slate-800 dark:text-slate-100 px-1.5 min-w-[24px] text-center">
+          <span class="text-xs font-mono font-bold text-h-text px-1.5 min-w-[24px] text-center">
             {item.qty}
           </span>
           <button
             type="button"
             onclick={() => handleQtyChange(item.product.id, item.qty, 1)}
-            class="p-1 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-md text-slate-500 dark:text-slate-300 cursor-pointer transition-colors"
+            class="p-1 hover:bg-accent-soft rounded-md text-ink cursor-pointer transition-colors"
             title="Tambah Quantity"
           >
             <Plus class="w-3 h-3" />
@@ -100,13 +100,13 @@
 
         <!-- Item Subtotal & Delete Action -->
         <div class="flex flex-col items-end gap-1 min-w-[70px] shrink-0">
-          <span class="font-mono text-xs font-black text-slate-800 dark:text-white">
+          <span class="font-mono text-xs font-black text-h-text">
             {formatCurrency(item.qty * item.product.sellingPrice)}
           </span>
           <button
             type="button"
             onclick={() => cart.remove(item.product.id)}
-            class="p-1 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+            class="p-1 text-ink-muted hover:text-rose-600 transition-colors cursor-pointer"
             title="Hapus Item"
           >
             <Trash2 class="w-3.5 h-3.5" />
@@ -115,16 +115,16 @@
       </div>
     {:else}
       <div
-        class="flex-1 flex flex-col items-center justify-center gap-2.5 text-slate-400 text-center py-20"
+        class="flex-1 flex flex-col items-center justify-center gap-2.5 text-ink-muted text-center py-20"
       >
-        <div class="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl">
+        <div class="p-3 bg-accent-soft text-accent rounded-2xl">
           <ShoppingCart class="w-6 h-6 stroke-[1.5]" />
         </div>
         <div class="space-y-0.5">
-          <p class="text-xs font-bold text-slate-700 dark:text-slate-300">
+          <p class="text-xs font-bold text-h-text">
             Keranjang Masih Kosong
           </p>
-          <p class="text-[11px] text-slate-400">
+          <p class="text-[11px] text-ink-muted">
             Klik produk dari daftar di samping untuk menambahkan.
           </p>
         </div>
@@ -133,18 +133,18 @@
   </div>
 
   <!-- Billing Summary Footer -->
-  <div class="border-t border-slate-200/60 dark:border-emerald-950/60 pt-3.5 mt-3 flex flex-col gap-2.5">
-    <div class="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
+  <div class="border-t border-border-theme pt-3.5 mt-3 flex flex-col gap-2.5">
+    <div class="flex justify-between items-center text-xs text-ink-muted">
       <span>Subtotal ({cart.totalItems} item)</span>
-      <span class="font-mono font-bold text-slate-700 dark:text-slate-200">
+      <span class="font-mono font-bold text-ink">
         {formatCurrency(subtotal)}
       </span>
     </div>
 
     {#if taxRate > 0}
-      <div class="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400">
+      <div class="flex justify-between items-center text-xs text-ink-muted">
         <span>Pajak PPN ({taxRate}%)</span>
-        <span class="font-mono font-bold text-slate-700 dark:text-slate-200">
+        <span class="font-mono font-bold text-ink">
           {formatCurrency(taxAmount)}
         </span>
       </div>
@@ -152,12 +152,12 @@
 
     <!-- Total Amount Box -->
     <div
-      class="flex justify-between items-center p-3.5 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 rounded-xl mt-1"
+      class="flex justify-between items-center p-3.5 bg-accent-soft border border-accent/20 rounded-xl mt-1"
     >
-      <span class="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">
+      <span class="text-xs font-bold text-accent uppercase tracking-wide">
         Total Bayar
       </span>
-      <span class="font-mono text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-300">
+      <span class="font-mono text-base sm:text-lg font-black text-accent">
         {formatCurrency(totalAmount)}
       </span>
     </div>
@@ -167,7 +167,7 @@
       type="button"
       onclick={oncheckout}
       disabled={cart.items.length === 0}
-      class="w-full mt-1.5 inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-35 text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl shadow-xs hover:shadow transition-all duration-150 disabled:pointer-events-none cursor-pointer"
+      class="w-full mt-1.5 inline-flex items-center justify-center gap-2 px-4 py-3 bg-accent hover:bg-accent-hover disabled:opacity-35 text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl shadow-xs hover:shadow transition-all duration-150 disabled:pointer-events-none cursor-pointer"
     >
       <CreditCard class="w-4 h-4" />
       <span>Proses Pembayaran</span>

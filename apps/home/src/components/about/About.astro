@@ -1,0 +1,163 @@
+---
+import { COMPANY_INFO, SERVICES_DATA } from '../../data/companyData';
+import { CheckCircle2, Award, ShieldCheck, Factory, Ruler, Armchair, Layers, ArrowRight } from 'lucide-astro';
+
+const serviceIcons = {
+  Armchair: Armchair,
+  Layers: Layers,
+};
+---
+
+<section id="tentang" class="py-16 sm:py-20 bg-theme-main relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+    
+    <!-- Section 1: Profil Workshop & Visual -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      
+      <!-- Visual Column -->
+      <div class="lg:col-span-5 relative about-card-animate">
+        <div class="architectural-card overflow-hidden">
+          <img
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80"
+            alt="Pengerjaan Aluminium & Wooden Craft"
+            class="w-full h-80 sm:h-96 object-cover"
+          />
+          
+          <div class="p-5 bg-slate-900 border-t-2 border-brand text-white space-y-1">
+            <div class="flex items-center space-x-2">
+              <Award class="w-4 h-4 text-brand" />
+              <p class="text-xl font-extrabold text-white">{COMPANY_INFO.experienceYears}+ TAHUN PENGALAMAN WORKSHOP</p>
+            </div>
+            <p class="text-xs text-slate-300 font-medium">Dedikasi Kualitas Pertukangan Kayu Custom & Konstruksi Aluminium.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Column -->
+      <div class="lg:col-span-7 space-y-6 about-text-animate">
+
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-theme-main tracking-tight leading-tight">
+          Tentang <span class="text-brand">Kami</span>
+        </h2>
+
+        <p class="text-theme-muted text-base leading-relaxed">
+          {COMPANY_INFO.description}
+        </p>
+
+        <!-- Feature Points Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div class="p-4 rounded-md bg-theme-card border border-theme space-y-2 hover:border-brand transition-colors">
+            <div class="w-8 h-8 rounded-sm bg-brand-light border border-theme-brand text-brand flex items-center justify-center font-bold">
+              <ShieldCheck class="w-5 h-5 text-brand" />
+            </div>
+            <h3 class="font-bold text-theme-main text-sm">Material Pilihan Berstandar SNI</h3>
+            <p class="text-xs text-theme-subtle">Hanya menggunakan aluminium merk ternama (Alexindo/YKK) dan kayu lapis Multiplek 18mm bebas lembab.</p>
+          </div>
+
+          <div class="p-4 rounded-md bg-theme-card border border-theme space-y-2 hover:border-brand transition-colors">
+            <div class="w-8 h-8 rounded-sm bg-brand-light border border-theme-brand text-brand flex items-center justify-center font-bold">
+              <Factory class="w-5 h-5 text-brand" />
+            </div>
+            <h3 class="font-bold text-theme-main text-sm">Pengerjaan Langsung Workshop</h3>
+            <p class="text-xs text-theme-subtle">Tanpa perantara agen, memastikan akurasi harga terbaik dan pengawasan produksi langsung.</p>
+          </div>
+
+          <div class="p-4 rounded-md bg-theme-card border border-theme space-y-2 hover:border-brand transition-colors">
+            <div class="w-8 h-8 rounded-sm bg-brand-light border border-theme-brand text-brand flex items-center justify-center font-bold">
+              <Ruler class="w-5 h-5 text-brand" />
+            </div>
+            <h3 class="font-bold text-theme-main text-sm">Desain Custom Bebas Konsultasi</h3>
+            <p class="text-xs text-theme-subtle">Tim teknis siap melakukan survei lokasi dan penyesuaian denah tata letak bangunan Anda.</p>
+          </div>
+
+          <div class="p-4 rounded-md bg-theme-card border border-theme space-y-2 hover:border-brand transition-colors">
+            <div class="w-8 h-8 rounded-sm bg-brand-light border border-theme-brand text-brand flex items-center justify-center font-bold">
+              <CheckCircle2 class="w-5 h-5 text-brand" />
+            </div>
+            <h3 class="font-bold text-theme-main text-sm">Garansi Pemasangan Rapi</h3>
+            <p class="text-xs text-theme-subtle">Jaminan instalasi yang kokoh, rapi, dan dukungan layanan pasca-pemasangan.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Section 2: Penjelasan 2 Divisi Layanan Spesialis Utama -->
+    <div class="pt-12 space-y-10">
+      
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <div class="inline-block">
+        </div>
+        <h3 class="text-2xl sm:text-3xl font-extrabold text-theme-main tracking-tight">
+         Layanan <span class="text-brand">Kami</span>
+        </h3>
+        <p class="text-theme-muted text-sm leading-relaxed">
+          Karya Sejati berfokus pada dua divisi utama pertukangan untuk memenuhi segala kebutuhan interior kayu kustom dan konstruksi aluminium bangunan Anda.
+        </p>
+      </div>
+
+      <!-- Grid 2 Divisi Utama -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {SERVICES_DATA.map((service: any, index: number) => {
+          const IconComponent = serviceIcons[service.icon as keyof typeof serviceIcons] || Layers;
+          return (
+            <div class="architectural-card p-5 sm:p-8 space-y-6 shadow-theme hover:border-brand transition-all duration-200 flex flex-col justify-between">
+              <div class="space-y-5">
+                
+
+                <div class="flex items-start space-x-4">
+                  <div class="w-12 h-12 rounded-md bg-brand-light border border-theme-brand text-brand flex items-center justify-center shrink-0">
+                    <IconComponent class="w-6 h-6 text-brand" />
+                  </div>
+                  <div>
+                    <h4 class="text-2xl font-extrabold text-theme-main">
+                      {service.title}
+                    </h4>
+                    <p class="text-xs font-mono uppercase font-semibold text-theme-subtle mt-1">
+                      {service.subtitle}
+                    </p>
+                  </div>
+                </div>
+
+                <p class="text-theme-muted text-sm leading-relaxed">
+                  {service.description}
+                </p>
+
+                <!-- Features List -->
+                <div class="space-y-2 pt-2 border-t border-theme">
+                  <p class="text-[10px] font-mono font-bold uppercase tracking-wider text-theme-subtle">Cakupan Pengerjaan:</p>
+                  <ul class="grid grid-cols-1 gap-2.5">
+                    {service.features.map((feat: string) => (
+                      <li class="flex items-center space-x-2.5 text-xs text-theme-main font-semibold">
+                        <CheckCircle2 class="w-4 h-4 text-brand shrink-0" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  import { inView, animate } from 'motion';
+
+  inView('#tentang', () => {
+    const card = document.querySelector('.about-card-animate');
+    const text = document.querySelector('.about-text-animate');
+    if (card) animate(card as any, { opacity: [0, 1], x: [-25, 0] }, { duration: 0.65, ease: 'easeOut' });
+    if (text) animate(text as any, { opacity: [0, 1], x: [25, 0] }, { duration: 0.65, delay: 0.1, ease: 'easeOut' });
+  });
+</script>
+
+
+
+

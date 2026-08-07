@@ -150,4 +150,17 @@ export class ProductsService {
 
 		return updateRes[0];
 	}
+
+	async deleteProduct(userId: string, id: string) {
+		const existing = await db.select().from(products)
+			.where(and(eq(products.id, id), this.userCondition(userId)))
+			.limit(1);
+		const product = existing[0];
+		if (!product) throw new Error('Produk tidak ditemukan.');
+
+		await db.delete(products)
+			.where(and(eq(products.id, id), this.userCondition(userId)));
+
+		return product;
+	}
 }

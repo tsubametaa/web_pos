@@ -756,7 +756,7 @@
                         : 'bg-base dark:bg-base/60 border-slate-300 text-slate-400'}"
                     >
                       {#if hasMinLength}
-                        <Check class="w-2.5 h-2.5 stroke-[3]" />
+                        <Check class="w-2.5 h-2.5 stroke-3" />
                       {:else}
                         <span class="w-1 h-1 rounded-full bg-slate-400"></span>
                       {/if}
@@ -774,7 +774,7 @@
                         : 'bg-base dark:bg-base/60 border-slate-300 text-slate-400'}"
                     >
                       {#if hasLetter}
-                        <Check class="w-2.5 h-2.5 stroke-[3]" />
+                        <Check class="w-2.5 h-2.5 stroke-3" />
                       {:else}
                         <span class="w-1 h-1 rounded-full bg-slate-400"></span>
                       {/if}
@@ -792,7 +792,7 @@
                         : 'bg-base dark:bg-base/60 border-slate-300 text-slate-400'}"
                     >
                       {#if hasNumber}
-                        <Check class="w-2.5 h-2.5 stroke-[3]" />
+                        <Check class="w-2.5 h-2.5 stroke-3" />
                       {:else}
                         <span class="w-1 h-1 rounded-full bg-slate-400"></span>
                       {/if}

@@ -1,0 +1,70 @@
+---
+import { COMPANY_INFO } from "../../data/companyData";
+import { ArrowRight, Award } from "lucide-astro";
+---
+
+<section
+  id="hero"
+  class="relative min-h-[500px] sm:min-h-[600px] lg:min-h-[700px] flex items-center overflow-hidden bg-slate-950 text-white"
+>
+  <!-- Full High-Impact Background Image -->
+  <div class="absolute inset-0 z-0">
+    <img
+      src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80"
+      alt="Karya Sejati Custom Woodwork & Precision Aluminum Showcase"
+      class="w-full h-full object-cover opacity-30"
+    />
+    <!-- Solid Dark Tint Overlay for Optimal Contrast (No Gradient) -->
+    <div class="absolute inset-0 bg-slate-950/80"></div>
+  </div>
+
+  <div
+    class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-16 sm:py-28 w-full"
+  >
+    <div class="max-w-4xl space-y-6 sm:space-y-8 hero-text-animate">
+      <!-- Single Prominent Bold Headline -->
+      <h1
+        class="text-3xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.15] sm:leading-[1.1]"
+      >
+        Furnitur Custom & <br class="hidden sm:inline" />
+        <span class="text-red-500">Aluminium Presisi</span>
+      </h1>
+
+      <!-- Action Buttons -->
+      <div
+        class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 pt-4"
+      >
+        <a
+          href="/tentang"
+          class="inline-flex items-center justify-center px-8 py-4 rounded-md bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition-colors shadow-theme group cursor-pointer"
+        >
+          <span>Tentang Kami & Layanan</span>
+          <ArrowRight
+            class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"
+          />
+        </a>
+
+        <a
+          href="/etalase"
+          class="inline-flex items-center justify-center px-8 py-4 rounded-md bg-slate-900 border border-slate-700 hover:border-red-500 text-white font-bold text-sm transition-colors cursor-pointer"
+        >
+          <span>Lihat Etalase Produk</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { animate } from "motion";
+
+  const textEl = document.querySelector(".hero-text-animate");
+
+  if (textEl) {
+    animate(
+      textEl,
+      { opacity: [0, 1], y: [30, 0] },
+      { duration: 0.75, ease: "easeOut" },
+    );
+  }
+</script>

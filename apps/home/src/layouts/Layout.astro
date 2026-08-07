@@ -1,0 +1,67 @@
+---
+import '../styles/global.css';
+import SplashScreen from '../components/layout/SplashScreen.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Karya Sejati - Furnitur Custom & Aluminium Specialist',
+  description = 'Spesialis pembuatan furnitur custom (Kitchen Set, Lemari, Meja) dan konstruksi aluminium (Kusen, Pintu, Jendela, Kanopi) presisi & berkualitas.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/kslogo.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO Meta Tags -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content="Karya Sejati, Furnitur Custom, Aluminium, Kusen Aluminium, Kitchen Set, Pintu Aluminium, Jendela Aluminium, Bandung, Workshop Furnitur" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/kslogo.svg" />
+
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <script is:inline>
+      // Theme Initialization Script (Day mode default, Dark mode ready)
+      (function () {
+        const storedTheme = localStorage.getItem('ks_theme');
+        if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+
+      // Copy & Selection Protection Script
+      (function () {
+        const isInput = (target) => target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA');
+        document.addEventListener('contextmenu', (e) => { if (!isInput(e.target)) e.preventDefault(); });
+        document.addEventListener('copy', (e) => { if (!isInput(e.target)) e.preventDefault(); });
+        document.addEventListener('selectstart', (e) => { if (!isInput(e.target)) e.preventDefault(); });
+        document.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) {
+            if (!isInput(e.target)) e.preventDefault();
+          }
+        });
+      })();
+    </script>
+  </head>
+  <body class="bg-theme-main text-theme-main min-h-screen flex flex-col antialiased selection:bg-brand selection:text-white">
+    <SplashScreen />
+    <slot />
+  </body>
+</html>

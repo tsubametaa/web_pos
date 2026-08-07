@@ -1,0 +1,157 @@
+---
+import { COMPANY_INFO } from '../../data/companyData';
+import { Sun, Moon, Menu, MessageSquare } from 'lucide-astro';
+
+const pathname = Astro.url.pathname;
+const isActive = (path: string) => {
+  if (path === '/' && pathname === '/') return true;
+  if (path !== '/' && pathname.startsWith(path)) return true;
+  return false;
+};
+---
+
+<header class="sticky top-0 z-50 bg-theme-nav transition-colors duration-200 backdrop-blur-md">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+      
+      <!-- Logo & Brand Name -->
+      <a href="/" class="flex items-center space-x-3 group">
+        <img src="/kslogo.svg" alt="Karya Sejati Logo" class="h-10 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform duration-300 ease-out" />
+        <span class="hidden sm:inline text-xl font-extrabold tracking-tight text-theme-main group-hover:text-brand transition-colors duration-200">
+          KARYA <span class="text-brand">SEJATI</span>
+        </span>
+      </a>
+
+      <!-- Desktop Navigation (4 Dedicated Pages) -->
+      <nav class="hidden md:flex items-center space-x-8 font-medium text-sm">
+        <a
+          href="/"
+          class={`relative py-1 transition-colors duration-200 group ${isActive('/') ? 'text-brand font-bold' : 'text-theme-muted hover:text-brand'}`}
+        >
+          <span>Beranda</span>
+          <span class={`absolute bottom-0 left-0 w-full h-[2.5px] bg-brand transition-transform duration-300 ease-out ${isActive('/') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100 origin-left'}`}></span>
+        </a>
+        <a
+          href="/tentang"
+          class={`relative py-1 transition-colors duration-200 group ${isActive('/tentang') ? 'text-brand font-bold' : 'text-theme-muted hover:text-brand'}`}
+        >
+          <span>Tentang Kami & Layanan</span>
+          <span class={`absolute bottom-0 left-0 w-full h-[2.5px] bg-brand transition-transform duration-300 ease-out ${isActive('/tentang') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100 origin-left'}`}></span>
+        </a>
+        <a
+          href="/etalase"
+          class={`relative py-1 transition-colors duration-200 group ${isActive('/etalase') ? 'text-brand font-bold' : 'text-theme-muted hover:text-brand'}`}
+        >
+          <span>Etalase Produk</span>
+          <span class={`absolute bottom-0 left-0 w-full h-[2.5px] bg-brand transition-transform duration-300 ease-out ${isActive('/etalase') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100 origin-left'}`}></span>
+        </a>
+        <a
+          href="/kontak"
+          class={`relative py-1 transition-colors duration-200 group ${isActive('/kontak') ? 'text-brand font-bold' : 'text-theme-muted hover:text-brand'}`}
+        >
+          <span>Kontak & Lokasi</span>
+          <span class={`absolute bottom-0 left-0 w-full h-[2.5px] bg-brand transition-transform duration-300 ease-out ${isActive('/kontak') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100 origin-left'}`}></span>
+        </a>
+      </nav>
+
+      <!-- Action Buttons & Theme Toggle -->
+      <div class="flex items-center space-x-3">
+        <!-- Theme Toggle Button -->
+        <button
+          id="theme-toggle"
+          type="button"
+          aria-label="Toggle Theme Mode"
+          class="p-2.5 rounded-md bg-theme-card border border-slate-300 dark:border-slate-700 text-theme-main hover:border-brand hover:text-brand hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shadow-xs flex items-center justify-center group"
+        >
+          <!-- Sun Icon (Dark Mode active) -->
+          <div id="sun-icon" class="hidden group-hover:rotate-45 transition-transform duration-300">
+            <Sun class="w-5 h-5 text-amber-500 fill-amber-400/20 stroke-[2.25]" />
+          </div>
+          <!-- Moon Icon (Day Mode active) -->
+          <div id="moon-icon" class="group-hover:-rotate-12 transition-transform duration-300">
+            <Moon class="w-5 h-5 text-slate-900 dark:text-amber-300 fill-slate-900/10 dark:fill-amber-300/20 stroke-[2.25]" />
+          </div>
+        </button>
+
+        <!-- WhatsApp Quick CTA -->
+        <a
+          href={`https://wa.me/${COMPANY_INFO.whatsapp}?text=Halo%20Karya%20Sejati,%20saya%20ingin%20konsultasi%20furnitur%20/%20aluminium`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hidden sm:inline-flex items-center space-x-2 px-4 py-2.5 rounded-md bg-brand text-white font-bold text-sm hover:bg-brand-hover hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 shadow-theme transition-all duration-200 group"
+        >
+          <MessageSquare class="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
+          <span>Konsultasi Gratis</span>
+        </a>
+
+        <!-- Mobile Menu Toggle -->
+        <button
+          id="mobile-menu-btn"
+          type="button"
+          class="md:hidden p-2 rounded-md text-theme-muted hover:text-brand border border-theme hover:border-brand transition-colors duration-200"
+          aria-label="Buka Menu Mobile"
+        >
+          <Menu class="w-6 h-6" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Navigation -->
+    <div id="mobile-menu" class="hidden md:hidden pb-6 pt-3 border-t border-theme space-y-2">
+      <a href="/" class={`flex items-center justify-between px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive('/') ? 'bg-brand-light text-brand font-bold border-l-4 border-brand' : 'text-theme-main hover:bg-theme-card hover:text-brand'}`}>
+        <span>Beranda</span>
+      </a>
+      <a href="/tentang" class={`flex items-center justify-between px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive('/tentang') ? 'bg-brand-light text-brand font-bold border-l-4 border-brand' : 'text-theme-main hover:bg-theme-card hover:text-brand'}`}>
+        <span>Tentang Kami & Layanan</span>
+      </a>
+      <a href="/etalase" class={`flex items-center justify-between px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive('/etalase') ? 'bg-brand-light text-brand font-bold border-l-4 border-brand' : 'text-theme-main hover:bg-theme-card hover:text-brand'}`}>
+        <span>Etalase Produk</span>
+      </a>
+      <a href="/kontak" class={`flex items-center justify-between px-4 py-3 rounded-md text-sm font-medium transition-colors ${isActive('/kontak') ? 'bg-brand-light text-brand font-bold border-l-4 border-brand' : 'text-theme-main hover:bg-theme-card hover:text-brand'}`}>
+        <span>Kontak & Lokasi</span>
+      </a>
+      <div class="pt-2">
+        <a
+          href={`https://wa.me/${COMPANY_INFO.whatsapp}?text=Halo%20Karya%20Sejati,%20saya%20ingin%20konsultasi%20furnitur%20/%20aluminium`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center justify-center space-x-2 w-full py-3 rounded-md bg-brand text-white font-bold text-sm shadow-theme"
+        >
+          <MessageSquare class="w-4 h-4" />
+          <span>Konsultasi Gratis via WhatsApp</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  const toggleBtn = document.getElementById('theme-toggle');
+  const sunIcon = document.getElementById('sun-icon');
+  const moonIcon = document.getElementById('moon-icon');
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  function updateIcons() {
+    const isDark = document.documentElement.classList.contains('dark');
+    if (isDark) {
+      sunIcon?.classList.remove('hidden');
+      moonIcon?.classList.add('hidden');
+    } else {
+      sunIcon?.classList.add('hidden');
+      moonIcon?.classList.remove('hidden');
+    }
+  }
+
+  updateIcons();
+
+  toggleBtn?.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('ks_theme', isDark ? 'dark' : 'light');
+    updateIcons();
+  });
+
+  mobileMenuBtn?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+</script>

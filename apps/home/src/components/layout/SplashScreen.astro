@@ -1,0 +1,60 @@
+---
+---
+
+<div
+  id="splash-screen"
+  class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950 transition-all duration-500 opacity-100 pointer-events-auto"
+>
+  <!-- Animated Pure KS Logo (No text, no extra elements) -->
+  <div class="relative w-24 h-24 sm:w-32 sm:h-32 splash-logo-wrapper">
+    <img
+      src="/kslogo.svg"
+      alt="Karya Sejati Logo"
+      class="w-full h-full object-contain"
+    />
+  </div>
+</div>
+
+<style>
+  @keyframes splashLogoAnim {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.08);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .splash-logo-wrapper {
+    animation: splashLogoAnim 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    const splash = document.getElementById('splash-screen');
+    if (!splash) return;
+
+    function hideSplash() {
+      splash.style.opacity = '0';
+      splash.style.pointerEvents = 'none';
+      setTimeout(() => {
+        splash.style.display = 'none';
+      }, 500);
+    }
+
+    // Hide splash after animation completes
+    window.addEventListener('load', () => {
+      setTimeout(hideSplash, 650);
+    });
+
+    // Fallback timer in case load event already fired
+    setTimeout(hideSplash, 950);
+  })();
+</script>

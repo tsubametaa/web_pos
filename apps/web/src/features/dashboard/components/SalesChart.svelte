@@ -82,16 +82,16 @@
 </script>
 
 <div
-  class="relative w-full bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs text-ink"
+  class="relative w-full bg-white dark:bg-surface border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-2xs text-ink"
   bind:this={containerRef}
 >
   <!-- Chart Header -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
     <div>
-      <h3 class="text-xs font-bold text-slate-400 dark:text-emerald-500/70 uppercase tracking-wider">
+      <h3 class="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
         Grafik Tren Mingguan
       </h3>
-      <p class="text-sm sm:text-base font-extrabold text-slate-800 dark:text-emerald-100 mt-0.5">
+      <p class="text-base sm:text-lg font-black text-red-600 dark:text-red-400 tracking-tight mt-0.5">
         Analisis Penjualan & Profit Bersih
       </p>
     </div>
@@ -99,11 +99,11 @@
     <div class="flex items-center gap-4 text-xs">
       <div class="flex items-center gap-2">
         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs"></span>
-        <span class="font-semibold text-slate-600 dark:text-slate-300">Penjualan</span>
+        <span class="font-bold text-slate-700 dark:text-slate-200">Penjualan</span>
       </div>
       <div class="flex items-center gap-2">
         <span class="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-xs"></span>
-        <span class="font-semibold text-slate-600 dark:text-slate-300">Profit</span>
+        <span class="font-bold text-slate-700 dark:text-slate-200">Profit</span>
       </div>
     </div>
   </div>
@@ -112,12 +112,12 @@
   <div class="relative w-full h-57.5 select-none">
     <svg viewBox="0 0 {width} {height}" class="w-full h-full overflow-visible">
       <defs>
-        <!-- Sales Area Gradient -->
+        <!-- Sales Area Gradient (Emerald Green) -->
         <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#10B981" stop-opacity="0.25" />
           <stop offset="100%" stop-color="#10B981" stop-opacity="0.0" />
         </linearGradient>
-        <!-- Profit Area Gradient -->
+        <!-- Profit Area Gradient (Orange) -->
         <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.2" />
           <stop offset="100%" stop-color="#F59E0B" stop-opacity="0.0" />
@@ -141,7 +141,7 @@
             x={padLeft - 8}
             y={y + 3.5}
             text-anchor="end"
-            class="text-[10px] font-medium fill-slate-400 dark:fill-slate-400 font-mono tracking-tight"
+            class="text-[10px] font-bold fill-slate-500 dark:fill-slate-400 font-mono tracking-tight"
           >
             {formatShortCurrency(val)}
           </text>
@@ -154,7 +154,7 @@
           x={xCoords[i]}
           y={height - 6}
           text-anchor="middle"
-          class="text-[10px] font-medium fill-slate-500 dark:fill-slate-400"
+          class="text-[10px] font-bold fill-slate-600 dark:fill-slate-400"
         >
           {pt.dateStr}
         </text>

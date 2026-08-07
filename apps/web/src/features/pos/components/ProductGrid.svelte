@@ -105,7 +105,7 @@
     <div class="flex items-center gap-2 flex-1 min-w-0">
       <div class="relative flex-1 min-w-[200px]">
         <div
-          class="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-slate-400"
+          class="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-ink-muted"
         >
           <Search class="w-4 h-4" />
         </div>
@@ -114,7 +114,7 @@
           bind:value={searchQuery}
           onkeydown={handleSearchKeyDown}
           placeholder="Scan Barcode atau cari nama/SKU..."
-          class="w-full pl-10 pr-20 py-2.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none transition-all shadow-2xs"
+          class="w-full pl-10 pr-20 py-2.5 bg-surface border border-border-theme focus:border-accent rounded-xl text-xs font-medium text-h-text placeholder-ink-muted focus:outline-none transition-all shadow-2xs"
         />
         <div
           class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5"
@@ -123,7 +123,7 @@
             <button
               type="button"
               onclick={clearSearch}
-              class="p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+              class="p-0.5 rounded-full text-ink-muted hover:text-h-text cursor-pointer"
             >
               <X class="w-3.5 h-3.5" />
             </button>
@@ -135,7 +135,7 @@
       <button
         type="button"
         onclick={() => (showCameraModal = true)}
-        class="inline-flex items-center gap-1.5 px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl shadow-xs hover:shadow transition-all duration-150 cursor-pointer shrink-0"
+        class="inline-flex items-center gap-1.5 px-3 py-2.5 bg-accent hover:bg-accent-hover text-white text-xs font-extrabold rounded-xl shadow-xs hover:shadow transition-all duration-150 cursor-pointer shrink-0"
         title="Buka Scanner Kamera POS"
       >
         <Camera class="w-4 h-4" />
@@ -156,9 +156,9 @@
   <!-- Search Result Status Indicator -->
   {#if isSearchActive}
     <div
-      class="text-[11px] font-semibold text-slate-400 dark:text-slate-400 -mt-1"
+      class="text-[11px] font-semibold text-ink-muted -mt-1"
     >
-      Menampilkan <span class="font-bold text-emerald-600 dark:text-emerald-400"
+      Menampilkan <span class="font-bold text-accent"
         >{filteredProducts().length}</span
       >
       produk untuk "{searchQuery}"
@@ -181,14 +181,14 @@
             type="button"
             onclick={() => !outOfStock && onselect(product)}
             disabled={outOfStock}
-            class="flex flex-col text-left bg-base/90 dark:bg-surface/50 rounded-2xl p-3 sm:p-3.5 border border-slate-200/80 dark:border-emerald-950/80 hover:border-emerald-500/40 transition-all duration-150 focus:outline-none group relative select-none shadow-2xs hover:shadow-xs
+            class="flex flex-col text-left bg-surface rounded-2xl p-3 sm:p-3.5 border border-border-theme hover:border-accent/40 transition-all duration-150 focus:outline-none group relative select-none shadow-2xs hover:shadow-xs
 							{outOfStock
               ? 'opacity-40 cursor-not-allowed'
               : 'cursor-pointer hover:-translate-y-0.5'}"
           >
             <!-- Product Thumbnail Image & Badges -->
             <div
-              class="aspect-4/3 w-full rounded-xl bg-emerald-500/5 dark:bg-emerald-950/30 border border-slate-200/40 dark:border-emerald-950/50 mb-3 overflow-hidden flex items-center justify-center relative"
+              class="aspect-4/3 w-full rounded-xl bg-accent-soft border border-border-theme mb-3 overflow-hidden flex items-center justify-center relative"
             >
               {#if product.imageUrl}
                 <img
@@ -198,7 +198,7 @@
                 />
               {:else}
                 <div
-                  class="flex flex-col items-center gap-1 text-slate-400 dark:text-emerald-500/40"
+                  class="flex flex-col items-center gap-1 text-accent opacity-60"
                 >
                   <Package class="w-7 h-7 stroke-[1.5]" />
                 </div>
@@ -208,7 +208,7 @@
               {#if inCartQty > 0}
                 <div class="absolute top-2 left-2 z-10">
                   <span
-                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-600 text-white shadow-xs ring-2 ring-white/50 dark:ring-slate-900/50"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-accent text-white shadow-xs ring-2 ring-white/50"
                   >
                     +{inCartQty} di keranjang
                   </span>
@@ -219,20 +219,20 @@
               <div class="absolute top-2 right-2 z-10">
                 {#if displayStock <= 0}
                   <span
-                    class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                    class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-rose-500/15 text-rose-600 border border-rose-500/20"
                   >
                     Habis
                   </span>
                 {:else if displayStock <= product.minStock}
                   <span
-                    class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20"
+                    class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-500/15 text-amber-700 border border-amber-500/20"
                   >
                     Sisa {displayStock}
                     {product.unit}
                   </span>
                 {:else}
                   <span
-                    class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-base/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-800"
+                    class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-base/80 text-ink-muted border border-border-theme"
                   >
                     {displayStock}
                     {product.unit}
@@ -243,28 +243,28 @@
 
             <!-- Product SKU & Title -->
             <span
-              class="font-mono text-[10px] text-slate-400 dark:text-slate-400 font-medium uppercase tracking-wider"
+              class="font-mono text-[10px] text-ink-muted font-medium uppercase tracking-wider"
             >
               SKU: {product.sku || "-"}
             </span>
             <h4
-              class="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm mt-0.5 line-clamp-1 min-h-[20px] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
+              class="font-bold text-h-text text-xs sm:text-sm mt-0.5 line-clamp-1 min-h-[20px] group-hover:text-accent transition-colors"
             >
               {product.name}
             </h4>
 
             <!-- Product Selling Price & Quick Add Button -->
             <div
-              class="flex items-center justify-between mt-2 pt-2 border-t border-slate-200/40 dark:border-emerald-950/40 w-full"
+              class="flex items-center justify-between mt-2 pt-2 border-t border-border-theme w-full"
             >
               <span
-                class="font-mono font-black text-xs sm:text-sm text-emerald-600 dark:text-emerald-400"
+                class="font-mono font-black text-xs sm:text-sm text-accent"
               >
                 {formatCurrency(product.sellingPrice)}
               </span>
 
               <div
-                class="p-1.5 rounded-xl bg-emerald-600 text-white shadow-2xs group-hover:scale-110 group-hover:bg-emerald-700 transition-all flex items-center justify-center shrink-0"
+                class="p-1.5 rounded-xl bg-accent text-white shadow-2xs group-hover:scale-110 group-hover:bg-accent-hover transition-all flex items-center justify-center shrink-0"
                 title="Tambah ke keranjang"
               >
                 <Plus class="w-3.5 h-3.5 stroke-[2.5]" />
@@ -275,10 +275,10 @@
       </div>
     {:else}
       <div
-        class="flex flex-col items-center justify-center gap-3 py-20 text-slate-400 select-none"
+        class="flex flex-col items-center justify-center gap-3 py-20 text-ink-muted select-none"
       >
-        <AlertCircle class="w-10 h-10 text-emerald-500/40" />
-        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+        <AlertCircle class="w-10 h-10 text-accent opacity-50" />
+        <span class="text-xs font-semibold text-ink-muted">
           {isSearchActive
             ? `Tidak ada produk cocok dengan "${searchQuery}"`
             : "Belum ada produk aktif"}

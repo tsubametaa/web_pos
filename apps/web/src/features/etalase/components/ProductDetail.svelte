@@ -3,7 +3,7 @@
   import { formatCurrency } from '../../../lib/utils/currency';
   import { Store, ArrowLeft, MapPin, Phone, Rocket, Package, MessageCircle } from 'lucide-svelte';
   import { api } from '../../../core/api';
-  import logoUrl from '../../../assets/img/arthapos.svg';
+  import logoUrl from '../../../assets/img/kslogo.svg';
   import Spinner from '../../../components/ui/Spinner.svelte';
   import type { UIProduct, UISettings } from '../../../types';
 

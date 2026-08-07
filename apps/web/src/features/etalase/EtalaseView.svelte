@@ -15,7 +15,7 @@
   import { api } from '../../core/api';
   import Spinner from '../../components/ui/Spinner.svelte';
   import Dropdown from '../../components/ui/Dropdown.svelte';
-  import logoUrl from '../../assets/img/arthapos.svg';
+  import logoUrl from '../../assets/img/kslogo.svg';
   import ProductDetail from './components/ProductDetail.svelte';
   import type { UIProduct, UISettings } from '../../types';
 

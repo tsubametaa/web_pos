@@ -5,7 +5,7 @@
   import { api } from "../../core/api";
   import { appState } from "../../core/state.svelte";
   import { toast } from "../../lib/utils/toast.svelte";
-  import logoUrl from "../../assets/img/arthapos.svg";
+  import logoUrl from "../../assets/img/kslogo.svg";
 
   let loading = $state(false);
 

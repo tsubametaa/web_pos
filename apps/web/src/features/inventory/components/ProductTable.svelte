@@ -6,6 +6,7 @@
     Edit,
     Package2,
     Share2,
+    Trash2,
     ToggleLeft,
     ToggleRight,
     AlertTriangle,
@@ -22,10 +23,11 @@
     onedit: (p: UIProduct) => void;
     onadjust: (p: UIProduct) => void;
     onshare: (p: UIProduct) => void;
+    ondelete: (p: UIProduct) => void;
     ontoggle: (p: UIProduct) => void;
   }
 
-  let { products, categories = [], onedit, onadjust, onshare, ontoggle }: Props = $props();
+  let { products, categories = [], onedit, onadjust, onshare, ondelete, ontoggle }: Props = $props();
 
   let searchQuery = $state('');
   let selectedCategory = $state('');
@@ -61,18 +63,18 @@
     <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center flex-1 min-w-0">
       <!-- Search Input -->
       <div class="relative flex-1 max-w-md">
-        <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
         <input
           type="text"
           bind:value={searchQuery}
           placeholder="Cari produk, SKU, atau kategori..."
-          class="w-full pl-10 pr-9 py-2.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none transition-all shadow-2xs"
+          class="w-full pl-10 pr-9 py-2.5 bg-surface border border-border-theme focus:border-accent rounded-xl text-xs font-medium text-h-text placeholder-ink-muted focus:outline-none transition-all shadow-2xs"
         />
         {#if isSearchActive}
           <button
             type="button"
             onclick={clearSearch}
-            class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+            class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-ink-muted hover:text-h-text cursor-pointer"
           >
             <X class="w-3.5 h-3.5" />
           </button>
@@ -93,9 +95,9 @@
       <input
         type="checkbox"
         bind:checked={showInactive}
-        class="w-4 h-4 rounded accent-emerald-600 cursor-pointer"
+        class="w-4 h-4 rounded accent-accent cursor-pointer"
       />
-      <span class="text-xs font-bold text-slate-600 dark:text-slate-300">
+      <span class="text-xs font-bold text-ink">
         Tampilkan Non-aktif
       </span>
     </label>
@@ -103,63 +105,63 @@
 
   <!-- Search Results Counter -->
   {#if isSearchActive}
-    <div class="text-[11px] font-semibold text-slate-400 -mt-1">
-      Menampilkan <span class="font-bold text-emerald-600 dark:text-emerald-400">{filteredProducts().length}</span> produk cocok
+    <div class="text-[11px] font-semibold text-ink-muted -mt-1">
+      Menampilkan <span class="font-bold text-accent">{filteredProducts().length}</span> produk cocok
     </div>
   {/if}
 
   <!-- Main Product Table Container -->
   <div
-    class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl overflow-hidden shadow-2xs"
+    class="bg-surface border border-border-theme rounded-2xl overflow-hidden shadow-2xs"
   >
     <div class="overflow-x-auto">
       <table class="w-full text-xs">
         <thead>
           <tr
-            class="border-b border-slate-200/60 dark:border-emerald-950/60 bg-base/50 dark:bg-surface/30"
+            class="border-b border-border-theme bg-base/50"
           >
             <th
-              class="text-left px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
+              class="text-left px-5 py-3.5 font-extrabold text-ink-muted uppercase tracking-wider"
             >
               Informasi Produk
             </th>
             <th
-              class="text-left px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider hidden md:table-cell"
+              class="text-left px-5 py-3.5 font-extrabold text-ink-muted uppercase tracking-wider hidden md:table-cell"
             >
               Kategori
             </th>
             <th
-              class="text-right px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
+              class="text-right px-5 py-3.5 font-extrabold text-ink-muted uppercase tracking-wider"
             >
               Harga & HPP
             </th>
             <th
-              class="text-center px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
+              class="text-center px-5 py-3.5 font-extrabold text-ink-muted uppercase tracking-wider"
             >
               Stok
             </th>
             <th
-              class="text-center px-5 py-3.5 font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider hidden sm:table-cell"
+              class="text-center px-5 py-3.5 font-extrabold text-ink-muted uppercase tracking-wider hidden sm:table-cell"
             >
               Status
             </th>
             <th
-              class="px-5 py-3.5 text-center font-extrabold text-slate-500 dark:text-emerald-500/70 uppercase tracking-wider"
+              class="px-5 py-3.5 text-center font-extrabold text-ink-muted uppercase tracking-wider"
             >
               Aksi
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-200/40 dark:divide-emerald-950/40">
+        <tbody class="divide-y divide-border-theme">
           {#each filteredProducts() as product (product.id)}
             <tr
-              class="hover:bg-emerald-500/5 transition-colors {!product.isActive ? 'opacity-45' : ''}"
+              class="hover:bg-accent-soft/40 transition-colors {!product.isActive ? 'opacity-45' : ''}"
             >
               <!-- Product Image & Details -->
               <td class="px-5 py-3.5">
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-10 h-10 rounded-xl bg-emerald-500/10 dark:bg-emerald-950/40 border border-slate-200/40 dark:border-emerald-950/60 overflow-hidden flex items-center justify-center shrink-0"
+                    class="w-10 h-10 rounded-xl bg-accent-soft border border-border-theme overflow-hidden flex items-center justify-center shrink-0"
                   >
                     {#if product.imageUrl}
                       <img
@@ -168,20 +170,20 @@
                         class="w-full h-full object-cover"
                       />
                     {:else}
-                      <Package class="w-5 h-5 text-emerald-600 dark:text-emerald-400 stroke-[1.5]" />
+                      <Package class="w-5 h-5 text-accent stroke-[1.5]" />
                     {/if}
                   </div>
 
                   <div class="flex flex-col min-w-0">
-                    <p class="font-bold text-slate-800 dark:text-slate-100 truncate">
+                    <p class="font-bold text-h-text truncate">
                       {product.name}
                     </p>
                     <div class="flex items-center gap-1.5 mt-0.5">
-                      <span class="text-[10px] font-mono font-medium text-slate-400 uppercase">
+                      <span class="text-[10px] font-mono font-medium text-ink-muted uppercase">
                         SKU: {product.sku || '-'}
                       </span>
-                      <span class="text-slate-300 dark:text-slate-600">&bull;</span>
-                      <span class="text-[10px] font-medium text-slate-400">
+                      <span class="text-ink-muted">&bull;</span>
+                      <span class="text-[10px] font-medium text-ink-muted">
                         {product.unit || 'unit'}
                       </span>
                     </div>
@@ -192,7 +194,7 @@
               <!-- Category Pill -->
               <td class="px-5 py-3.5 hidden md:table-cell">
                 <span
-                  class="px-2.5 py-1 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 rounded-lg font-bold text-[10px]"
+                  class="px-2.5 py-1 bg-accent-soft border border-accent/20 text-accent rounded-lg font-bold text-[10px]"
                 >
                   {product.category || 'Umum'}
                 </span>
@@ -200,11 +202,11 @@
 
               <!-- Price & Cost Price -->
               <td class="px-5 py-3.5 text-right font-mono">
-                <p class="font-black text-emerald-600 dark:text-emerald-400">
+                <p class="font-black text-accent">
                   {formatCurrency(product.sellingPrice)}
                 </p>
                 {#if product.costPrice}
-                  <p class="text-[10px] text-slate-400 mt-0.5">
+                  <p class="text-[10px] text-ink-muted mt-0.5">
                     HPP: {formatCurrency(product.costPrice)}
                   </p>
                 {/if}
@@ -214,20 +216,20 @@
               <td class="px-5 py-3.5 text-center">
                 {#if product.stock <= 0}
                   <span
-                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-mono"
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-rose-500/10 text-rose-600 border border-rose-500/20 font-mono"
                   >
                     Habis (0)
                   </span>
                 {:else if product.stock <= product.minStock}
                   <span
-                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-mono"
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-amber-500/10 text-amber-600 border border-amber-500/20 font-mono"
                   >
                     <AlertTriangle class="w-3 h-3 text-amber-500" />
                     {product.stock} {product.unit}
                   </span>
                 {:else}
                   <span
-                    class="font-mono font-bold text-slate-800 dark:text-slate-200"
+                    class="font-mono font-bold text-h-text"
                   >
                     {product.stock} {product.unit}
                   </span>
@@ -243,9 +245,9 @@
                   title={product.isActive ? 'Nonaktifkan Produk' : 'Aktifkan Produk'}
                 >
                   {#if product.isActive}
-                    <ToggleRight class="w-6 h-6 text-emerald-500" />
+                    <ToggleRight class="w-6 h-6 text-accent" />
                   {:else}
-                    <ToggleLeft class="w-6 h-6 text-slate-300 dark:text-slate-600" />
+                    <ToggleLeft class="w-6 h-6 text-ink-muted" />
                   {/if}
                 </button>
               </td>
@@ -256,7 +258,7 @@
                   <button
                     type="button"
                     onclick={() => onedit(product)}
-                    class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-500/10 rounded-lg cursor-pointer transition-colors bg-transparent border-0"
+                    class="p-1.5 text-ink-muted hover:text-accent hover:bg-accent-soft rounded-lg cursor-pointer transition-colors bg-transparent border-0"
                     title="Edit Produk"
                   >
                     <Edit class="w-4 h-4" />
@@ -264,7 +266,7 @@
                   <button
                     type="button"
                     onclick={() => onadjust(product)}
-                    class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-500/10 rounded-lg cursor-pointer transition-colors bg-transparent border-0"
+                    class="p-1.5 text-ink-muted hover:text-accent hover:bg-accent-soft rounded-lg cursor-pointer transition-colors bg-transparent border-0"
                     title="Sesuaikan Stok Persediaan"
                   >
                     <Package2 class="w-4 h-4" />
@@ -272,17 +274,25 @@
                   <button
                     type="button"
                     onclick={() => onshare(product)}
-                    class="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-500/10 rounded-lg cursor-pointer transition-colors bg-transparent border-0"
+                    class="p-1.5 text-ink-muted hover:text-accent hover:bg-accent-soft rounded-lg cursor-pointer transition-colors bg-transparent border-0"
                     title="Bagikan / QR Code"
                   >
                     <Share2 class="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onclick={() => ondelete(product)}
+                    class="p-1.5 text-ink-muted hover:text-accent hover:bg-accent-soft rounded-lg cursor-pointer transition-colors bg-transparent border-0"
+                    title="Hapus Produk"
+                  >
+                    <Trash2 class="w-4 h-4" />
                   </button>
                 </div>
               </td>
             </tr>
           {:else}
             <tr>
-              <td colspan="6" class="py-16 text-center text-slate-400 font-semibold">
+              <td colspan="6" class="py-16 text-center text-ink-muted font-semibold">
                 {isSearchActive
                   ? `Tidak ada produk cocok dengan "${searchQuery}"`
                   : 'Belum ada produk terdaftar di inventori'}
