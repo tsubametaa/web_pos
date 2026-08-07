@@ -1,6 +1,14 @@
 ---
 import { COMPANY_INFO } from "../../data/companyData";
+import Dropdown from "../etalase/layout/Dropdown.astro";
 import { MapPin, Phone, Mail, Send, Clock, MessageSquare } from "lucide-astro";
+
+const categoryOptions = [
+  { value: "Furnitur Custom (Kitchen Set / Lemari)", label: "Furnitur Custom (Kitchen Set / Lemari)" },
+  { value: "Kusen & Pintu Aluminium", label: "Kusen & Pintu Aluminium" },
+  { value: "Jendela & Partisi Kaca", label: "Jendela & Partisi Kaca" },
+  { value: "Kanopi & Proyek Lainnya", label: "Kanopi & Proyek Lainnya" },
+];
 ---
 
 <section id="kontak" class="py-20 bg-theme-main relative">
@@ -142,27 +150,16 @@ import { MapPin, Phone, Mail, Send, Clock, MessageSquare } from "lucide-astro";
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
-                for="contact-category"
                 class="block text-xs font-mono font-bold text-theme-subtle uppercase mb-2"
                 >Kategori Proyek</label
               >
-              <select
+              <Dropdown
                 id="contact-category"
-                class="w-full px-4 py-3 rounded-md bg-theme-main border border-theme text-theme-main text-sm focus:outline-none focus:border-brand cursor-pointer"
-              >
-                <option value="Furnitur Custom (Kitchen Set/Lemari)"
-                  >Furnitur Custom (Kitchen Set / Lemari)</option
-                >
-                <option value="Kusen & Pintu Aluminium"
-                  >Kusen & Pintu Aluminium</option
-                >
-                <option value="Jendela & Partisi Kaca"
-                  >Jendela & Partisi Kaca</option
-                >
-                <option value="Kanopi & Proyek Lainnya"
-                  >Kanopi & Proyek Lainnya</option
-                >
-              </select>
+                name="contactCategory"
+                placeholder="Pilih Kategori Proyek"
+                value="Furnitur Custom (Kitchen Set / Lemari)"
+                options={categoryOptions}
+              />
             </div>
 
             <div>
@@ -225,9 +222,10 @@ import { MapPin, Phone, Mail, Send, Clock, MessageSquare } from "lucide-astro";
       ?.value;
     const phone = (document.getElementById("contact-phone") as HTMLInputElement)
       ?.value;
-    const category = (
-      document.getElementById("contact-category") as HTMLSelectElement
-    )?.value;
+    const categoryInput = document.getElementById(
+      "contact-category-input",
+    ) as HTMLInputElement | null;
+    const category = categoryInput?.value || "Furnitur Custom (Kitchen Set / Lemari)";
     const location = (
       document.getElementById("contact-location") as HTMLInputElement
     )?.value;
