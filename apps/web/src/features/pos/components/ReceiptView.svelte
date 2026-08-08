@@ -13,6 +13,12 @@
 
 	let { show, transaction, settings, onclose }: Props = $props();
 
+	function handlePrintBoth() {
+		if (transaction?.id) {
+			window.open(`#/print-all/${transaction.id}`, '_blank');
+		}
+	}
+
 	function handlePrintInvoice() {
 		if (transaction?.id) {
 			window.open(`#/invoice/${transaction.id}`, '_blank');
@@ -123,28 +129,37 @@
 
 			<!-- Actions -->
 			<div class="px-6 pb-6 flex flex-col gap-2">
-				<div class="flex gap-2">
+				<button
+					type="button"
+					onclick={handlePrintBoth}
+					class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl cursor-pointer transition-all shadow-xs flex items-center justify-center gap-2"
+				>
+					<Printer class="w-4 h-4" />
+					<span>Cetak Invoice & Surat Jalan</span>
+				</button>
+
+				<div class="flex gap-2 pt-1">
 					<button
 						type="button"
 						onclick={handlePrintInvoice}
-						class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs"
+						class="flex-1 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1"
 					>
-						<Printer class="w-3.5 h-3.5 inline mr-1" />
-						Cetak Invoice
+						<Printer class="w-3.5 h-3.5 text-slate-500" />
+						Invoice Saja
 					</button>
 					<button
 						type="button"
 						onclick={handlePrintSuratJalan}
-						class="flex-1 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs"
+						class="flex-1 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1"
 					>
-						<FileText class="w-3.5 h-3.5 inline mr-1" />
-						Cetak Surat Jalan
+						<FileText class="w-3.5 h-3.5 text-slate-500" />
+						Surat Jalan Saja
 					</button>
 				</div>
 				<button
 					type="button"
 					onclick={onclose}
-					class="w-full py-2 border border-sage-200 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-base cursor-pointer transition-all"
+					class="w-full py-2 border border-sage-200 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-base cursor-pointer transition-all mt-1"
 				>
 					<X class="w-3.5 h-3.5 inline mr-1" />
 					Tutup

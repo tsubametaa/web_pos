@@ -19,6 +19,7 @@
   import Etalase from "./pages/Etalase.svelte";
   import Invoice from "./pages/Invoice.svelte";
   import SuratJalan from "./pages/SuratJalan.svelte";
+  import CombinedPrint from "./pages/CombinedPrint.svelte";
 
   // Icons
   import {
@@ -53,6 +54,10 @@
     if (hash.startsWith("#/surat-jalan/")) {
       const id = hash.replace("#/surat-jalan/", "");
       return { name: "surat-jalan", params: { id } };
+    }
+    if (hash.startsWith("#/print-all/")) {
+      const id = hash.replace("#/print-all/", "");
+      return { name: "print-all", params: { id } };
     }
     if (hash.startsWith("#/etalase/")) {
       const id = hash.replace("#/etalase/", "");
@@ -100,7 +105,7 @@
   );
 
   const isShellHidden = $derived(
-    parsedRoute.name === "etalase" || parsedRoute.name === "invoice" || parsedRoute.name === "surat-jalan",
+    parsedRoute.name === "etalase" || parsedRoute.name === "invoice" || parsedRoute.name === "surat-jalan" || parsedRoute.name === "print-all",
   );
 
   // Handle routing auth guard
@@ -188,6 +193,8 @@
     <Invoice transactionId={parsedRoute.params.id ?? ""} />
   {:else if parsedRoute.name === "surat-jalan"}
     <SuratJalan transactionId={parsedRoute.params.id ?? ""} />
+  {:else if parsedRoute.name === "print-all"}
+    <CombinedPrint transactionId={parsedRoute.params.id ?? ""} />
   {:else}
     <Etalase productId={parsedRoute.params.id} />
   {/if}

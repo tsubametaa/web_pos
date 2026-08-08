@@ -21,6 +21,12 @@
       window.open(`#/invoice/${transaction.id}`, '_blank');
     }
   }
+
+  function openCombinedPrint() {
+    if (transaction?.id) {
+      window.open(`#/print-all/${transaction.id}`, '_blank');
+    }
+  }
 </script>
 
 {#if transaction}
@@ -180,27 +186,39 @@
 
       <!-- Modal Footer Actions -->
       <div
-        class="px-6 py-4 border-t border-slate-200/60 dark:border-emerald-950/60 bg-base/50 dark:bg-surface/50 flex items-center justify-end gap-3"
+        class="px-6 py-4 border-t border-slate-200/60 dark:border-emerald-950/60 bg-base/50 dark:bg-surface/50 flex flex-wrap items-center justify-between gap-2"
       >
         {#if transaction.status === 'completed' && onvoid}
           <button
             type="button"
             onclick={() => onvoid?.(transaction!.id)}
-            class="px-4 py-2.5 rounded-xl border border-rose-200/80 dark:border-rose-900/60 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer flex items-center gap-1.5"
+            class="px-3 py-2 rounded-xl border border-rose-200/80 dark:border-rose-900/60 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer flex items-center gap-1.5"
           >
-            <Ban class="w-4 h-4" />
+            <Ban class="w-3.5 h-3.5" />
             <span>Batalkan</span>
           </button>
+        {:else}
+          <div></div>
         {/if}
 
-        <button
-          type="button"
-          onclick={openInvoice}
-          class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs hover:shadow"
-        >
-          <Printer class="w-4 h-4" />
-          <span>Cetak Invoice</span>
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            onclick={openInvoice}
+            class="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl cursor-pointer transition-all flex items-center gap-1"
+          >
+            <Printer class="w-3.5 h-3.5 text-slate-500" />
+            <span>Invoice Saja</span>
+          </button>
+          <button
+            type="button"
+            onclick={openCombinedPrint}
+            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs hover:shadow"
+          >
+            <Printer class="w-4 h-4" />
+            <span>Cetak Keduanya</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
