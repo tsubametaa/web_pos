@@ -40,22 +40,22 @@
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
-      class="relative w-full max-w-md bg-base dark:bg-surface border border-slate-200/80 dark:border-emerald-950/80 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col text-ink select-none"
+      class="relative w-full max-w-md bg-base dark:bg-surface border border-slate-200/80 dark:border-slate-800/80 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col text-ink select-none"
       onclick={(e) => e.stopPropagation()}
     >
       <!-- Modal Header -->
       <div
-        class="flex items-center justify-between px-6 py-4.5 border-b border-slate-200/60 dark:border-emerald-950/60 bg-base/50 dark:bg-surface/50"
+        class="flex items-center justify-between px-6 py-4.5 border-b border-slate-200/60 dark:border-slate-800/60 bg-base/50 dark:bg-surface/50"
       >
         <div class="flex items-center gap-3">
-          <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+          <div class="p-2 rounded-xl bg-accent-soft text-accent">
             <Receipt class="w-5 h-5" />
           </div>
           <div>
-            <h2 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <h2 class="text-base font-extrabold dark:text-white tracking-tight">
               Rincian Transaksi
             </h2>
-            <p class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+            <p class="text-xs font-mono font-bold text-accent">
               {transaction.transactionCode}
             </p>
           </div>
@@ -76,12 +76,12 @@
         <!-- Status Banner -->
         <div class="flex items-center justify-between p-3 rounded-xl border text-xs font-bold
 					{transaction.status === 'completed'
-            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+            ? 'bg-accent-soft border-accent/20 text-accent-soft-text'
             : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'}"
         >
           <div class="flex items-center gap-2">
             {#if transaction.status === 'completed'}
-              <CheckCircle2 class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2 class="w-4 h-4 text-accent" />
               <span>Transaksi Selesai</span>
             {:else}
               <AlertCircle class="w-4 h-4 text-rose-500" />
@@ -95,11 +95,11 @@
 
         <!-- Items Purchased List -->
         <div class="space-y-2">
-          <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-emerald-500/70">
+          <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
             Daftar Produk Belanja ({transaction.items.length} Item)
           </h3>
 
-          <div class="divide-y divide-slate-200/40 dark:divide-emerald-950/40 bg-white/50 dark:bg-base/40 rounded-2xl border border-slate-200/60 dark:border-emerald-950/60 p-3">
+          <div class="divide-y divide-slate-200/40 dark:divide-slate-800/40 bg-white/50 dark:bg-base/40 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 p-3">
             {#each transaction.items as item}
               <div class="flex justify-between items-center py-2 text-xs">
                 <div class="flex flex-col min-w-0 pr-2">
@@ -120,14 +120,14 @@
 
         <!-- Financial Summary Breakdown -->
         <div class="space-y-2">
-          <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-emerald-500/70">
+          <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
             Rincian Pembayaran
           </h3>
 
-          <div class="bg-white/50 dark:bg-base/40 rounded-2xl border border-slate-200/60 dark:border-emerald-950/60 p-3.5 space-y-2.5 text-xs">
+          <div class="bg-white/50 dark:bg-base/40 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 p-3.5 space-y-2.5 text-xs">
             <div class="flex justify-between items-center">
               <span class="font-medium text-slate-500 dark:text-slate-400">Total Belanja</span>
-              <span class="font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm">
+              <span class="font-mono font-black text-accent text-sm">
                 {formatCurrency(transaction.totalAmount)}
               </span>
             </div>
@@ -142,7 +142,7 @@
 
               <div class="flex justify-between items-center">
                 <span class="font-medium text-slate-500 dark:text-slate-400">Estimasi Profit / Laba</span>
-                <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                <span class="font-mono font-bold text-accent">
                   {formatCurrency(transaction.profit || 0)}
                 </span>
               </div>
@@ -166,7 +166,7 @@
               </div>
               <div class="flex justify-between items-center">
                 <span class="font-medium text-slate-500 dark:text-slate-400">Kembalian</span>
-                <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                <span class="font-mono font-bold text-accent">
                   {formatCurrency(transaction.change)}
                 </span>
               </div>
@@ -186,7 +186,7 @@
 
       <!-- Modal Footer Actions -->
       <div
-        class="px-6 py-4 border-t border-slate-200/60 dark:border-emerald-950/60 bg-base/50 dark:bg-surface/50 flex flex-wrap items-center justify-between gap-2"
+        class="px-6 py-4 border-t border-slate-200/60 dark:border-slate-800/60 bg-base/50 dark:bg-surface/50 flex flex-wrap items-center justify-between gap-2"
       >
         {#if transaction.status === 'completed' && onvoid}
           <button
@@ -213,7 +213,7 @@
           <button
             type="button"
             onclick={openCombinedPrint}
-            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs hover:shadow"
+            class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs hover:shadow"
           >
             <Printer class="w-4 h-4" />
             <span>Cetak Keduanya</span>

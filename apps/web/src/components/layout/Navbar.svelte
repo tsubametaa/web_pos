@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { appState } from '../../core/state.svelte';
   import { activeStore } from '../../core/activeStore.svelte';
-  import { Menu, X, Sun, Moon, Store, ChevronRight, Building2, ChevronDown, Check } from 'lucide-svelte';
+  import { Menu, X, Sun, Moon, ChevronRight, Building2, ChevronDown, Check } from 'lucide-svelte';
 
   interface Props {
     activeMenuItem?: {
@@ -88,7 +88,7 @@
           class="flex items-center gap-2 px-3 py-1.5 bg-accent-soft hover:bg-accent-soft/80 border border-accent/30 rounded-xl text-xs font-bold text-accent cursor-pointer transition-all duration-150 shadow-2xs"
         >
           <Building2 class="w-3.5 h-3.5 text-accent" />
-          <span class="truncate max-w-32.5 sm:max-w-[180px]">
+          <span class="truncate max-w-32.5 sm:max-w-45">
             {activeStore.currentStore?.name || 'Pilih Brand'}
           </span>
           <ChevronDown class="w-3.5 h-3.5 text-accent transition-transform duration-200 {dropdownOpen ? 'rotate-180' : ''}" />
@@ -134,18 +134,6 @@
         <span>{activeStore.currentStore?.name || appState.user?.businessName || 'Brand Utama'}</span>
       </div>
     {/if}
-
-    <!-- Public Storefront Shortcut -->
-    <a
-      href="#/etalase"
-      target="_blank"
-      class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-ink hover:text-accent bg-base hover:bg-accent-soft border border-border-theme rounded-xl shadow-2xs transition-all duration-150 group"
-      title="Buka Etalase Publik di Tab Baru"
-    >
-      <Store class="w-3.5 h-3.5 text-accent group-hover:scale-110 transition-transform" />
-      <span class="hidden sm:inline">Etalase Publik</span>
-      <span class="text-ink-muted text-[10px] group-hover:translate-x-0.5 transition-transform">&rarr;</span>
-    </a>
 
     <!-- Theme Switcher -->
     <button

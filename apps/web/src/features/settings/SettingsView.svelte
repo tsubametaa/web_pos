@@ -4,7 +4,7 @@
   import { api, API_BASE_URL } from '../../core/api';
   import { appState } from '../../core/state.svelte';
   import { activeStore } from '../../core/activeStore.svelte';
-  import Spinner from '../../components/ui/Spinner.svelte';
+  import Skeleton from '../../components/ui/Skeleton.svelte';
 
   import SettingsHeader from './components/SettingsHeader.svelte';
   import SettingsSidebar, { type TabType } from './components/SettingsSidebar.svelte';
@@ -191,11 +191,34 @@
 </script>
 
 {#if loading}
-  <div class="h-96 flex flex-col items-center justify-center gap-3">
-    <Spinner size="lg" />
-    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">
-      Memuat Pengaturan Toko...
-    </span>
+  <div class="flex flex-col gap-6 text-ink w-full pb-8 select-none">
+    <!-- Header Banner Skeleton -->
+    <div class="p-6 bg-surface/90 border border-border-theme rounded-2xl flex justify-between items-center gap-4">
+      <div class="space-y-2 w-full max-w-md">
+        <Skeleton class="h-6 w-40" />
+        <Skeleton class="h-4 w-full" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      <!-- Sidebar Skeleton -->
+      <div class="lg:col-span-1 space-y-2 bg-surface/90 border border-border-theme p-4 rounded-2xl">
+        {#each Array(4) as _}
+          <Skeleton class="h-10 w-full" />
+        {/each}
+      </div>
+
+      <!-- Main Form Skeleton -->
+      <div class="lg:col-span-3 space-y-4 bg-surface/90 border border-border-theme p-6 rounded-2xl">
+        <Skeleton class="h-8 w-60" />
+        <Skeleton class="h-20 w-full" />
+        <div class="grid grid-cols-2 gap-4">
+          <Skeleton class="h-10 w-full" />
+          <Skeleton class="h-10 w-full" />
+        </div>
+        <Skeleton class="h-24 w-full" />
+      </div>
+    </div>
   </div>
 {:else}
   <div class="flex flex-col gap-6 text-ink w-full pb-8 select-none">

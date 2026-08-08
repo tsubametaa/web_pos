@@ -3,7 +3,7 @@
   import { api } from '../../core/api';
   import { toast } from '../../lib/utils/toast.svelte';
   import { formatCurrency } from '../../lib/utils/currency';
-  import Spinner from '../../components/ui/Spinner.svelte';
+  import Skeleton from '../../components/ui/Skeleton.svelte';
   import ProductTable from './components/ProductTable.svelte';
   import ProductFormModal from './components/ProductFormModal.svelte';
   import StockAdjustModal from './components/StockAdjustModal.svelte';
@@ -134,11 +134,33 @@
 </script>
 
 {#if loading}
-  <div class="h-96 flex flex-col items-center justify-center gap-3">
-    <Spinner size="lg" />
-    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">
-      Memuat Data Inventori...
-    </span>
+  <div class="flex flex-col gap-6 text-ink w-full pb-8 select-none">
+    <!-- Header Banner Skeleton -->
+    <div class="p-6 bg-surface border border-border-theme rounded-2xl flex justify-between items-center gap-4">
+      <div class="space-y-2 w-full max-w-md">
+        <Skeleton class="h-6 w-44" />
+        <Skeleton class="h-4 w-full" />
+      </div>
+      <Skeleton class="h-10 w-36" />
+    </div>
+
+    <!-- Stat Cards Skeleton -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {#each Array(4) as _}
+        <div class="bg-surface border border-border-theme rounded-2xl p-4 space-y-3">
+          <Skeleton class="h-4 w-24" />
+          <Skeleton class="h-8 w-32" />
+        </div>
+      {/each}
+    </div>
+
+    <!-- Table Skeleton -->
+    <div class="bg-surface border border-border-theme rounded-2xl p-4 space-y-3">
+      <Skeleton class="h-10 w-full" />
+      {#each Array(5) as _}
+        <Skeleton class="h-12 w-full" />
+      {/each}
+    </div>
   </div>
 {:else}
   <div class="flex flex-col gap-6 text-ink w-full pb-8 select-none">

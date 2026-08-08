@@ -4,7 +4,7 @@
   import { appState } from "../../core/state.svelte";
   import { formatCurrency } from "../../lib/utils/currency";
   import { formatDate } from "../../lib/utils/date";
-  import Spinner from "../../components/ui/Spinner.svelte";
+  import Skeleton from "../../components/ui/Skeleton.svelte";
   import {
     TrendingUp,
     ShoppingBag,
@@ -157,11 +157,36 @@
 </script>
 
 {#if loading}
-  <div class="h-96 flex flex-col items-center justify-center gap-3">
-    <Spinner size="lg" />
-    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">
-      Memuat Data Dashboard...
-    </span>
+  <div class="flex flex-col gap-6 text-ink w-full pb-8 select-none">
+    <!-- Header Banner Skeleton -->
+    <div class="p-6 bg-surface/90 border border-border-theme rounded-2xl space-y-2">
+      <Skeleton class="h-6 w-64" />
+      <Skeleton class="h-4 w-96" />
+    </div>
+
+    <!-- Stat Cards Grid Skeleton -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {#each Array(4) as _}
+        <div class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5 space-y-3">
+          <Skeleton class="h-4 w-28" />
+          <Skeleton class="h-8 w-36" />
+        </div>
+      {/each}
+    </div>
+
+    <!-- Sales Chart & Side Card Skeleton -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5 space-y-4">
+        <Skeleton class="h-6 w-48" />
+        <Skeleton class="h-56 w-full" />
+      </div>
+      <div class="lg:col-span-1 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5 space-y-4">
+        <Skeleton class="h-6 w-40" />
+        {#each Array(4) as _}
+          <Skeleton class="h-10 w-full" />
+        {/each}
+      </div>
+    </div>
   </div>
 {:else}
   <div class="flex flex-col gap-6 text-ink w-full pb-8">

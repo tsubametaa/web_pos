@@ -3,7 +3,7 @@
   import { api } from '../../core/api';
   import { toast } from '../../lib/utils/toast.svelte';
   import { formatDate } from '../../lib/utils/date';
-  import Spinner from '../../components/ui/Spinner.svelte';
+  import Skeleton from '../../components/ui/Skeleton.svelte';
   import MemberFormModal from './components/MemberFormModal.svelte';
   import MemberPricesModal from './components/MemberPricesModal.svelte';
   import {
@@ -92,11 +92,23 @@
 </script>
 
 {#if loading}
-  <div class="h-96 flex flex-col items-center justify-center gap-3">
-    <Spinner size="lg" />
-    <span class="text-xs font-bold text-ink-muted uppercase tracking-widest">
-      Memuat Data Member & Harga Khusus...
-    </span>
+  <div class="flex flex-col gap-6 text-ink w-full pb-8 select-none">
+    <!-- Header Banner Skeleton -->
+    <div class="p-6 bg-surface border border-border-theme rounded-2xl flex justify-between items-center gap-4">
+      <div class="space-y-2 w-full max-w-md">
+        <Skeleton class="h-6 w-48" />
+        <Skeleton class="h-4 w-full" />
+      </div>
+      <Skeleton class="h-10 w-36" />
+    </div>
+
+    <!-- Table Skeleton -->
+    <div class="bg-surface border border-border-theme rounded-2xl p-4 space-y-3">
+      <Skeleton class="h-10 w-full" />
+      {#each Array(5) as _}
+        <Skeleton class="h-12 w-full" />
+      {/each}
+    </div>
   </div>
 {:else}
   <div class="flex flex-col gap-6 text-ink w-full pb-8 select-none">

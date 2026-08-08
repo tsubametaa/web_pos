@@ -13,15 +13,15 @@
 </script>
 
 <aside
-	class="flex lg:flex-col gap-1.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 p-2 rounded-2xl shadow-2xs overflow-x-auto lg:overflow-visible scrollbar-none"
+	class="flex lg:flex-col gap-1.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 p-2 rounded-2xl shadow-2xs overflow-x-auto lg:overflow-visible scrollbar-none"
 >
 	<button
 		type="button"
 		onclick={() => onTabChange('profile')}
 		class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer select-none shrink-0 w-full border-0
 			{activeTab === 'profile'
-			? 'bg-emerald-600 text-white shadow-xs'
-			: 'text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
+			? 'bg-accent text-white shadow-xs'
+			: 'text-slate-600 dark:text-slate-300 hover:bg-accent-soft'}"
 	>
 		<Store class="w-4 h-4 shrink-0" />
 		<span>Profil Bisnis & Kasir</span>
@@ -32,8 +32,8 @@
 		onclick={() => onTabChange('security')}
 		class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer select-none shrink-0 w-full border-0
 			{activeTab === 'security'
-			? 'bg-emerald-600 text-white shadow-xs'
-			: 'text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
+			? 'bg-accent text-white shadow-xs'
+			: 'text-slate-600 dark:text-slate-300 hover:bg-accent-soft'}"
 	>
 		<ShieldCheck class="w-4 h-4 shrink-0" />
 		<span>Keamanan & Sandi</span>
@@ -44,8 +44,8 @@
 		onclick={() => onTabChange('printer')}
 		class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer select-none shrink-0 w-full border-0
 			{activeTab === 'printer'
-			? 'bg-emerald-600 text-white shadow-xs'
-			: 'text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
+			? 'bg-accent text-white shadow-xs'
+			: 'text-slate-600 dark:text-slate-300 hover:bg-accent-soft'}"
 	>
 		<Printer class="w-4 h-4 shrink-0" />
 		<span>Pengaturan Printer USB</span>
@@ -57,8 +57,8 @@
 			onclick={() => onTabChange('stores')}
 			class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left cursor-pointer select-none shrink-0 w-full border-0
 				{activeTab === 'stores'
-				? 'bg-emerald-600 text-white shadow-xs'
-				: 'text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10'}"
+				? 'bg-accent text-white shadow-xs'
+				: 'text-slate-600 dark:text-slate-300 hover:bg-accent-soft'}"
 		>
 			<Building2 class="w-4 h-4 shrink-0" />
 			<span>Kelola Daftar Brand</span>

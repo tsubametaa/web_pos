@@ -155,7 +155,7 @@
 <svelte:window onclick={handleWindowClick} />
 
 <div
-  class="flex flex-col h-full bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-2xs relative text-ink select-none"
+  class="flex flex-col h-full w-full bg-surface border border-border-theme rounded-2xl p-4 sm:p-5 shadow-2xs relative text-ink select-none"
 >
   <!-- Panel Header -->
   <div
@@ -303,7 +303,7 @@
   </div>
 
   <!-- Cart Items Scroll List -->
-  <div class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2.5 min-h-65 scrollbar-none">
+  <div class="flex-1 overflow-y-auto pr-1 flex flex-col gap-2.5 min-h-65 scrollbar-none cart-scroll-area">
     {#each cart.items as item (item.product.id)}
       {@const effectivePrice = item.customPrice ?? item.product.sellingPrice}
       {@const isMemberDiscount = item.customPrice !== undefined && item.customPrice < item.product.sellingPrice}

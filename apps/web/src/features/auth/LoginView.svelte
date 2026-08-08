@@ -113,19 +113,6 @@
           />
         </Button>
       </form>
-
-      <!-- Footer Links -->
-      <div
-        class="flex flex-col gap-4 pt-4 border-t border-accent-soft/20 dark:border-accent-soft/10 text-center"
-      >
-        <a
-          href="#/etalase"
-          class="text-xs text-ink hover:text-accent font-bold transition-colors duration-150 inline-flex items-center justify-center gap-1"
-        >
-          <span>Kunjungi Etalase Publik</span>
-          <span>&rarr;</span>
-        </a>
-      </div>
     </div>
   </div>
 </div>

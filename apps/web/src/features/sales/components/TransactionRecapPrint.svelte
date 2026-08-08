@@ -54,17 +54,17 @@
   <title>Rekap Penjualan - ${brandName}</title>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; padding: 24px; color: #0f172a; background: #ffffff; }
-    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #047857; padding-bottom: 12px; margin-bottom: 20px; }
-    .brand-title { font-size: 20px; font-weight: 900; color: #047857; text-transform: uppercase; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #dc2626; padding-bottom: 12px; margin-bottom: 20px; }
+    .brand-title { font-size: 20px; font-weight: 900; color: #dc2626; text-transform: uppercase; }
     .brand-sub { font-size: 11px; color: #64748b; }
-    .doc-title { font-size: 13px; font-weight: 900; color: #065f46; text-transform: uppercase; text-align: right; }
+    .doc-title { font-size: 13px; font-weight: 900; color: #b91c1c; text-transform: uppercase; text-align: right; }
     .doc-sub { font-size: 11px; color: #64748b; text-align: right; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
-    th { background: #047857; color: #ffffff; padding: 10px; text-align: left; text-transform: uppercase; font-size: 11px; font-weight: 800; }
+    th { background: #dc2626; color: #ffffff; padding: 10px; text-align: left; text-transform: uppercase; font-size: 11px; font-weight: 800; }
     td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
     tr:nth-child(even) { background: #f8fafc; }
     .total-row { font-weight: 900; background: #e2e8f0 !important; font-size: 13px; }
-    .status-badge { padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: bold; bg-color: #d1fae5; color: #065f46; display: inline-block; }
+    .status-badge { padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: bold; background-color: #fee2e2; color: #991b1b; display: inline-block; }
   </style>
 </head>
 <body>
@@ -98,7 +98,7 @@
           <td style="font-family: monospace; font-weight: bold;">${t.id}</td>
           <td>${formatDate(t.createdAt)}</td>
           <td style="text-transform: uppercase;">${t.paymentMethod}</td>
-          <td style="text-align: right; font-family: monospace; font-weight: bold; color: #047857;">${formatCurrency(t.totalAmount)}</td>
+          <td style="text-align: right; font-family: monospace; font-weight: bold; color: #dc2626;">${formatCurrency(t.totalAmount)}</td>
           ${isSuperAdmin ? `<td style="text-align: right; font-family: monospace; font-weight: bold;">${formatCurrency(t.profit || 0)}</td>` : ''}
           <td style="text-align: center;"><span class="status-badge">${t.status === 'completed' ? 'Selesai' : 'Batal'}</span></td>
         </tr>
@@ -107,7 +107,7 @@
     <tfoot>
       <tr class="total-row">
         <td colspan="3" style="text-align: right;">TOTAL REKAP PENJUALAN (${completedTx.length} NOTA):</td>
-        <td style="text-align: right; font-family: monospace; color: #047857;">${formatCurrency(totalRevenue)}</td>
+        <td style="text-align: right; font-family: monospace; color: #dc2626;">${formatCurrency(totalRevenue)}</td>
         ${isSuperAdmin ? `<td style="text-align: right; font-family: monospace;">${formatCurrency(totalProfit)}</td>` : ''}
         <td></td>
       </tr>
@@ -148,7 +148,7 @@
     class="w-full max-w-4xl flex items-center justify-between bg-surface border border-slate-700/50 rounded-2xl px-5 py-3 mb-4 shadow-xl text-white print:hidden shrink-0"
   >
     <div class="flex items-center gap-2">
-      <Printer class="w-5 h-5 text-emerald-400" />
+      <Printer class="w-5 h-5 text-accent" />
       <span class="font-bold text-sm">Dokumen Laporan Rekap Penjualan</span>
     </div>
 
@@ -156,7 +156,7 @@
       <button
         type="button"
         onclick={downloadDirectReport}
-        class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent-hover text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
       >
         <Download class="w-4 h-4" />
         <span>Langsung Unduh File (Instant)</span>
@@ -189,12 +189,12 @@
   >
     <div>
       <!-- Header: Logo & Title Only -->
-      <div class="flex items-center justify-between border-b-2 border-emerald-700 pb-4 mb-5">
+      <div class="flex items-center justify-between border-b-2 border-red-600 pb-4 mb-5">
         <div class="flex items-center gap-3.5">
           {#if brandLogo}
             <img src={brandLogo} alt={brandName} class="h-12 max-w-40 object-contain" />
           {:else}
-            <div class="px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-black tracking-tight">
+            <div class="px-3 py-1.5 rounded-lg bg-red-600 text-white font-black tracking-tight">
               {brandName}
             </div>
           {/if}
@@ -208,7 +208,7 @@
         </div>
 
         <div class="text-right">
-          <h2 class="text-xs font-black text-emerald-800 uppercase tracking-wider">
+          <h2 class="text-xs font-black text-red-700 uppercase tracking-wider">
             LAPORAN REKAPITULASI PENJUALAN
           </h2>
           <p class="text-[10px] text-slate-500 font-medium">Tanggal Cetak: {printDate}</p>
@@ -220,7 +220,7 @@
       <div class="w-full">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-emerald-800 text-white font-black uppercase text-[10px] tracking-wider">
+            <tr class="bg-red-600 text-white font-black uppercase text-[10px] tracking-wider">
               <th class="p-2.5 rounded-tl-lg">Kode Transaksi</th>
               <th class="p-2.5">Waktu & Tanggal</th>
               <th class="p-2.5">Metode Pembayaran</th>
@@ -252,7 +252,7 @@
                 </td>
 
                 <!-- Total Belanja -->
-                <td class="p-2.5 text-right font-bold font-mono text-emerald-700">
+                <td class="p-2.5 text-right font-bold font-mono text-red-700">
                   {formatCurrency(t.totalAmount)}
                 </td>
 
@@ -266,7 +266,7 @@
                 <!-- Status -->
                 <td class="p-2.5 text-center">
                   {#if t.status === 'completed'}
-                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800">
                       Selesai
                     </span>
                   {:else}
@@ -291,7 +291,7 @@
               <td colspan="3" class="p-3 text-right uppercase tracking-wider text-xs">
                 TOTAL PENJUALAN REKAP ({completedTx.length} NOTA):
               </td>
-              <td class="p-3 text-right font-mono text-sm text-emerald-800">
+              <td class="p-3 text-right font-mono text-sm text-red-700">
                 {formatCurrency(totalRevenue)}
               </td>
               {#if isSuperAdmin}

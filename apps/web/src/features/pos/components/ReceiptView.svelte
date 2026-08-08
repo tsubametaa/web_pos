@@ -49,7 +49,7 @@
 				<div class="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-200 flex items-center justify-center">
 					<CheckCircle class="w-8 h-8 text-emerald-500" />
 				</div>
-				<h2 class="text-base font-extrabold text-slate-800 dark:text-white tracking-tight">Pembayaran Berhasil!</h2>
+				<h2 class="text-base font-extrabold dark:text-white tracking-tight">Pembayaran Berhasil!</h2>
 				<p class="text-xs text-slate-500 dark:text-slate-400 font-mono">{transaction.transactionCode}</p>
 			</div>
 

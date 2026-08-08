@@ -16,7 +16,6 @@
   import Settings from "./pages/Settings.svelte";
   import Users from "./pages/Users.svelte";
   import Members from "./pages/Members.svelte";
-  import Etalase from "./pages/Etalase.svelte";
   import Invoice from "./pages/Invoice.svelte";
   import SuratJalan from "./pages/SuratJalan.svelte";
   import CombinedPrint from "./pages/CombinedPrint.svelte";
@@ -59,13 +58,6 @@
       const id = hash.replace("#/print-all/", "");
       return { name: "print-all", params: { id } };
     }
-    if (hash.startsWith("#/etalase/")) {
-      const id = hash.replace("#/etalase/", "");
-      return { name: "etalase", params: { id } };
-    }
-    if (hash === "#/etalase") {
-      return { name: "etalase", params: {} };
-    }
     if (hash === "#/login") {
       return { name: "login", params: {} };
     }
@@ -99,13 +91,10 @@
     };
   });
 
-  const requiresAuth = $derived(
-    parsedRoute.name !== "login" &&
-      parsedRoute.name !== "etalase",
-  );
+  const requiresAuth = $derived(parsedRoute.name !== "login");
 
   const isShellHidden = $derived(
-    parsedRoute.name === "etalase" || parsedRoute.name === "invoice" || parsedRoute.name === "surat-jalan" || parsedRoute.name === "print-all",
+    parsedRoute.name === "invoice" || parsedRoute.name === "surat-jalan" || parsedRoute.name === "print-all",
   );
 
   // Handle routing auth guard
@@ -188,15 +177,13 @@
     >
   </div>
 {:else if isShellHidden}
-  <!-- Render public or fullscreen layouts (Etalase, Invoice, Surat Jalan) directly -->
+  <!-- Render public or fullscreen layouts (Invoice, Surat Jalan, Combined Print) directly -->
   {#if parsedRoute.name === "invoice"}
     <Invoice transactionId={parsedRoute.params.id ?? ""} />
   {:else if parsedRoute.name === "surat-jalan"}
     <SuratJalan transactionId={parsedRoute.params.id ?? ""} />
   {:else if parsedRoute.name === "print-all"}
     <CombinedPrint transactionId={parsedRoute.params.id ?? ""} />
-  {:else}
-    <Etalase productId={parsedRoute.params.id} />
   {/if}
 {:else if parsedRoute.name === "login"}
   <Login />

@@ -151,7 +151,7 @@
           type="text"
           bind:value={searchQuery}
           placeholder="Cari kode transaksi..."
-          class="w-full pl-10 pr-9 py-2.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none transition-all shadow-2xs"
+          class="w-full pl-10 pr-9 py-2.5 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 focus:border-accent rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none transition-all shadow-2xs"
         />
         {#if isSearchActive}
           <button
@@ -215,7 +215,7 @@
   <!-- Search Results Counter -->
   {#if isSearchActive}
     <div class="text-[11px] font-semibold text-slate-400 -mt-1">
-      Menampilkan <span class="font-bold text-emerald-600 dark:text-emerald-400"
+      Menampilkan <span class="font-bold text-accent"
         >{filteredTransactions.length}</span
       > hasil transaksi
     </div>
@@ -223,13 +223,13 @@
 
   <!-- Main Transaction Table Container -->
   <div
-    class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl overflow-hidden shadow-2xs"
+    class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-2xs"
   >
     <div class="overflow-x-auto scrollbar-none">
       <table class="w-full text-left border-collapse">
         <thead>
           <tr
-            class="border-b border-slate-200/80 dark:border-emerald-950/80 bg-base/80 dark:bg-surface/80 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none"
+            class="border-b border-slate-200/80 dark:border-slate-800/80 bg-base/80 dark:bg-surface/80 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 select-none"
           >
             <th class="px-5 py-3.5">Kode Transaksi</th>
             <th class="px-5 py-3.5 hidden md:table-cell">Waktu & Tanggal</th>
@@ -243,18 +243,18 @@
           </tr>
         </thead>
         <tbody
-          class="divide-y divide-slate-200/60 dark:divide-emerald-950/60 text-xs font-medium"
+          class="divide-y divide-slate-200/60 dark:divide-slate-800/60 text-xs font-medium"
         >
           {#each paginatedTransactions as trx, i (trx.id)}
             {@const IconComp = getMethodIcon(trx.paymentMethod)}
             <tr
-              class="hover:bg-emerald-500/5 transition-colors group text-slate-800 dark:text-slate-200"
+              class="hover:bg-accent-soft/30 transition-colors group text-slate-800 dark:text-slate-200"
             >
               <!-- Kode Transaksi & Icon -->
               <td class="px-5 py-3.5 font-bold font-mono">
                 <div class="flex items-center gap-2.5">
                   <div
-                    class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 shrink-0"
+                    class="p-1.5 rounded-lg bg-accent-soft text-accent shrink-0"
                   >
                     <Receipt class="w-4 h-4" />
                   </div>
@@ -274,10 +274,10 @@
               <!-- Payment Method -->
               <td class="px-5 py-3.5 hidden sm:table-cell">
                 <span
-                  class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 rounded-lg font-bold text-[10px] uppercase"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent-soft border border-accent/20 text-accent-soft-text rounded-lg font-bold text-[10px] uppercase"
                 >
                   <IconComp
-                    class="w-3 h-3 text-emerald-600 dark:text-emerald-400"
+                    class="w-3 h-3 text-accent"
                   />
                   {trx.paymentMethod}
                 </span>
@@ -285,7 +285,7 @@
 
               <!-- Total Amount -->
               <td class="px-5 py-3.5 text-right font-mono">
-                <span class="font-black text-emerald-600 dark:text-emerald-400">
+                <span class="font-black text-accent">
                   {formatCurrency(trx.totalAmount)}
                 </span>
               </td>
@@ -303,7 +303,7 @@
               <td class="px-5 py-3.5 text-center hidden sm:table-cell">
                 {#if trx.status === "completed"}
                   <span
-                    class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
+                    class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-accent-soft text-accent border border-accent/20"
                   >
                     Selesai
                   </span>
@@ -322,7 +322,7 @@
                   <button
                     type="button"
                     onclick={() => onview(trx)}
-                    class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-500/10 rounded-lg cursor-pointer transition-colors bg-transparent border-0"
+                    class="p-1.5 text-slate-400 hover:text-accent hover:bg-accent-soft rounded-lg cursor-pointer transition-colors bg-transparent border-0"
                     title="Lihat Rincian Transaksi"
                   >
                     <Eye class="w-4 h-4" />
@@ -358,7 +358,7 @@
 
   <!-- Pagination Control Bar -->
   <div
-    class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-base/80 dark:bg-surface/60 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl shadow-2xs text-xs font-semibold text-slate-600 dark:text-slate-300"
+    class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-base/80 dark:bg-surface/60 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-2xs text-xs font-semibold text-slate-600 dark:text-slate-300"
   >
     <!-- Left: Rows per page selector & Total Items Counter -->
     <div class="flex items-center gap-3">
@@ -379,7 +379,7 @@
       </div>
 
       <span class="hidden sm:inline-block text-slate-400 font-medium">
-        Menampilkan <strong class="text-emerald-600 dark:text-emerald-400">{filteredTransactions.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</strong> - <strong class="text-emerald-600 dark:text-emerald-400">{Math.min(currentPage * pageSize, filteredTransactions.length)}</strong> dari <strong class="text-slate-800 dark:text-white">{filteredTransactions.length}</strong> Transaksi
+        Menampilkan <strong class="text-accent">{filteredTransactions.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</strong> - <strong class="text-accent">{Math.min(currentPage * pageSize, filteredTransactions.length)}</strong> dari <strong class="text-slate-800 dark:text-white">{filteredTransactions.length}</strong> Transaksi
       </span>
     </div>
 
@@ -393,7 +393,7 @@
         type="button"
         disabled={currentPage <= 1}
         onclick={() => (currentPage = Math.max(1, currentPage - 1))}
-        class="inline-flex items-center gap-1 px-3 py-1.5 bg-base dark:bg-base border border-slate-200 dark:border-emerald-950 rounded-xl hover:bg-emerald-500/10 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all text-xs font-bold text-slate-700 dark:text-slate-200"
+        class="inline-flex items-center gap-1 px-3 py-1.5 bg-base dark:bg-base border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-accent-soft disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all text-xs font-bold text-slate-700 dark:text-slate-200"
       >
         <ChevronLeft class="w-4 h-4" />
         <span>Sebelumnya</span>
@@ -403,7 +403,7 @@
         type="button"
         disabled={currentPage >= totalPages}
         onclick={() => (currentPage = Math.min(totalPages, currentPage + 1))}
-        class="inline-flex items-center gap-1 px-3 py-1.5 bg-base dark:bg-base border border-slate-200 dark:border-emerald-950 rounded-xl hover:bg-emerald-500/10 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all text-xs font-bold text-slate-700 dark:text-slate-200"
+        class="inline-flex items-center gap-1 px-3 py-1.5 bg-base dark:bg-base border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-accent-soft disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all text-xs font-bold text-slate-700 dark:text-slate-200"
       >
         <span>Selanjutnya</span>
         <ChevronRight class="w-4 h-4" />

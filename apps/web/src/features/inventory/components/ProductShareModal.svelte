@@ -14,7 +14,7 @@
 	const barcodeValue = $derived(product.barcode || product.sku || 'PRD-0000');
 
 	const shareUrl = $derived(
-		typeof window !== 'undefined' ? `${window.location.origin}/#/etalase/${product.id}` : ''
+		'https://karyasejatitest.vercel.app/etalase'
 	);
 
 	function copyLink() {
@@ -56,7 +56,7 @@
 		<div class="px-6 py-5 flex flex-col items-center gap-4 max-h-[85vh] overflow-y-auto scrollbar-none">
 			<!-- Product Info Header -->
 			<div class="text-center">
-				<h3 class="font-extrabold text-slate-800 dark:text-white text-base">{product.name}</h3>
+				<h3 class="font-extrabold dark:text-white text-base">{product.name}</h3>
 				<div class="flex items-center justify-center gap-2 mt-0.5">
 					<span class="font-mono text-xs text-slate-400 font-bold">SKU: {product.sku}</span>
 					{#if product.barcode && product.barcode !== product.sku}

@@ -57,7 +57,7 @@
 		<div class="print:hidden w-full max-w-7xl bg-white border-b border-slate-200 p-4 sticky top-0 z-20 flex flex-wrap justify-between items-center gap-3 shadow-xs">
 			<a
 				href="#/sales"
-				class="text-xs font-semibold text-slate-600 hover:text-emerald-700 flex items-center gap-1.5 cursor-pointer"
+				class="text-xs font-semibold text-slate-600 hover:text-accent flex items-center gap-1.5 cursor-pointer"
 			>
 				<ArrowLeft class="w-4 h-4" />
 				Kembali ke Riwayat
@@ -87,7 +87,7 @@
 				<button
 					type="button"
 					onclick={() => triggerPrint('all')}
-					class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-xs font-extrabold text-white rounded-xl shadow-xs cursor-pointer transition-all"
+					class="inline-flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-xs font-extrabold text-white rounded-xl shadow-xs cursor-pointer transition-all"
 				>
 					<Printer class="w-4 h-4" />
 					Cetak Keduanya (Invoice & Surat Jalan)
@@ -102,8 +102,8 @@
 			<div
 				class="doc-wrapper flex flex-col items-center w-full xl:w-auto {printTarget === 'surat-jalan' ? 'print:hidden' : ''} {printTarget === 'all' ? 'page-break' : ''}"
 			>
-				<div class="print:hidden w-full max-w-[9.5in] mb-2 flex items-center justify-between px-1">
-					<span class="text-xs font-extrabold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
+				<div class="print:hidden w-full max-w-228 mb-2 flex items-center justify-between px-1">
+					<span class="text-xs font-extrabold uppercase tracking-wider text-accent flex items-center gap-1">
 						<CheckCircle2 class="w-3.5 h-3.5" /> Pratinjau Invoice (Lembar 1)
 					</span>
 					<span class="text-[11px] font-mono text-slate-500">{transaction.transactionCode}</span>
@@ -193,7 +193,7 @@
 			<div
 				class="doc-wrapper flex flex-col items-center w-full xl:w-auto {printTarget === 'invoice' ? 'print:hidden' : ''}"
 			>
-				<div class="print:hidden w-full max-w-[9.5in] mb-2 flex items-center justify-between px-1">
+				<div class="print:hidden w-full max-w-228 mb-2 flex items-center justify-between px-1">
 					<span class="text-xs font-extrabold uppercase tracking-wider text-sky-800 flex items-center gap-1">
 						<CheckCircle2 class="w-3.5 h-3.5" /> Pratinjau Surat Jalan (Lembar 2)
 					</span>

@@ -105,7 +105,7 @@
   >
     <!-- Search & Barcode Scanner Input Bar -->
     <div class="flex items-center gap-2 flex-1 min-w-0">
-      <div class="relative flex-1 min-w-[200px]">
+      <div class="relative flex-1 min-w-50">
         <div
           class="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-ink-muted"
         >
@@ -172,7 +172,7 @@
   <!-- Products Grid Area -->
   <div class="flex-1 min-h-[50vh] overflow-y-auto pr-1 pb-6 scrollbar-none">
     {#if filteredProducts().length > 0}
-      <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5">
+      <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3.5 tablet-grid-cols-3">
         {#each filteredProducts() as product (product.id)}
           {@const cartItem = cart.items.find(
             (item) => item.product.id === product.id,
@@ -254,7 +254,7 @@
               SKU: {product.sku || "-"}
             </span>
             <h4
-              class="font-bold text-h-text text-xs sm:text-sm mt-0.5 line-clamp-1 min-h-[20px] group-hover:text-accent transition-colors"
+              class="font-bold text-h-text text-xs sm:text-sm mt-0.5 line-clamp-1 min-h-5 group-hover:text-accent transition-colors"
             >
               {product.name}
             </h4>

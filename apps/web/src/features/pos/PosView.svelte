@@ -3,7 +3,7 @@
   import { cart } from './logic/cart.svelte';
   import { api } from '../../core/api';
   import { toast } from '../../lib/utils/toast.svelte';
-  import Spinner from '../../components/ui/Spinner.svelte';
+  import Skeleton from '../../components/ui/Skeleton.svelte';
   import ProductGrid from './components/ProductGrid.svelte';
   import CartPanel from './components/CartPanel.svelte';
   import PaymentModal from './components/PaymentModal.svelte';
@@ -85,21 +85,49 @@
 </script>
 
 {#if loading}
-  <div class="h-96 flex flex-col items-center justify-center gap-3">
-    <Spinner size="lg" />
-    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">
-      Memuat Sistem POS Kasir...
-    </span>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-100px)] items-stretch w-full pb-2 select-none">
+    <!-- Left Side: Product Grid Skeleton -->
+    <div class="lg:col-span-2 flex flex-col h-full gap-4">
+      <div class="flex gap-3">
+        <Skeleton class="h-10 flex-1" />
+        <Skeleton class="h-10 w-28" />
+      </div>
+      <div class="flex gap-2">
+        {#each Array(4) as _}
+          <Skeleton class="h-8 w-20" />
+        {/each}
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 flex-1">
+        {#each Array(6) as _}
+          <div class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between gap-3">
+            <Skeleton class="h-28 w-full" />
+            <Skeleton class="h-4 w-3/4" />
+            <Skeleton class="h-5 w-1/2" />
+          </div>
+        {/each}
+      </div>
+    </div>
+
+    <!-- Right Side: Cart Panel Skeleton -->
+    <div class="lg:col-span-1 bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between h-full gap-4">
+      <Skeleton class="h-8 w-36" />
+      <div class="space-y-3 flex-1">
+        {#each Array(3) as _}
+          <Skeleton class="h-12 w-full" />
+        {/each}
+      </div>
+      <Skeleton class="h-14 w-full" />
+    </div>
   </div>
 {:else}
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-100px)] items-stretch w-full pb-2">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-100px)] items-stretch w-full pb-2 tablet-pos-grid">
     <!-- Left Side: Product Grid (2/3 width on large screens) -->
-    <div class="lg:col-span-2 flex flex-col h-full min-w-0">
+    <div class="col-span-full lg:col-span-2 flex flex-col h-full min-w-0 w-full tablet-product-grid">
       <ProductGrid {products} {categories} onselect={handleProductSelect} />
     </div>
 
     <!-- Right Side: Cart Panel (1/3 width on large screens) -->
-    <div class="lg:col-span-1 flex flex-col h-full">
+    <div class="col-span-full lg:col-span-1 flex flex-col h-full w-full tablet-cart-panel">
       <CartPanel {settings} oncheckout={handleCheckoutTrigger} />
     </div>
   </div>

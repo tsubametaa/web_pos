@@ -4,7 +4,7 @@
   import { appState } from '../../core/state.svelte';
   import { toast } from '../../lib/utils/toast.svelte';
   import { formatCurrency } from '../../lib/utils/currency';
-  import Spinner from '../../components/ui/Spinner.svelte';
+  import Skeleton from '../../components/ui/Skeleton.svelte';
   import TransactionTable from './components/TransactionTable.svelte';
   import TransactionDetailModal from './components/TransactionDetailModal.svelte';
   import { generateSalesPDF } from '../../lib/utils/pdfGenerator';
@@ -117,36 +117,61 @@
 </script>
 
 {#if loading}
-  <div class="h-96 flex flex-col items-center justify-center gap-3">
-    <Spinner size="lg" />
-    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">
-      Memuat Riwayat Transaksi...
-    </span>
+  <div class="flex flex-col gap-6 text-ink w-full pb-8 select-none">
+    <!-- Header Banner Skeleton -->
+    <div class="p-6 bg-base/90 dark:bg-surface/60 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div class="space-y-2 w-full max-w-md">
+        <Skeleton class="h-6 w-44" />
+        <Skeleton class="h-4 w-full" />
+      </div>
+      <div class="flex gap-2">
+        <Skeleton class="h-10 w-28" />
+        <Skeleton class="h-10 w-28" />
+      </div>
+    </div>
+
+    <!-- Stat Cards Skeleton -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {#each Array(4) as _}
+        <div class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4 space-y-3">
+          <Skeleton class="h-4 w-24" />
+          <Skeleton class="h-8 w-36" />
+        </div>
+      {/each}
+    </div>
+
+    <!-- Table Skeleton -->
+    <div class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4 space-y-3">
+      <Skeleton class="h-10 w-full" />
+      {#each Array(5) as _}
+        <Skeleton class="h-12 w-full" />
+      {/each}
+    </div>
   </div>
 {:else}
   <div class="flex flex-col gap-6 text-ink w-full pb-8 select-none">
     <!-- Top Bar Header Banner -->
     <div
-      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-base/90 dark:bg-surface/60 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl shadow-2xs"
+      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 bg-base/90 dark:bg-surface/60 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl shadow-2xs"
     >
       <div class="space-y-1">
         <div class="flex items-center gap-2.5">
-          <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+          <div class="p-2 rounded-xl bg-accent-soft text-accent">
             <History class="w-5 h-5" />
           </div>
           <h1 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
             Riwayat Transaksi
           </h1>
         </div>
-        <p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium">
+        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
           Pantau seluruh catatan penjualan toko, rincian pembayaran, laba rugi, dan kelola faktur invoice.
         </p>
       </div>
 
       <div
-        class="inline-flex items-center gap-2 px-3.5 py-2.5 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 rounded-xl font-extrabold text-xs shrink-0 self-start sm:self-auto"
+        class="inline-flex items-center gap-2 px-3.5 py-2.5 bg-accent-soft text-accent-soft-text rounded-xl font-extrabold text-xs shrink-0 self-start sm:self-auto"
       >
-        <ShoppingBag class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+        <ShoppingBag class="w-4 h-4 text-accent" />
         <span>{transactions.length} Total Transaksi</span>
       </div>
     </div>
@@ -155,17 +180,17 @@
     <div class="grid grid-cols-2 {isSuperAdmin ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4">
       <!-- Omset Penjualan -->
       <div
-        class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
+        class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
       >
         <div class="flex items-center justify-between gap-2">
           <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Total Omset
           </span>
-          <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+          <div class="p-1.5 rounded-lg bg-accent-soft text-accent">
             <DollarSign class="w-4 h-4" />
           </div>
         </div>
-        <span class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono truncate">
+        <span class="text-xl sm:text-2xl font-black text-accent font-mono truncate">
           {formatCurrency(totalRevenue)}
         </span>
       </div>
@@ -173,13 +198,13 @@
       <!-- Total Profit (Super Admin only) -->
       {#if isSuperAdmin}
         <div
-          class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
+          class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
         >
           <div class="flex items-center justify-between gap-2">
             <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Profit / Laba
             </span>
-            <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+            <div class="p-1.5 rounded-lg bg-accent-soft text-accent">
               <TrendingUp class="w-4 h-4" />
             </div>
           </div>
@@ -191,13 +216,13 @@
 
       <!-- Transaksi Selesai -->
       <div
-        class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
+        class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
       >
         <div class="flex items-center justify-between gap-2">
           <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Transaksi Selesai
           </span>
-          <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+          <div class="p-1.5 rounded-lg bg-accent-soft text-accent">
             <ShoppingBag class="w-4 h-4" />
           </div>
         </div>
@@ -208,13 +233,13 @@
 
       <!-- Rata-rata Nilai Transaksi -->
       <div
-        class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
+        class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col justify-between gap-2"
       >
         <div class="flex items-center justify-between gap-2">
           <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Rata-rata Transaksi
           </span>
-          <div class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+          <div class="p-1.5 rounded-lg bg-accent-soft text-accent">
             <Calculator class="w-4 h-4" />
           </div>
         </div>

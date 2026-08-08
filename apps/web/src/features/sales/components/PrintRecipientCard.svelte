@@ -50,7 +50,7 @@
 			</div>
 			<div class="grid grid-cols-12 gap-1 text-[11px]">
 				<span class="col-span-5 font-semibold text-slate-700">Status Nota</span>
-				<span class="col-span-7 font-bold uppercase text-emerald-700">: {status === 'voided' ? 'BATAL' : 'LUNAS (PAID)'}</span>
+				<span class="col-span-7 font-bold uppercase text-red-700">: {status === 'voided' ? 'BATAL' : 'LUNAS (PAID)'}</span>
 			</div>
 		{:else}
 			<div class="grid grid-cols-12 gap-1 text-[11px]">

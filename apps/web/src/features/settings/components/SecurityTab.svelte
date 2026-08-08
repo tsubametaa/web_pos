@@ -29,17 +29,17 @@
 	<div class="md:col-span-2">
 		<form
 			onsubmit={onSubmit}
-			class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-6 shadow-2xs space-y-5"
+			class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-6 shadow-2xs space-y-5"
 		>
-			<div class="border-b border-slate-200/60 dark:border-emerald-950/60 pb-3 flex items-center gap-3">
-				<div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+			<div class="border-b border-slate-200/60 dark:border-slate-800/60 pb-3 flex items-center gap-3">
+				<div class="p-2 rounded-xl bg-accent-soft text-accent">
 					<KeyRound class="w-5 h-5" />
 				</div>
 				<div>
 					<h2 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">
 						Kredensial Keamanan Akun
 					</h2>
-					<p class="text-xs text-slate-500 dark:text-emerald-500/70 font-medium mt-0.5">
+					<p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
 						Perbarui kata sandi utama toko Anda secara berkala untuk menjaga keamanan data.
 					</p>
 				</div>
@@ -61,7 +61,7 @@
 						placeholder="Masukkan password lama"
 						required
 						disabled={securitySaving}
-						class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+						class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-slate-800/80 focus:border-accent rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all shadow-2xs"
 					/>
 				</div>
 			</div>
@@ -82,7 +82,7 @@
 						placeholder="Masukkan password baru"
 						required
 						disabled={securitySaving}
-						class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+						class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-slate-800/80 focus:border-accent rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all shadow-2xs"
 					/>
 				</div>
 			</div>
@@ -103,7 +103,7 @@
 						placeholder="Ketik ulang password baru"
 						required
 						disabled={securitySaving}
-						class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-emerald-950/80 focus:border-emerald-500 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
+						class="w-full pl-9 pr-3.5 py-2.5 bg-white dark:bg-base border border-slate-200/80 dark:border-slate-800/80 focus:border-accent rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all shadow-2xs"
 					/>
 				</div>
 				{#if newPassword && confirmNewPassword && newPassword !== confirmNewPassword}
@@ -113,7 +113,7 @@
 				{/if}
 			</div>
 
-			<div class="pt-3 border-t border-slate-200/60 dark:border-emerald-950/60 flex justify-end">
+			<div class="pt-3 border-t border-slate-200/60 dark:border-slate-800/60 flex justify-end">
 				<button
 					type="submit"
 					disabled={securitySaving ||
@@ -121,7 +121,7 @@
 						!newPassword ||
 						newPassword !== confirmNewPassword ||
 						!isNewPasswordValid}
-					class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs disabled:pointer-events-none"
+					class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-40 text-white text-xs font-bold rounded-xl cursor-pointer transition-all shadow-xs disabled:pointer-events-none"
 				>
 					{#if securitySaving}
 						<span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -138,9 +138,9 @@
 	<!-- Right: Password Criteria Card -->
 	<div class="md:col-span-1">
 		<div
-			class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-emerald-950/80 rounded-2xl p-5 flex flex-col gap-4 shadow-2xs"
+			class="bg-base/90 dark:bg-surface/50 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-5 flex flex-col gap-4 shadow-2xs"
 		>
-			<div class="border-b border-slate-200/60 dark:border-emerald-950/60 pb-2.5">
+			<div class="border-b border-slate-200/60 dark:border-slate-800/60 pb-2.5">
 				<span class="text-xs font-extrabold text-slate-800 dark:text-white uppercase tracking-wider">
 					Kriteria Keamanan Password
 				</span>
@@ -151,7 +151,7 @@
 					<div
 						class="w-4 h-4 rounded-full flex items-center justify-center border shrink-0 transition-colors
 							{hasMinLength
-							? 'bg-emerald-600 border-emerald-600 text-white'
+							? 'bg-accent border-accent text-white'
 							: 'bg-base dark:bg-base/60 border-slate-300 text-slate-400'}"
 					>
 						{#if hasMinLength}
@@ -160,7 +160,7 @@
 							<span class="w-1 h-1 rounded-full bg-slate-400"></span>
 						{/if}
 					</div>
-					<span class={hasMinLength ? 'text-emerald-700 dark:text-emerald-300 font-bold' : 'text-slate-500'}>
+					<span class={hasMinLength ? 'text-accent font-bold' : 'text-slate-500'}>
 						Minimal 6 karakter
 					</span>
 				</li>
@@ -169,7 +169,7 @@
 					<div
 						class="w-4 h-4 rounded-full flex items-center justify-center border shrink-0 transition-colors
 							{hasLetter
-							? 'bg-emerald-600 border-emerald-600 text-white'
+							? 'bg-accent border-accent text-white'
 							: 'bg-base dark:bg-base/60 border-slate-300 text-slate-400'}"
 					>
 						{#if hasLetter}
@@ -178,7 +178,7 @@
 							<span class="w-1 h-1 rounded-full bg-slate-400"></span>
 						{/if}
 					</div>
-					<span class={hasLetter ? 'text-emerald-700 dark:text-emerald-300 font-bold' : 'text-slate-500'}>
+					<span class={hasLetter ? 'text-accent font-bold' : 'text-slate-500'}>
 						Mengandung huruf (A-Z, a-z)
 					</span>
 				</li>
@@ -187,7 +187,7 @@
 					<div
 						class="w-4 h-4 rounded-full flex items-center justify-center border shrink-0 transition-colors
 							{hasNumber
-							? 'bg-emerald-600 border-emerald-600 text-white'
+							? 'bg-accent border-accent text-white'
 							: 'bg-base dark:bg-base/60 border-slate-300 text-slate-400'}"
 					>
 						{#if hasNumber}
@@ -196,7 +196,7 @@
 							<span class="w-1 h-1 rounded-full bg-slate-400"></span>
 						{/if}
 					</div>
-					<span class={hasNumber ? 'text-emerald-700 dark:text-emerald-300 font-bold' : 'text-slate-500'}>
+					<span class={hasNumber ? 'text-accent font-bold' : 'text-slate-500'}>
 						Mengandung angka (0-9)
 					</span>
 				</li>
